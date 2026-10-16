@@ -51,14 +51,21 @@ class RuleManager(
         ((initialRules.flatMap { it.history } + initialRecent.map { it.notification }).maxOfOrNull { it.id } ?: 0L) + 1
     )
 
+    /** Recent arrival times per burst rule and app ("ruleId|package"), oldest first. */
+    private val arrivals = HashMap<String, ArrayDeque<Long>>()
+
     fun newNotificationId(): Long = nextId.getAndIncrement()
 
-    /** Decides the outcome for [n] and records it in the catching rule's history. */
+    /** Decides the outcome for [n], records it in the catching rule's history and updates stats. */
     fun process(n: Notification, maxSaved: Int, filteringEnabled: Boolean = true): Decision {
-        val decision = if (filteringEnabled) decide(_rules.value, n) else Decision.NONE
+        val rules = _rules.value
+        val decision = if (filteringEnabled) decide(rules, n, recordArrivals(rules, n)) else Decision.NONE
         val rule = decision.rule
-        if (rule != null && decision.action != Action.PASS) {
-            updateRule(rule.id) { it.catch(n, maxSaved) }
+        if (rule != null) {
+            updateRule(rule.id) {
+                val counted = it.recordHit(n.postedAt)
+                if (decision.action == Action.PASS) counted else counted.catch(n, maxSaved)
+            }
         }
         _recent.update { log ->
             (listOf(LoggedNotification(n, decision.action, rule?.name, filteringEnabled)) + log).take(RECENT_LIMIT)
@@ -75,6 +82,8 @@ class RuleManager(
                 if (it.id != edited.id) it
                 else edited.copy(
                     history = it.history,
+                    hits = it.hits,
+                    createdAt = it.createdAt,
                     bundle = if (edited.type == RuleType.BUNDLE) it.bundle else Bundle(),
                 )
             }
@@ -83,10 +92,42 @@ class RuleManager(
 
     fun delete(id: String) = _rules.update { list -> list.filter { it.id != id } }
 
+    /** Adds imported rules (configuration only) under fresh ids, skipping ones already present. */
+    fun import(imported: List<Rule>): Int {
+        var added = 0
+        _rules.update { list ->
+            val existing = list.mapTo(HashSet()) { it.signature() }
+            val fresh = imported.filter { it.signature() !in existing }.distinctBy { it.signature() }
+            added = fresh.size
+            list + fresh.map {
+                it.copy(
+                    id = java.util.UUID.randomUUID().toString(),
+                    history = emptyList(),
+                    bundle = Bundle(),
+                    hits = emptyList(),
+                    createdAt = System.currentTimeMillis(),
+                )
+            }
+        }
+        return added
+    }
+
+    /** Lets digest bundles whose delivery time came show themselves. */
+    fun release(ids: Set<String>) = _rules.update { list ->
+        list.map { if (it.id in ids && it.bundle.count > 0) it.copy(bundle = it.bundle.copy(released = true)) else it }
+    }
+
     fun move(id: String, delta: Int) = _rules.update { list ->
         val from = list.indexOfFirst { it.id == id }
         val to = from + delta
         if (from < 0 || to !in list.indices) list
+        else list.toMutableList().apply { add(to, removeAt(from)) }
+    }
+
+    /** Moves the rule [id] to position [to]. */
+    fun moveTo(id: String, to: Int) = _rules.update { list ->
+        val from = list.indexOfFirst { it.id == id }
+        if (from < 0 || to !in list.indices || from == to) list
         else list.toMutableList().apply { add(to, removeAt(from)) }
     }
 
@@ -106,15 +147,40 @@ class RuleManager(
         list.map { if (it.id == id) transform(it) else it }
     }
 
+    /**
+     * Notes [n]'s arrival for every burst rule it otherwise matches, and returns how many such
+     * arrivals each has seen from this app within its window (this one included).
+     */
+    private fun recordArrivals(rules: List<Rule>, n: Notification): (Rule) -> Int {
+        val counts = HashMap<String, Int>()
+        synchronized(arrivals) {
+            for (rule in rules) {
+                val burst = rule.burst ?: continue
+                if (!rule.matches(n)) continue
+                val times = arrivals.getOrPut(rule.id + "|" + n.packageName) { ArrayDeque() }
+                times.addLast(n.postedAt)
+                while (times.isNotEmpty() && times.first() <= n.postedAt - burst.windowMs) times.removeFirst()
+                counts[rule.id] = times.size
+            }
+        }
+        return { counts[it.id] ?: 0 }
+    }
+
+    private fun Rule.signature() = listOf(name, regex, field, packageName, invert, type)
+
     companion object {
         const val RECENT_LIMIT = 500
 
         /**
          * Evaluates every rule in order; the last one that matches is the final effective
          * match and decides the outcome. No match, or a final ALLOW rule, means PASS.
+         * [burstCount] says how many recent matching arrivals a burst rule has seen; without
+         * that history, burst rules are treated as already bursting.
          */
-        fun decide(rules: List<Rule>, n: Notification): Decision {
-            val matched = rules.filter { it.matches(n) }
+        fun decide(rules: List<Rule>, n: Notification, burstCount: (Rule) -> Int = { Int.MAX_VALUE }): Decision {
+            val matched = rules.filter { rule ->
+                rule.matches(n) && rule.burst.let { it == null || burstCount(rule) > it.count }
+            }
             val final = matched.lastOrNull() ?: return Decision.NONE
             val action = when (final.type) {
                 RuleType.HIDE -> Action.HIDE

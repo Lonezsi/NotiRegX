@@ -8,6 +8,8 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Re-arms digest delivery alarms after a reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- Optional, granted only via adb: lets the vibration log read Android's own vibration history. -->
     <uses-permission
@@ -54,5 +56,24 @@
         <receiver
             android:name=".service.BundleDismissReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".service.DigestReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.LastBuzzTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_vibration"
+            android:label="Last buzz"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

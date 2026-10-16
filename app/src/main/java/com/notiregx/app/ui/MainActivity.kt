@@ -30,11 +30,35 @@ class MainActivity : ComponentActivity() {
     /** Rule whose archive should be shown, set when a bundle notification is tapped. */
     private val openRuleId = mutableStateOf<String?>(null)
 
+    /** Tab to switch to, set when the quick-settings tile opens the app. */
+    private val openTab = mutableStateOf<String?>(null)
+
     /** Bumped on every resume so permission states are re-read after visiting system settings. */
     private val resumeTick = mutableIntStateOf(0)
 
     private val companionChooser = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
         app.companionLinked.value = app.settings.isCompanionLinked()
+    }
+
+    private val exportFile = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri ?: return@registerForActivityResult
+        try {
+            contentResolver.openOutputStream(uri)?.use { it.write(app.exportRules().toByteArray()) }
+            toast("Rules exported")
+        } catch (e: Exception) {
+            toast("Export failed: ${e.message}")
+        }
+    }
+
+    private val importFile = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@registerForActivityResult
+        try {
+            val json = contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: return@registerForActivityResult
+            val added = app.importRules(json)
+            toast(if (added == 0) "No new rules in that file" else "Imported $added rule${if (added == 1) "" else "s"}")
+        } catch (e: Exception) {
+            toast("That doesn't look like a NotiRegX export")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,11 +70,14 @@ class MainActivity : ComponentActivity() {
             openUrl = ::openUrl,
             openIntent = ::startSafely,
             linkCompanion = ::linkCompanion,
+            exportRules = { exportFile.launch("notiregx-rules.json") },
+            importRules = { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
+            restore = { app.restore(it); toast("Put back in your notifications") },
             canOpenDirectly = { app.contentIntents.get(it.id) != null },
         )
         setContent {
             NotiRegXTheme {
-                AppRoot(app, openRuleId, resumeTick.intValue, actions)
+                AppRoot(app, openRuleId, openTab, resumeTick.intValue, actions)
             }
         }
     }
@@ -92,6 +119,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         intent?.getStringExtra(EXTRA_RULE_ID)?.let { openRuleId.value = it }
+        intent?.getStringExtra(EXTRA_TAB)?.let { openTab.value = it }
     }
 
     /** Fires the original notification's click action, or falls back to launching its app. */
@@ -132,6 +160,8 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_RULE_ID = "com.notiregx.app.RULE_ID"
+        const val EXTRA_TAB = "com.notiregx.app.TAB"
+        const val TAB_VIBRATIONS = "vibrations"
         val POST_NOTIFICATIONS: String? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
     }
@@ -142,5 +172,8 @@ class AppActions(
     val openUrl: (String) -> Unit,
     val openIntent: (Intent) -> Unit,
     val linkCompanion: () -> Unit,
+    val exportRules: () -> Unit,
+    val importRules: () -> Unit,
+    val restore: (Notification) -> Unit,
     val canOpenDirectly: (Notification) -> Boolean,
 )

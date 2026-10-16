@@ -52,7 +52,13 @@ private enum class Tab(val title: String) {
 }
 
 @Composable
-fun AppRoot(app: NotiRegXApp, openRuleId: MutableState<String?>, resumeTick: Int, actions: AppActions) {
+fun AppRoot(
+    app: NotiRegXApp,
+    openRuleId: MutableState<String?>,
+    openTab: MutableState<String?>,
+    resumeTick: Int,
+    actions: AppActions,
+) {
     val manager = app.ruleManager
     val rules by manager.rules.collectAsState()
     val recent by manager.recent.collectAsState()
@@ -76,6 +82,14 @@ fun AppRoot(app: NotiRegXApp, openRuleId: MutableState<String?>, resumeTick: Int
     LaunchedEffect(Unit) {
         val permission = MainActivity.POST_NOTIFICATIONS
         if (permission != null && !app.settings.canPostNotifications()) requestPost.launch(permission)
+    }
+
+    LaunchedEffect(openTab.value) {
+        if (openTab.value == MainActivity.TAB_VIBRATIONS) {
+            tab = Tab.VIBRATIONS
+            editing = null
+        }
+        openTab.value = null
     }
 
     LaunchedEffect(openRuleId.value) {
@@ -143,7 +157,7 @@ fun AppRoot(app: NotiRegXApp, openRuleId: MutableState<String?>, resumeTick: Int
                     onGrantAccess = { actions.openIntent(app.settings.notificationAccessIntent()) },
                     onGrantPost = { actions.openIntent(app.settings.appNotificationSettingsIntent()) },
                     onEdit = { editing = it },
-                    onMove = manager::move,
+                    onMoveTo = manager::moveTo,
                     onToggle = manager::setEnabled,
                     onOpenArchive = { archiveRuleId = it; tab = Tab.ARCHIVE },
                 )
@@ -155,6 +169,7 @@ fun AppRoot(app: NotiRegXApp, openRuleId: MutableState<String?>, resumeTick: Int
                     onMarkSeen = manager::markSeen,
                     onClearHistory = manager::clearHistory,
                     onCreateRule = { suggestFor = it },
+                    onRestore = actions.restore,
                     actions = actions,
                 )
                 Tab.VIBRATIONS -> VibrationsScreen(
@@ -170,6 +185,8 @@ fun AppRoot(app: NotiRegXApp, openRuleId: MutableState<String?>, resumeTick: Int
                     companionLinked = companionLinked,
                     muteStatus = muteStatus,
                     onLinkCompanion = actions.linkCompanion,
+                    onExport = actions.exportRules,
+                    onImport = actions.importRules,
                     onOpenIntent = actions.openIntent,
                 )
             }

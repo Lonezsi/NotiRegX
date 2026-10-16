@@ -36,7 +36,6 @@ class NotiListenerService : NotificationListenerService() {
 
     private var scope: CoroutineScope? = null
     private var muter: ChannelMuter? = null
-    private val alerter by lazy { Alerter(this) }
 
     private val muting get() = muter != null && app.companionLinked.value
 
@@ -134,7 +133,7 @@ class NotiListenerService : NotificationListenerService() {
                 return
             }
             val onlyOnce = sbn.notification.flags and android.app.Notification.FLAG_ONLY_ALERT_ONCE != 0
-            if (!(isUpdate && onlyOnce)) alerter.alert(sbn, n, original)
+            if (!(isUpdate && onlyOnce)) app.alerter.alert(sbn, n, original)
         } else if (decision.rule?.let { it.debuzz && it.packageName.isNullOrEmpty() } == true) {
             publish(muter.learn(sbn.packageName, channelId))
         }

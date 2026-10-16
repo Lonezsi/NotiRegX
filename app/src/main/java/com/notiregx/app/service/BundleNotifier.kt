@@ -20,15 +20,23 @@ class BundleNotifier(private val context: Context) {
     private val posted = HashMap<String, List<Long>>()
 
     init {
-        manager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Bundles", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "One notification per bundle rule, with its unseen count"
-            }
+        manager.createNotificationChannels(
+            listOf(
+                NotificationChannel(CHANNEL_ID, "Bundles", NotificationManager.IMPORTANCE_LOW).apply {
+                    description = "One notification per bundle rule, with its unseen count"
+                },
+                NotificationChannel(DIGEST_CHANNEL_ID, "Digests", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = "Bundles delivered at their set times"
+                },
+            )
         )
     }
 
     fun sync(rules: List<Rule>) {
-        val live = rules.filter { it.type == RuleType.BUNDLE && it.bundle.count > 0 }.associateBy { it.id }
+        // Digest bundles stay hidden until their delivery time releases them.
+        val live = rules
+            .filter { it.type == RuleType.BUNDLE && it.bundle.count > 0 && (!it.isDigest || it.bundle.released) }
+            .associateBy { it.id }
         (posted.keys - live.keys).forEach { manager.cancel(it, NOTIFICATION_ID) }
         posted.keys.retainAll(live.keys)
         for (rule in live.values) {
@@ -60,7 +68,7 @@ class BundleNotifier(private val context: Context) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, if (rule.isDigest) DIGEST_CHANNEL_ID else CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(rule.name)
             .setContentText(if (count == 1) "1 unseen notification" else "$count unseen notifications")
@@ -76,6 +84,7 @@ class BundleNotifier(private val context: Context) {
 
     private companion object {
         const val CHANNEL_ID = "bundles"
+        const val DIGEST_CHANNEL_ID = "digests"
         const val NOTIFICATION_ID = 1
         const val PREVIEW_LINES = 6
     }

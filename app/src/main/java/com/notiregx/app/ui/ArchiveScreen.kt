@@ -45,6 +45,7 @@ fun ArchiveScreen(
     onMarkSeen: (String) -> Unit,
     onClearHistory: (String) -> Unit,
     onCreateRule: (Notification) -> Unit,
+    onRestore: (Notification) -> Unit,
     actions: AppActions,
 ) {
     val archivable = rules.filter { it.type != RuleType.ALLOW || it.history.isNotEmpty() }
@@ -69,7 +70,7 @@ fun ArchiveScreen(
         if (rule == null) {
             RecentList(recent, onCreateRule, actions)
         } else {
-            RuleHistory(rule, onMarkSeen, onClearHistory, onCreateRule, actions)
+            RuleHistory(rule, onMarkSeen, onClearHistory, onCreateRule, onRestore, actions)
         }
     }
 }
@@ -103,6 +104,7 @@ private fun RuleHistory(
     onMarkSeen: (String) -> Unit,
     onClearHistory: (String) -> Unit,
     onCreateRule: (Notification) -> Unit,
+    onRestore: (Notification) -> Unit,
     actions: AppActions,
 ) {
     // Snapshot what was unseen when the tab opened, so the dots survive marking them seen.
@@ -132,6 +134,7 @@ private fun RuleHistory(
                 outcome = null,
                 actions = actions,
                 onCreateRule = { onCreateRule(n) },
+                onRestore = { onRestore(n) }.takeIf { rule.type != RuleType.ALLOW },
             )
         }
     }
@@ -156,6 +159,7 @@ private fun NotificationCard(
     outcome: String?,
     actions: AppActions,
     onCreateRule: (() -> Unit)? = null,
+    onRestore: (() -> Unit)? = null,
 ) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp)) {
@@ -164,6 +168,8 @@ private fun NotificationCard(
                     Box(Modifier.size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
                     Spacer(Modifier.size(6.dp))
                 }
+                AppIcon(n.packageName, size = 18.dp)
+                Spacer(Modifier.size(6.dp))
                 Text(
                     n.appName,
                     style = MaterialTheme.typography.labelMedium,
@@ -179,6 +185,7 @@ private fun NotificationCard(
             }
             Row {
                 Spacer(Modifier.weight(1f))
+                if (onRestore != null) TextButton(onClick = onRestore) { Text("Restore") }
                 if (onCreateRule != null) TextButton(onClick = onCreateRule) { Text("Make rule") }
                 n.url?.let { url -> TextButton(onClick = { actions.openUrl(url) }) { Text("Open link") } }
                 TextButton(onClick = { actions.openNotification(n) }) {

@@ -33,6 +33,8 @@ fun SettingsScreen(
     companionLinked: Boolean,
     muteStatus: MuteStatus,
     onLinkCompanion: () -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
     onOpenIntent: (Intent) -> Unit,
 ) {
     val filtering by settings.filteringEnabled.collectAsState()
@@ -91,6 +93,14 @@ fun SettingsScreen(
             )
         }
         Hint("Before uninstalling NotiRegX, turn De-buzz off on every rule so the apps get their sound back.")
+
+        HorizontalDivider()
+        Section("Backup")
+        Hint("Save your rules to a file, or add rules from one (yours or a friend's). History isn't included.")
+        Row {
+            TextButton(onClick = onExport) { Text("Export rules") }
+            TextButton(onClick = onImport) { Text("Import rules") }
+        }
 
         HorizontalDivider()
         Section("Permissions")

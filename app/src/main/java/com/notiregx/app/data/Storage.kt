@@ -4,11 +4,13 @@ import android.util.AtomicFile
 import android.util.Log
 import com.notiregx.app.model.Action
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.Burst
 import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.MatchField
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleType
+import com.notiregx.app.model.Schedule
 import com.notiregx.app.model.VibrationEvent
 import com.notiregx.app.model.VibrationSource
 import org.json.JSONArray
@@ -26,7 +28,17 @@ class Storage(dir: File) {
 
     fun loadRules(): List<Rule> = read(rulesFile, "rules", ::ruleFromJson)
 
-    fun saveRules(rules: List<Rule>) = write(rulesFile, "rules", rules.map(::ruleToJson))
+    fun saveRules(rules: List<Rule>) = write(rulesFile, "rules", rules.map { ruleToJson(it, includeData = true) })
+
+    /** Rule configurations (no history) as a shareable JSON document. */
+    fun exportRules(rules: List<Rule>): String =
+        JSONObject().put("app", "NotiRegX").put("version", 1)
+            .put("rules", JSONArray(rules.map { ruleToJson(it, includeData = false) }))
+            .toString(2)
+
+    /** Parses an exported document; throws if it isn't one. */
+    fun importRules(json: String): List<Rule> =
+        JSONObject(json).getJSONArray("rules").objects().map(::ruleFromJson)
 
     fun loadRecent(): List<LoggedNotification> = read(recentFile, "recent", ::loggedFromJson)
 
@@ -62,7 +74,7 @@ class Storage(dir: File) {
         }
     }
 
-    private fun ruleToJson(r: Rule) = JSONObject()
+    private fun ruleToJson(r: Rule, includeData: Boolean): JSONObject = JSONObject()
         .put("id", r.id)
         .put("name", r.name)
         .put("regex", r.regex)
@@ -74,8 +86,29 @@ class Storage(dir: File) {
         .put("description", r.description)
         .put("enabled", r.enabled)
         .put("debuzz", r.debuzz)
-        .put("history", JSONArray(r.history.map(::notificationToJson)))
-        .put("unseen", JSONArray(r.bundle.unseen))
+        .put("schedule", r.schedule?.let(::scheduleToJson) ?: JSONObject.NULL)
+        .put("burst", r.burst?.let { JSONObject().put("count", it.count).put("windowMinutes", it.windowMinutes) } ?: JSONObject.NULL)
+        .put("deliveryTimes", JSONArray(r.deliveryTimes))
+        .apply {
+            if (includeData) {
+                put("createdAt", r.createdAt)
+                put("hits", JSONArray(r.hits))
+                put("history", JSONArray(r.history.map(::notificationToJson)))
+                put("unseen", JSONArray(r.bundle.unseen))
+                put("released", r.bundle.released)
+            }
+        }
+
+    private fun scheduleToJson(s: Schedule) = JSONObject()
+        .put("days", JSONArray(s.days.sorted()))
+        .put("start", s.startMinute)
+        .put("end", s.endMinute)
+
+    private fun scheduleFromJson(o: JSONObject) = Schedule(
+        days = o.getJSONArray("days").ints().toSet(),
+        startMinute = o.getInt("start"),
+        endMinute = o.getInt("end"),
+    )
 
     private fun ruleFromJson(o: JSONObject) = Rule(
         id = o.getString("id"),
@@ -89,8 +122,13 @@ class Storage(dir: File) {
         description = o.optString("description"),
         enabled = o.optBoolean("enabled", true),
         debuzz = o.optBoolean("debuzz"),
+        schedule = o.optJSONObject("schedule")?.let(::scheduleFromJson),
+        burst = o.optJSONObject("burst")?.let { Burst(it.getInt("count"), it.getInt("windowMinutes")) },
+        deliveryTimes = o.optJSONArray("deliveryTimes")?.ints().orEmpty(),
+        createdAt = o.optLong("createdAt", System.currentTimeMillis()),
+        hits = o.optJSONArray("hits")?.longs().orEmpty(),
         history = o.optJSONArray("history")?.objects()?.map(::notificationFromJson).orEmpty(),
-        bundle = Bundle(o.optJSONArray("unseen")?.let { a -> (0 until a.length()).map { a.getLong(it) } }.orEmpty()),
+        bundle = Bundle(o.optJSONArray("unseen")?.longs().orEmpty(), o.optBoolean("released")),
     )
 
     private fun notificationToJson(n: Notification) = JSONObject()
@@ -148,6 +186,10 @@ class Storage(dir: File) {
         enumValues<E>().firstOrNull { it.name == name } ?: default
 
     private fun JSONArray.objects() = (0 until length()).map { getJSONObject(it) }
+
+    private fun JSONArray.ints() = (0 until length()).map { getInt(it) }
+
+    private fun JSONArray.longs() = (0 until length()).map { getLong(it) }
 
     private fun JSONObject.stringOrNull(key: String) = if (!has(key) || isNull(key)) null else getString(key)
 

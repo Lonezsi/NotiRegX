@@ -73,6 +73,9 @@ fun RuleEditorScreen(
     var regex by remember { mutableStateOf(initial.regex) }
     var field by remember { mutableStateOf(initial.field) }
     var debuzz by remember { mutableStateOf(initial.debuzz) }
+    var schedule by remember { mutableStateOf(initial.schedule) }
+    var burst by remember { mutableStateOf(initial.burst) }
+    var deliveryTimes by remember { mutableStateOf(initial.deliveryTimes) }
     var app by remember { mutableStateOf(initial.packageName?.let { AppInfo(it, initial.appName ?: it) }) }
     var invert by remember { mutableStateOf(initial.invert) }
     var type by remember { mutableStateOf(initial.type) }
@@ -86,6 +89,9 @@ fun RuleEditorScreen(
         regex = regex,
         field = field,
         debuzz = debuzz,
+        schedule = schedule,
+        burst = burst,
+        deliveryTimes = if (type == RuleType.BUNDLE) deliveryTimes else emptyList(),
         packageName = app?.packageName,
         appName = app?.label,
         invert = invert,
@@ -201,6 +207,18 @@ fun RuleEditorScreen(
                     TextButton(onClick = onLinkCompanion) { Text("Link") }
                 }
             }
+            HorizontalDivider()
+            Text("When", style = MaterialTheme.typography.titleSmall)
+            RuleConditions(
+                schedule = schedule,
+                onSchedule = { schedule = it },
+                burst = burst,
+                onBurst = { burst = it },
+                isBundle = type == RuleType.BUNDLE,
+                deliveryTimes = deliveryTimes,
+                onDeliveryTimes = { deliveryTimes = it },
+            )
+            HorizontalDivider()
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -224,7 +242,7 @@ fun RuleEditorScreen(
                     appName = "",
                     title = if (field == MatchField.TITLE) testText else "",
                     text = if (field == MatchField.TITLE) "" else testText,
-                    postedAt = 0,
+                    postedAt = System.currentTimeMillis(),
                 )
                 val hit = draft.copy(enabled = true).matches(sample)
                 Text(
@@ -312,6 +330,7 @@ private fun AppPickerDialog(extraApps: List<AppInfo>, onPick: (AppInfo?) -> Unit
                         }
                         items(filtered, key = { it.packageName }) { info ->
                             ListItem(
+                                leadingContent = { AppIcon(info.packageName, size = 32.dp) },
                                 headlineContent = { Text(info.label) },
                                 supportingContent = { Text(info.packageName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                 modifier = Modifier.clickable { onPick(info) },

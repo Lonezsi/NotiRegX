@@ -142,6 +142,8 @@ private fun VibrationCard(row: VibrationRow) {
     Card(Modifier.fillMaxWidth(), colors = colors) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                AppIcon(e.packageName, size = 20.dp)
+                Spacer(Modifier.padding(start = 8.dp))
                 Text(e.appName, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                 Text(formatTime(e.time), style = MaterialTheme.typography.labelSmall)
             }
