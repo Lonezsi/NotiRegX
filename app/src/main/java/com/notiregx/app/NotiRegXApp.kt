@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,6 +56,15 @@ class NotiRegXApp : Application() {
 
     /** Result of the last channel-silencing attempt, published by the listener service. */
     val muteStatus = MutableStateFlow(MuteStatus())
+
+    /** Apps whose notification vibration is turned off, published by the listener service. */
+    val vibrationMuted = MutableStateFlow<Set<String>>(emptySet())
+
+    /** Mute (true) / unmute (false) requests for an app's notification vibration, served by the listener. */
+    val vibrationMuteRequests = MutableSharedFlow<Pair<String, Boolean>>(extraBufferCapacity = 8)
+
+    /** Errors from the last vibration mute request, for the UI to show. */
+    val vibrationMuteError = MutableStateFlow<String?>(null)
 
     /** The last raw system vibration dump, for sending along when parsing goes wrong. */
     @Volatile

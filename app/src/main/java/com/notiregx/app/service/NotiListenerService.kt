@@ -36,13 +36,22 @@ class NotiListenerService : NotificationListenerService() {
 
     private var scope: CoroutineScope? = null
     private var muter: ChannelMuter? = null
+    private var vibrationMuter: VibrationMuter? = null
 
     private val muting get() = muter != null && app.companionLinked.value
 
     override fun onListenerConnected() {
         super.onListenerConnected()
         val muter = ChannelMuter(this, this).also { muter = it }
+        val vibrationMuter = VibrationMuter(this, this).also { vibrationMuter = it }
+        app.vibrationMuted.value = vibrationMuter.mutedPackages
         scope = MainScope().apply {
+            launch {
+                app.vibrationMuteRequests.collect { (pkg, mute) ->
+                    app.vibrationMuteError.value = if (mute) vibrationMuter.mute(pkg) else vibrationMuter.unmute(pkg)
+                    app.vibrationMuted.value = vibrationMuter.mutedPackages
+                }
+            }
             launch {
                 // Only re-sync when the set of silenced apps changes, not on every caught notification.
                 val wanted = app.ruleManager.rules
@@ -59,6 +68,7 @@ class NotiListenerService : NotificationListenerService() {
         scope?.cancel()
         scope = null
         muter = null
+        vibrationMuter = null
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification, rankingMap: RankingMap?) {
@@ -67,6 +77,8 @@ class NotiListenerService : NotificationListenerService() {
         val isUpdate = sbn.key in seenKeys
         seenKeys[sbn.key] = Unit
         logLikelyVibration(sbn, ranking, isUpdate)
+        // A vibration-muted app may have added a category since it was muted.
+        if (ranking?.channel?.shouldVibrate() == true) vibrationMuter?.takeIf { it.isMuted(sbn.packageName) }?.muteNewChannels(sbn.packageName)
 
         if (!app.reader.isFilterable(sbn)) return
         if (NotificationReader.isGroupSummary(sbn)) {

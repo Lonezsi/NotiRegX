@@ -69,6 +69,32 @@ class RuleSuggesterTest {
     }
 
     @Test
+    fun offersExceptionsThatLeaveTheTargetOut() {
+        val target = n("Mom", "call me")
+        val others = listOf(n("Bob", "hi"), n("Cy", "yo"), n("Mom", "dinner?"))
+        val except = RuleSuggester.suggest(target, others).first { it.group == SuggestionGroup.EXCEPT }
+        assertEquals("Everything except title “Mom”", except.label)
+        assertTrue(except.invert)
+        assertEquals(2, except.matches) // Bob and Cy
+        val rule = Rule(name = "x", regex = except.regex, field = except.field, invert = except.invert)
+        assertFalse(rule.matches(target))
+        assertTrue(rule.matches(n("Dan", "hey")))
+    }
+
+    @Test
+    fun includesEndingsMentionsAndExamples() {
+        val target = n("Order 1", "Your parcel was delivered today")
+        val others = listOf(n("Order 2", "Your parcel was delivered today"), n("Order 3", "Item delivered today"), n("Promo", "Big sale"))
+        val s = RuleSuggester.suggest(target, others)
+        val labels = s.map { it.label }
+        assertTrue(labels.toString(), labels.any { it.startsWith("Text ends with") })
+        assertTrue(labels.toString(), labels.any { it.startsWith("Mentions") })
+        val like = s.first { it.label == "Title like “Order #”" }
+        assertEquals(listOf("Order 2", "Order 3"), like.examples.map { it.title })
+        assertTrue(s.size > 4)
+    }
+
+    @Test
     fun sortsByHowManyNotificationsMatch() {
         val target = n("Sale today", "Up to 70% off")
         val others = listOf(n("Sale today", "Up to 30% off"), n("Sale today", "Free gift"), n("Receipt", "Thanks"))

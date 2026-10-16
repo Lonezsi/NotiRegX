@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.model.Notification
 import com.notiregx.app.model.VibrationEvent
 import com.notiregx.app.model.VibrationKind
 import com.notiregx.app.model.VibrationLog
@@ -65,7 +66,16 @@ fun VibrationsScreen(
     onRefresh: suspend () -> Unit,
     onClear: () -> Unit,
     lastDump: () -> String?,
+    notifications: List<Notification>,
+    companionLinked: Boolean,
+    vibrationMuted: Set<String>,
+    muteError: String?,
+    onSetVibrationMuted: (String, Boolean) -> Unit,
+    onLinkCompanion: () -> Unit,
+    onCreateRule: (Notification) -> Unit,
+    actions: AppActions,
 ) {
+    var selected by remember { mutableStateOf<VibrationRow?>(null) }
     val rows = remember(events) { VibrationLog.timeline(events) }
     var kindFilter by rememberSaveable { mutableStateOf<VibrationKind?>(null) }
     var appFilter by rememberSaveable { mutableStateOf<String?>(null) }
@@ -175,7 +185,22 @@ fun VibrationsScreen(
                 }
             }
         }
-        items(shown, key = { it.event.key }) { VibrationCard(it) }
+        items(shown, key = { it.event.key }) { VibrationCard(it, onClick = { selected = it }) }
+    }
+
+    selected?.let { row ->
+        VibrationDetailSheet(
+            row = row,
+            notifications = notifications,
+            companionLinked = companionLinked,
+            vibrationMuted = row.event.packageName in vibrationMuted,
+            muteError = muteError,
+            onSetVibrationMuted = { onSetVibrationMuted(row.event.packageName, it) },
+            onLinkCompanion = onLinkCompanion,
+            onCreateRule = onCreateRule,
+            actions = actions,
+            onDismiss = { selected = null },
+        )
     }
 
     if (confirmClear) {
@@ -189,14 +214,14 @@ fun VibrationsScreen(
 }
 
 @Composable
-private fun VibrationCard(row: VibrationRow) {
+private fun VibrationCard(row: VibrationRow, onClick: () -> Unit) {
     val e = row.event
     val colors = if (row.isGhost) {
         CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
     } else {
         CardDefaults.cardColors()
     }
-    Card(Modifier.fillMaxWidth(), colors = colors) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), colors = colors) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppIcon(e.packageName, size = 20.dp)

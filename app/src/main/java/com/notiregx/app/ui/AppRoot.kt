@@ -66,6 +66,8 @@ fun AppRoot(
     val companionLinked by app.companionLinked.collectAsState()
     val muteStatus by app.muteStatus.collectAsState()
     val vibrations by app.vibrationLog.events.collectAsState()
+    val vibrationMuted by app.vibrationMuted.collectAsState()
+    val vibrationMuteError by app.vibrationMuteError.collectAsState()
 
     var tab by rememberSaveable { mutableStateOf(Tab.RULES) }
     /** Selected archive tab: a rule id, or null for the Recent log. */
@@ -116,13 +118,16 @@ fun AppRoot(
         return
     }
 
-    suggestFor?.let { target ->
-        SuggestionDialog(
+    val target = suggestFor
+    if (target != null) {
+        BackHandler { suggestFor = null }
+        SuggestionScreen(
             target = target,
             known = recent.map { it.notification } + rules.flatMap { it.history },
             onPick = { editing = it; suggestFor = null },
-            onDismiss = { suggestFor = null },
+            onBack = { suggestFor = null },
         )
+        return
     }
 
     Scaffold(
@@ -178,6 +183,14 @@ fun AppRoot(
                     onRefresh = app::refreshSystemVibrations,
                     onClear = app.vibrationLog::clear,
                     lastDump = { app.lastVibrationDump },
+                    notifications = recent.map { it.notification } + rules.flatMap { it.history },
+                    companionLinked = companionLinked,
+                    vibrationMuted = vibrationMuted,
+                    muteError = vibrationMuteError,
+                    onSetVibrationMuted = { pkg, mute -> app.vibrationMuteRequests.tryEmit(pkg to mute) },
+                    onLinkCompanion = actions.linkCompanion,
+                    onCreateRule = { suggestFor = it },
+                    actions = actions,
                 )
                 Tab.SETTINGS -> SettingsScreen(
                     settings = app.settings,
