@@ -57,6 +57,42 @@ class VibrationTest {
         assertEquals(10301, v[1].uid)
     }
 
+    /** Captured from a Galaxy A56 on One UI 8.5 (Android 16). */
+    @Test
+    fun parsesOneUi8PipeFormat() {
+        val dump = """
+              Recent vibrations:
+                UNKNOWN:
+                  10-08 12:32:21.320 |   effect |             finished | duration:   288ms | start: 12:32:21.326 | end: 12:32:21.609 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: UNKNOWN | com.android.systemui (uid=10051, deviceId=0) | reason: null
+
+                ALARM:
+                  10-08 12:06:13.358 |   effect | cancelled_superseded | duration:    42ms | start: 12:06:13.363 | end: 12:06:13.400 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: ALARM | hu.diverzum.diverzummobile (uid=10342, deviceId=0) | reason:
+                  10-08 12:06:13.380 |   effect | cancelled_superseded | duration:     9ms | start:              | end: 12:06:13.390 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: ALARM | hu.diverzum.diverzummobile (uid=10342, deviceId=0) | reason:
+                  10-08 12:06:13.661 |   effect |             finished | duration:   139ms | start: 12:06:13.692 | end: 12:06:13.800 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: ALARM | hu.diverzum.diverzummobile (uid=10342, deviceId=0) | reason:
+
+                TOUCH:
+                  10-08 14:37:24.888 |   effect |             finished | duration:   245ms | start: 14:37:24.892 | end: 14:37:25.133 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: TOUCH | com.android.settings (uid=1000, deviceId=0) | reason: perform
+                NOTIFICATION:
+                  10-08 21:59:03.841 |   effect |             finished | duration:   134ms | start: 21:59:03.848 | end: 21:59:03.975 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: NOTIFICATION | android (uid=1000, deviceId=0) | reason: Notification (com.facebook.orca 10375) (Delayed) | played: [Step=0ms(amplitude=0.00
+                IME:
+                  10-08 22:00:00.000 |   effect |             finished | duration:    10ms | start: 22:00:00.001 | end: 22:00:00.011 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: IME | com.samsung.android.honeyboard (uid=10100, deviceId=0) | reason: null
+              Aggregated vibration history:
+                ALARM:
+                  10-08 12:06:13.661 |   effect |             finished | duration:   139ms | start: 12:06:13.692 | end: 12:06:13.800 | scale:      NONE (1.00) | adaptiveScale=1.00 | flags:    0 | usage: ALARM | hu.diverzum.diverzummobile (uid=10342, deviceId=0) | reason:
+        """.trimIndent()
+        val v = VibrationDumpParser.parse(dump, now, utc)
+        assertEquals(listOf("hu.diverzum.diverzummobile", "com.android.systemui", "com.facebook.orca"), v.map { it.packageName })
+
+        val burst = v[0]
+        assertEquals("ALARM", burst.usage)
+        assertEquals(181L, burst.durationMs) // 42 + 139 merged; the never-started 9 ms piece is dropped
+        assertNull(burst.reason)
+
+        assertEquals(288L, v[1].durationMs)
+        assertNull(v[1].reason)
+        assertTrue(v[2].viaNotification)
+    }
+
     @Test
     fun yearlessDatesInTheFutureBelongToLastYear() {
         val v = VibrationDumpParser.parse("12-31 23:00:00.000 uid=1 opPkg=a", now, utc)

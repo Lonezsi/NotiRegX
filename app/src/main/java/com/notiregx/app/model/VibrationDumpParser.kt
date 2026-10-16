@@ -22,23 +22,36 @@ data class LoggedVibration(
  * Parses the vibration history out of `dumpsys vibrator_manager`. The format differs between
  * Android versions and manufacturers, so this is deliberately lenient: every line (plus its
  * more-indented continuation lines) with a timestamp is a record, and known fields are picked
- * out of it wherever they appear.
+ * out of it wherever they appear. One UI 8 prints one pipe-separated line per vibration:
+ *
+ *     10-14 21:59:03.841 | effect | finished | duration: 134ms | start: … | usage: NOTIFICATION |
+ *         android (uid=1000, deviceId=0) | reason: Notification (com.facebook.orca 10375) (Delayed) | …
  */
 object VibrationDumpParser {
     private val TIMESTAMP = Regex("""(?:(\d{4})-)?(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})""")
     private val PKG = Regex("""\b(?:opPkg|pkg|packageName)\s*[=:]\s*([A-Za-z][\w.]*)""")
+
+    /** One UI 8 style: "| com.app (uid=10342, deviceId=0) |". */
+    private val PKG_WITH_UID = Regex("""\|\s*([A-Za-z][\w.]*)\s*\(uid=(\d+)""")
     private val UID = Regex("""\buid\s*[=:]\s*(\d+)""")
     private val USAGE = Regex("""\busage\s*[=:]\s*(?:USAGE_)?([A-Za-z_]+)""")
-    private val DURATION = Regex("""\bdurationMs\s*[=:]\s*(\d+)""")
-    private val REASON = Regex("""\breason\s*[=:]\s*(.*?)(?:,\s*\w+\s*[=:]|[}\]]|$)""")
+    private val DURATION = Regex("""\bduration(?:Ms)?\s*[=:]\s*(\d+)""")
+    private val REASON = Regex("""\breason\s*[=:]\s*(.*?)(?:,\s*\w+\s*[=:]|\s\|\s|[}\]]|$)""")
     private val STATUS = Regex("""\bstatus\s*[=:]\s*(\w+)""")
+    private val IGNORED_STATUS = Regex("""\|\s*ignored""", RegexOption.IGNORE_CASE)
+
+    /** Superseded before it ever played: "| start:              |". */
+    private val NEVER_STARTED = Regex("""\bstart:\s*\|""")
     private val NOTIFICATION = Regex("""Notification \(([A-Za-z][\w.]*)""")
 
     /** Haptic feedback (keyboard taps, gestures) isn't what anyone means by a vibration. */
-    private val IGNORED_USAGES = setOf("TOUCH", "HARDWARE_FEEDBACK", "PHYSICAL_EMULATION")
+    private val IGNORED_USAGES = setOf("TOUCH", "HARDWARE_FEEDBACK", "PHYSICAL_EMULATION", "IME")
+
+    /** Vibrations from one app this close together are one buzz played as many short pieces. */
+    private const val MERGE_WINDOW_MS = 2_000L
 
     fun parse(dump: String, now: Long = System.currentTimeMillis(), zone: TimeZone = TimeZone.getDefault()): List<LoggedVibration> =
-        records(dump).mapNotNull { parseRecord(it, now, zone) }.distinctBy { it.time to it.packageName }
+        merge(records(dump).mapNotNull { parseRecord(it, now, zone) }.distinctBy { it.time to it.packageName })
 
     private fun records(dump: String): List<String> {
         val out = ArrayList<String>()
@@ -64,11 +77,14 @@ object VibrationDumpParser {
     private fun parseRecord(record: String, now: Long, zone: TimeZone): LoggedVibration? {
         val status = STATUS.find(record)?.groupValues?.get(1)
         if (status != null && status.startsWith("ignored", ignoreCase = true)) return null
+        if (IGNORED_STATUS.containsMatchIn(record) || NEVER_STARTED.containsMatchIn(record)) return null
         val usage = USAGE.find(record)?.groupValues?.get(1)?.uppercase()
         if (usage != null && usage in IGNORED_USAGES) return null
 
         val viaNotification = NOTIFICATION.find(record)
-        val pkg = viaNotification?.groupValues?.get(1) ?: PKG.find(record)?.groupValues?.get(1)
+        val pkg = viaNotification?.groupValues?.get(1)
+            ?: PKG.find(record)?.groupValues?.get(1)
+            ?: PKG_WITH_UID.find(record)?.groupValues?.get(1)
         val uid = UID.find(record)?.groupValues?.get(1)?.toIntOrNull()
         if (pkg == null && uid == null) return null
 
@@ -79,9 +95,28 @@ object VibrationDumpParser {
             uid = uid,
             usage = usage,
             durationMs = DURATION.find(record)?.groupValues?.get(1)?.toLongOrNull(),
-            reason = REASON.find(record)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() },
+            reason = REASON.find(record)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() && it != "null" },
             viaNotification = viaNotification != null,
         )
+    }
+
+    /** Collapses each app's rapid-fire pieces into one vibration with their total duration. */
+    private fun merge(vibrations: List<LoggedVibration>): List<LoggedVibration> {
+        val out = ArrayList<LoggedVibration>()
+        val lastByApp = HashMap<Any?, Int>()
+        for (v in vibrations.sortedBy { it.time }) {
+            val app = v.packageName ?: v.uid
+            val i = lastByApp[app]
+            val prev = i?.let { out[it] }
+            if (i != null && prev != null && v.time - prev.time <= MERGE_WINDOW_MS && prev.viaNotification == v.viaNotification) {
+                val total = (prev.durationMs ?: 0) + (v.durationMs ?: 0)
+                out[i] = prev.copy(durationMs = total.takeIf { it > 0 })
+            } else {
+                lastByApp[app] = out.size
+                out += v
+            }
+        }
+        return out
     }
 
     private fun parseTime(match: MatchResult, now: Long, zone: TimeZone): Long? {
