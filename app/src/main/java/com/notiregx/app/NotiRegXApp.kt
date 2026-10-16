@@ -7,6 +7,8 @@ import android.content.Intent
 import android.util.LruCache
 import com.notiregx.app.data.Storage
 import com.notiregx.app.model.Delivery
+import com.notiregx.app.model.InteractionLog
+import com.notiregx.app.model.SenderStats
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.RuleManager
 import com.notiregx.app.model.VibrationLog
@@ -41,6 +43,10 @@ class NotiRegXApp : Application() {
     lateinit var systemVibrations: SystemVibrationReader
         private set
     lateinit var alerter: Alerter
+        private set
+    lateinit var interactions: InteractionLog
+        private set
+    lateinit var senderStats: SenderStats
         private set
     private lateinit var storage: Storage
     private lateinit var bundleNotifier: BundleNotifier
@@ -80,6 +86,11 @@ class NotiRegXApp : Application() {
         storage = Storage(filesDir)
         ruleManager = RuleManager(storage.loadRules(), storage.loadRecent())
         vibrationLog = VibrationLog(storage.loadVibrations())
+        interactions = InteractionLog(storage.loadInteractions())
+        senderStats = SenderStats(storage.loadSenders())
+        if (senderStats.senders.value.isEmpty()) {
+            senderStats.backfill(ruleManager.recent.value.map { it.notification } + ruleManager.rules.value.flatMap { it.history })
+        }
         reader = NotificationReader(this)
         systemVibrations = SystemVibrationReader(this, reader)
         bundleNotifier = BundleNotifier(this)
@@ -89,6 +100,8 @@ class NotiRegXApp : Application() {
         scope.launch { ruleManager.rules.drop(1).collect { storage.saveRules(it) } }
         scope.launch { ruleManager.recent.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveRecent(it) } }
         scope.launch { vibrationLog.events.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveVibrations(it) } }
+        scope.launch { interactions.events.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveInteractions(it) } }
+        scope.launch { senderStats.senders.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveSenders(it.values) } }
         scope.launch { ruleManager.rules.collect { bundleNotifier.sync(it) } }
         scope.launch { settings.maxSaved.collect { ruleManager.trimHistories(it) } }
         scope.launch {

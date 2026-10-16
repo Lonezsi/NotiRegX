@@ -30,6 +30,8 @@ data class Rule(
     val createdAt: Long = System.currentTimeMillis(),
     /** When this rule was the final match, newest first, for the last [STATS_WINDOW_MS]. */
     val hits: List<Long> = emptyList(),
+    /** Everything this rule has ever caught, regardless of how much [history] keeps. */
+    val totalCaught: Long = 0,
     /** Notifications this rule ultimately caught, newest first. */
     val history: List<Notification> = emptyList(),
     val bundle: Bundle = Bundle(),
@@ -49,7 +51,7 @@ data class Rule(
     /** Records [n] as caught by this rule, keeping at most [maxSaved] entries. */
     fun catch(n: Notification, maxSaved: Int): Rule {
         val withBundle = if (type == RuleType.BUNDLE) copy(bundle = bundle.add(n.id)) else this
-        return withBundle.copy(history = listOf(n) + history).trimmed(maxSaved)
+        return withBundle.copy(history = listOf(n) + history, totalCaught = totalCaught + 1).trimmed(maxSaved)
     }
 
     fun trimmed(maxSaved: Int): Rule {

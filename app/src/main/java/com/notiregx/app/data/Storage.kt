@@ -4,6 +4,9 @@ import android.util.AtomicFile
 import android.util.Log
 import com.notiregx.app.model.Action
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.Interaction
+import com.notiregx.app.model.Outcome
+import com.notiregx.app.model.SenderCount
 import com.notiregx.app.model.Burst
 import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.MatchField
@@ -24,6 +27,8 @@ class Storage(dir: File) {
     private val rulesFile = File(dir, "rules.json")
     private val recentFile = File(dir, "recent.json")
     private val vibrationsFile = File(dir, "vibrations.json")
+    private val interactionsFile = File(dir, "interactions.json")
+    private val sendersFile = File(dir, "senders.json")
     private val writer = Executors.newSingleThreadExecutor()
 
     fun loadRules(): List<Rule> = read(rulesFile, "rules", ::ruleFromJson)
@@ -47,6 +52,36 @@ class Storage(dir: File) {
     fun loadVibrations(): List<VibrationEvent> = read(vibrationsFile, "vibrations", ::vibrationFromJson)
 
     fun saveVibrations(events: List<VibrationEvent>) = write(vibrationsFile, "vibrations", events.map(::vibrationToJson))
+
+    fun loadInteractions(): List<Interaction> = read(interactionsFile, "interactions") { o ->
+        Interaction(notificationFromJson(o.getJSONObject("notification")), enumOr(o.optString("outcome"), Outcome.DISMISSED), o.optLong("time"))
+    }
+
+    fun saveInteractions(events: List<Interaction>) = write(interactionsFile, "interactions", events.map {
+        JSONObject().put("notification", notificationToJson(it.notification)).put("outcome", it.outcome.name).put("time", it.time)
+    })
+
+    fun loadSenders(): List<SenderCount> = read(sendersFile, "senders") { o ->
+        val days = o.optJSONObject("days")
+        SenderCount(
+            packageName = o.getString("packageName"),
+            appName = o.optString("appName"),
+            sender = o.getString("sender"),
+            total = o.optLong("total"),
+            days = days?.keys()?.asSequence()?.associate { it.toInt() to days.getInt(it) }.orEmpty(),
+            lastSeen = o.optLong("lastSeen"),
+        )
+    }
+
+    fun saveSenders(senders: Collection<SenderCount>) = write(sendersFile, "senders", senders.map { s ->
+        JSONObject()
+            .put("packageName", s.packageName)
+            .put("appName", s.appName)
+            .put("sender", s.sender)
+            .put("total", s.total)
+            .put("days", JSONObject().apply { s.days.forEach { (d, c) -> put(d.toString(), c) } })
+            .put("lastSeen", s.lastSeen)
+    })
 
     private fun <T> read(file: File, key: String, parse: (JSONObject) -> T): List<T> {
         if (!file.exists()) return emptyList()
@@ -93,6 +128,7 @@ class Storage(dir: File) {
             if (includeData) {
                 put("createdAt", r.createdAt)
                 put("hits", JSONArray(r.hits))
+                put("totalCaught", r.totalCaught)
                 put("history", JSONArray(r.history.map(::notificationToJson)))
                 put("unseen", JSONArray(r.bundle.unseen))
                 put("released", r.bundle.released)
@@ -127,6 +163,8 @@ class Storage(dir: File) {
         deliveryTimes = o.optJSONArray("deliveryTimes")?.ints().orEmpty(),
         createdAt = o.optLong("createdAt", System.currentTimeMillis()),
         hits = o.optJSONArray("hits")?.longs().orEmpty(),
+        // Older saves had no counter; the saved history is the best starting point.
+        totalCaught = if (o.has("totalCaught")) o.getLong("totalCaught") else (o.optJSONArray("history")?.length() ?: 0).toLong(),
         history = o.optJSONArray("history")?.objects()?.map(::notificationFromJson).orEmpty(),
         bundle = Bundle(o.optJSONArray("unseen")?.longs().orEmpty(), o.optBoolean("released")),
     )

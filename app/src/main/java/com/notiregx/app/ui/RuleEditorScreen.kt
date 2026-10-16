@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -52,6 +53,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.MatchField
+import com.notiregx.app.model.PeoplePattern
+import com.notiregx.app.model.SenderCount
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleType
@@ -65,6 +68,7 @@ fun RuleEditorScreen(
     recent: List<LoggedNotification>,
     companionLinked: Boolean,
     onLinkCompanion: () -> Unit,
+    senders: Collection<SenderCount>,
     onSave: (Rule) -> Unit,
     onDelete: () -> Unit,
     onBack: () -> Unit,
@@ -72,6 +76,7 @@ fun RuleEditorScreen(
     var name by remember { mutableStateOf(initial.name) }
     var regex by remember { mutableStateOf(initial.regex) }
     var field by remember { mutableStateOf(initial.field) }
+    var pickingPeople by remember { mutableStateOf(false) }
     var debuzz by remember { mutableStateOf(initial.debuzz) }
     var schedule by remember { mutableStateOf(initial.schedule) }
     var burst by remember { mutableStateOf(initial.burst) }
@@ -143,6 +148,9 @@ fun RuleEditorScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
+            OutlinedButton(onClick = { pickingPeople = true }) {
+                Text(if (PeoplePattern.parse(regex) != null && field == MatchField.TITLE) "Edit senders" else "Pick senders…")
+            }
             Text("Search in", style = MaterialTheme.typography.labelLarge)
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 MatchField.entries.forEachIndexed { i, f ->
@@ -269,6 +277,20 @@ fun RuleEditorScreen(
         }
     }
 
+    if (pickingPeople) {
+        PeoplePickerDialog(
+            senders = senders,
+            packageName = app?.packageName,
+            initial = PeoplePattern.parse(regex).takeIf { field == MatchField.TITLE }.orEmpty(),
+            onDone = { names ->
+                regex = PeoplePattern.build(names)
+                field = MatchField.TITLE
+                if (name.isBlank()) name = "People: " + names.sorted().joinToString(", ").take(50)
+                pickingPeople = false
+            },
+            onDismiss = { pickingPeople = false },
+        )
+    }
     if (pickingApp) {
         val seen = recent.map { AppInfo(it.notification.packageName, it.notification.appName) }
         AppPickerDialog(

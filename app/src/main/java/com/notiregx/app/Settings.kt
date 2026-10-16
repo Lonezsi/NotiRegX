@@ -21,6 +21,16 @@ class Settings(private val context: Context) {
     private val _filteringEnabled = MutableStateFlow(prefs.getBoolean(KEY_FILTERING, true))
     val filteringEnabled: StateFlow<Boolean> = _filteringEnabled.asStateFlow()
 
+    private val _ignoredAdvice = MutableStateFlow(prefs.getStringSet(KEY_IGNORED_ADVICE, emptySet()).orEmpty())
+    /** Rule suggestions the user answered "not now" to. */
+    val ignoredAdvice: StateFlow<Set<String>> = _ignoredAdvice.asStateFlow()
+
+    fun ignoreAdvice(key: String) {
+        val next = _ignoredAdvice.value + key
+        prefs.edit().putStringSet(KEY_IGNORED_ADVICE, next).apply()
+        _ignoredAdvice.value = next
+    }
+
     fun setMaxSaved(value: Int) {
         val clamped = value.coerceIn(MIN_MAX_SAVED, MAX_MAX_SAVED)
         prefs.edit().putInt(KEY_MAX_SAVED, clamped).apply()
@@ -66,5 +76,6 @@ class Settings(private val context: Context) {
         private const val DEFAULT_MAX_SAVED = 100
         private const val KEY_MAX_SAVED = "max_saved_per_rule"
         private const val KEY_FILTERING = "filtering_enabled"
+        private const val KEY_IGNORED_ADVICE = "ignored_advice"
     }
 }

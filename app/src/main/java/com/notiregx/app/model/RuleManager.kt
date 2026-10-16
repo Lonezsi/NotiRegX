@@ -83,6 +83,7 @@ class RuleManager(
                 else edited.copy(
                     history = it.history,
                     hits = it.hits,
+                    totalCaught = it.totalCaught,
                     createdAt = it.createdAt,
                     bundle = if (edited.type == RuleType.BUNDLE) it.bundle else Bundle(),
                 )
@@ -105,6 +106,7 @@ class RuleManager(
                     history = emptyList(),
                     bundle = Bundle(),
                     hits = emptyList(),
+                    totalCaught = 0,
                     createdAt = System.currentTimeMillis(),
                 )
             }

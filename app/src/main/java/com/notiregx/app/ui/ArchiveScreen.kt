@@ -33,13 +33,20 @@ import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleType
+import com.notiregx.app.model.SenderCount
+
 import java.text.DateFormat
 import java.util.Date
+
+/** Archive "tab" id for the senders leaderboard (rule ids are UUIDs, so this can't clash). */
+const val SENDERS_TAB = "senders"
 
 @Composable
 fun ArchiveScreen(
     rules: List<Rule>,
     recent: List<LoggedNotification>,
+    senders: Collection<SenderCount>,
+    onMakeRule: (Rule) -> Unit,
     selectedRuleId: String?,
     onSelect: (String?) -> Unit,
     onMarkSeen: (String) -> Unit,
@@ -57,6 +64,13 @@ fun ArchiveScreen(
             item {
                 FilterChip(selected = selectedRuleId == null, onClick = { onSelect(null) }, label = { Text("Recent") })
             }
+            item {
+                FilterChip(
+                    selected = selectedRuleId == SENDERS_TAB,
+                    onClick = { onSelect(SENDERS_TAB) },
+                    label = { Text("Senders") },
+                )
+            }
             items(archivable, key = { it.id }) { rule ->
                 val unseen = rule.bundle.count
                 FilterChip(
@@ -67,7 +81,9 @@ fun ArchiveScreen(
             }
         }
         val rule = rules.firstOrNull { it.id == selectedRuleId }
-        if (rule == null) {
+        if (selectedRuleId == SENDERS_TAB) {
+            SendersView(senders, onMakeRule)
+        } else if (rule == null) {
             RecentList(recent, onCreateRule, actions)
         } else {
             RuleHistory(rule, onMarkSeen, onClearHistory, onCreateRule, onRestore, actions)
@@ -118,7 +134,11 @@ private fun RuleHistory(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${rule.history.size} saved",
+                    if (rule.totalCaught > rule.history.size) {
+                        "Last ${rule.history.size} of ${"%,d".format(rule.totalCaught)} caught (raise the limit in Settings)"
+                    } else {
+                        "${rule.history.size} saved"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),

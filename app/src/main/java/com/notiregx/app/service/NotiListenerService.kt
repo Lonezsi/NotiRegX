@@ -8,6 +8,8 @@ import com.notiregx.app.MuteStatus
 import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Action
 import com.notiregx.app.model.Decision
+import com.notiregx.app.model.Interaction
+import com.notiregx.app.model.Outcome
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.RuleManager
 import com.notiregx.app.model.VibrationEvent
@@ -33,6 +35,9 @@ class NotiListenerService : NotificationListenerService() {
 
     /** Groups whose children we removed; their summaries get removed once orphaned. */
     private val handledGroups = lru<Unit>(256)
+
+    /** Notifications we let through, by key, so we can tell whether the user opened or swiped them. */
+    private val inShade = lru<Notification>(1000)
 
     private var scope: CoroutineScope? = null
     private var muter: ChannelMuter? = null
@@ -95,10 +100,25 @@ class NotiListenerService : NotificationListenerService() {
         }
 
         sbn.notification.contentIntent?.let { app.contentIntents.put(n.id, it) }
+        app.senderStats.record(n)
         val decision = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value)
         lastSeen[sbn.key] = signature to decision.action
-        if (decision.action != Action.PASS) remove(sbn)
+        if (decision.action != Action.PASS) remove(sbn) else inShade[sbn.key] = n
         if (muting) handleDebuzz(sbn, ranking, n, decision, isUpdate = previous != null)
+    }
+
+    /**
+     * Learns from what the user does with notifications we let through: opened or swiped away.
+     * Removals by the app itself or by NotiRegX say nothing about what the user wanted.
+     */
+    override fun onNotificationRemoved(sbn: StatusBarNotification, rankingMap: RankingMap?, reason: Int) {
+        val n = inShade.remove(sbn.key) ?: return
+        val outcome = when (reason) {
+            REASON_CLICK -> Outcome.OPENED
+            REASON_CANCEL, REASON_CANCEL_ALL, REASON_GROUP_SUMMARY_CANCELED -> Outcome.DISMISSED
+            else -> return
+        }
+        app.interactions.record(Interaction(n, outcome, System.currentTimeMillis()))
     }
 
     /**

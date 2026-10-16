@@ -26,6 +26,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -34,7 +35,12 @@ import androidx.compose.ui.res.painterResource
 import com.notiregx.app.R
 import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Notification
+import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.DismissalAdvisor
 import com.notiregx.app.model.Rule
+import com.notiregx.app.model.RuleAdvice
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private enum class Tab(val title: String) {
     RULES("Rules"),
@@ -67,6 +73,14 @@ fun AppRoot(
     val muteStatus by app.muteStatus.collectAsState()
     val vibrations by app.vibrationLog.events.collectAsState()
     val vibrationMuted by app.vibrationMuted.collectAsState()
+    val senders by app.senderStats.senders.collectAsState()
+    val interactions by app.interactions.events.collectAsState()
+    val ignoredAdvice by app.settings.ignoredAdvice.collectAsState()
+    // Only rule configuration matters for advice, not histories that change with every notification.
+    val ruleConfig = remember(rules) { rules.map { it.copy(history = emptyList(), hits = emptyList(), bundle = Bundle(), totalCaught = 0) } }
+    val advice by produceState(emptyList<RuleAdvice>(), interactions, ruleConfig, ignoredAdvice) {
+        value = withContext(Dispatchers.Default) { DismissalAdvisor.advise(interactions, ruleConfig, ignoredAdvice) }
+    }
     val vibrationMuteError by app.vibrationMuteError.collectAsState()
 
     var tab by rememberSaveable { mutableStateOf(Tab.RULES) }
@@ -111,6 +125,7 @@ fun AppRoot(
             recent = recent,
             companionLinked = companionLinked,
             onLinkCompanion = actions.linkCompanion,
+            senders = senders.values,
             onSave = { manager.save(it); editing = null },
             onDelete = { manager.delete(draft.id); editing = null },
             onBack = { editing = null },
@@ -165,11 +180,16 @@ fun AppRoot(
                     onMoveTo = manager::moveTo,
                     onToggle = manager::setEnabled,
                     onOpenArchive = { archiveRuleId = it; tab = Tab.ARCHIVE },
+                    advice = advice,
+                    onUseAdvice = { editing = ruleFromAdvice(it) },
+                    onIgnoreAdvice = app.settings::ignoreAdvice,
                 )
                 Tab.ARCHIVE -> ArchiveScreen(
                     rules = rules,
                     recent = recent,
-                    selectedRuleId = archiveRuleId?.takeIf { id -> rules.any { it.id == id } },
+                    senders = senders.values,
+                    onMakeRule = { editing = it },
+                    selectedRuleId = archiveRuleId?.takeIf { id -> id == SENDERS_TAB || rules.any { it.id == id } },
                     onSelect = { archiveRuleId = it },
                     onMarkSeen = manager::markSeen,
                     onClearHistory = manager::clearHistory,

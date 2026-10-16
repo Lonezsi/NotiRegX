@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.notiregx.app.model.MatchField
 import com.notiregx.app.model.Rule
+import com.notiregx.app.model.RuleAdvice
 import com.notiregx.app.model.RuleType
 import com.notiregx.app.model.formatMinute
 
@@ -54,6 +56,9 @@ fun HomeScreen(
     onMoveTo: (String, Int) -> Unit,
     onToggle: (String, Boolean) -> Unit,
     onOpenArchive: (String) -> Unit,
+    advice: List<RuleAdvice>,
+    onUseAdvice: (RuleAdvice) -> Unit,
+    onIgnoreAdvice: (String) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val currentRules by rememberUpdatedState(rules)
@@ -113,10 +118,20 @@ fun HomeScreen(
                 NoticeCard(title = "Filtering is paused", body = "Every notification is let through. Resume it in Settings.")
             }
         }
+        if (advice.isNotEmpty()) {
+            item(key = "advice-header") {
+                Text("Suggested for you", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            }
+            items(advice, key = { "advice-" + it.key }) { a ->
+                AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a.key) })
+            }
+        }
         item(key = "intro") {
+            val filtered = rules.filter { it.type != RuleType.ALLOW }.sumOf { it.totalCaught }
             Text(
                 if (rules.isEmpty()) "No rules yet. Tap + to create one, or Make rule on any notification in the Archive."
-                else "Rules run top to bottom. The last rule that matches decides what happens. Drag ≡ to reorder.",
+                else "Your rules have filtered ${"%,d".format(filtered)} notifications so far. Rules run top to bottom; " +
+                    "the last rule that matches decides. Drag ≡ to reorder.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 4.dp),
@@ -207,7 +222,8 @@ private fun RuleCard(
                 val stale = week == 0 && rule.enabled && now - rule.createdAt > DAY_MS
                 Text(
                     if (stale) "No matches in the last 7 days. Check the regex or app?"
-                    else "$week match${if (week == 1) "" else "es"} in the last 7 days · ${rule.hitsSince(now - DAY_MS)} today",
+                    else "$week match${if (week == 1) "" else "es"} in the last 7 days · ${rule.hitsSince(now - DAY_MS)} today" +
+                        if (rule.type != RuleType.ALLOW) " · ${"%,d".format(rule.totalCaught)} caught in total" else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (stale) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
