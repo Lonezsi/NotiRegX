@@ -171,6 +171,7 @@ class Storage(dir: File) {
         .put("detail", v.detail)
         .put("usage", v.usage ?: JSONObject.NULL)
         .put("durationMs", v.durationMs ?: JSONObject.NULL)
+        .put("viaNotification", v.viaNotification)
 
     private fun vibrationFromJson(o: JSONObject) = VibrationEvent(
         time = o.getLong("time"),
@@ -180,6 +181,8 @@ class Storage(dir: File) {
         detail = o.optString("detail"),
         usage = o.stringOrNull("usage"),
         durationMs = if (o.isNull("durationMs")) null else o.optLong("durationMs"),
+        // Older logs didn't store this; the reader labelled those "Notification".
+        viaNotification = o.optBoolean("viaNotification", o.optString("detail") == "Notification"),
     )
 
     private inline fun <reified E : Enum<E>> enumOr(name: String, default: E): E =

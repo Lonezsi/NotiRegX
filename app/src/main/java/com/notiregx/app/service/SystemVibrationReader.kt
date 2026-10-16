@@ -49,6 +49,7 @@ class SystemVibrationReader(private val context: Context, private val reader: No
             detail = detail,
             usage = v.usage,
             durationMs = v.durationMs,
+            viaNotification = v.viaNotification,
         )
     }
 

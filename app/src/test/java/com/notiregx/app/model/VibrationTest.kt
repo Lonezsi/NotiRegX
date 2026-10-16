@@ -118,6 +118,22 @@ class VibrationTest {
     }
 
     @Test
+    fun onlyUnexplainedVibrationsAreGhosts() {
+        fun logged(usage: String?, viaNotification: Boolean = false) = VibrationRow(
+            VibrationEvent(1, "app", "App", VibrationSource.SYSTEM, "", usage = usage, viaNotification = viaNotification),
+            notification = null,
+        ).kind
+        // Android says a notification played it, even though NotiRegX didn't see that notification.
+        assertEquals(VibrationKind.NOTIFICATION, logged("NOTIFICATION", viaNotification = true))
+        assertEquals(VibrationKind.NOTIFICATION, logged("NOTIFICATION"))
+        assertEquals(VibrationKind.CALL, logged("RINGTONE"))
+        assertEquals(VibrationKind.ALARM, logged("ALARM"))
+        assertEquals(VibrationKind.GHOST, logged("UNKNOWN"))
+        assertEquals(VibrationKind.GHOST, logged(null))
+        assertEquals(VibrationKind.ESTIMATE, VibrationRow(ev(1, "a", VibrationSource.NOTIFICATION), null).kind)
+    }
+
+    @Test
     fun logDedupesAndKeepsNewestFirst() {
         val log = VibrationLog()
         log.add(listOf(ev(1, "a", VibrationSource.SYSTEM), ev(3, "b", VibrationSource.SYSTEM)))

@@ -23,8 +23,22 @@ data class VibrationEvent(
     val detail: String,
     val usage: String? = null,
     val durationMs: Long? = null,
+    /** For logged vibrations: Android says a notification played it. */
+    val viaNotification: Boolean = false,
 ) {
     val key: String get() = "$source|$packageName|$time"
+}
+
+enum class VibrationKind(val label: String) {
+    NOTIFICATION("Notification"),
+
+    /** NotiRegX thinks a notification vibrated, but Android's log doesn't confirm it (or isn't readable). */
+    ESTIMATE("Notification (estimated)"),
+    CALL("Call"),
+    ALARM("Alarm"),
+
+    /** Logged by Android with no notification, call or alarm behind it. */
+    GHOST("Ghost vibration"),
 }
 
 /**
@@ -32,8 +46,20 @@ data class VibrationEvent(
  * that explains it (if any), or a notification estimate the system log didn't confirm.
  */
 data class VibrationRow(val event: VibrationEvent, val notification: VibrationEvent?) {
-    /** A vibration Android logged with no notification behind it. */
-    val isGhost: Boolean get() = event.source == VibrationSource.SYSTEM && notification == null
+    val kind: VibrationKind
+        get() = when {
+            event.source == VibrationSource.NOTIFICATION -> VibrationKind.ESTIMATE
+            notification != null || event.viaNotification || event.usage == "NOTIFICATION" -> VibrationKind.NOTIFICATION
+            event.usage in CALL_USAGES -> VibrationKind.CALL
+            event.usage == "ALARM" -> VibrationKind.ALARM
+            else -> VibrationKind.GHOST
+        }
+
+    val isGhost: Boolean get() = kind == VibrationKind.GHOST
+
+    private companion object {
+        val CALL_USAGES = setOf("RINGTONE", "COMMUNICATION_REQUEST")
+    }
 }
 
 class VibrationLog(initial: List<VibrationEvent> = emptyList()) {
