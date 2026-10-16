@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rule editor -->
+    <string name="editor_title_new">Új szabály</string>
+    <string name="editor_title_edit">Szabály szerkesztése</string>
+    <string name="editor_back">Vissza</string>
+    <string name="editor_delete_rule">Szabály törlése</string>
+    <string name="editor_save">Mentés</string>
+    <string name="editor_name">Név</string>
+    <string name="editor_regex">Regex</string>
+    <string name="editor_regex_hint">Ha üres, mindenre illeszkedik. Kezdd (?i)-vel, ha nem számít a kis- és nagybetű.</string>
+    <string name="editor_edit_senders">Küldők szerkesztése</string>
+    <string name="editor_pick_senders">Küldők kiválasztása…</string>
+    <string name="editor_search_in">Keresés itt</string>
+    <string name="editor_app">Alkalmazás</string>
+    <string name="editor_invert">Fordított</string>
+    <string name="editor_invert_description">Azokra az értesítésekre illeszkedik, amelyekben a regex NEM található meg</string>
+    <string name="editor_final_match">Ha ez a szabály az utolsó egyező</string>
+    <string name="editor_dnd_needed">Hogy a Ne zavarjanak módon is átcsörögjön, a NotiRegX-nek hozzáférés kell a Ne zavarjanak beállításhoz.</string>
+    <string name="editor_allow">Engedélyezés</string>
+    <string name="editor_debuzz">Rezgésmentesítés</string>
+    <string name="editor_debuzz_needs_link">Előbb egy társeszközt kell csatlakoztatnod (lásd: Beállítások).</string>
+    <string name="editor_debuzz_any_app">Lenémít minden értesítési kategóriát, amelyből ez a szabály elkap valamit; helyette a NotiRegX rezeg arra, ami átjut.</string>
+    <string name="editor_debuzz_app">Lenémítja ezt: %1$s; helyette a NotiRegX rezeg arra, ami átjut, így a kiszűrt értesítések sosem rezegnek.</string>
+    <string name="editor_link">Csatlakoztatás</string>
+    <string name="editor_when">Mikor</string>
+    <string name="editor_description">Leírás (nem kötelező)</string>
+    <string name="editor_try_it">Próbáld ki</string>
+    <string name="editor_sample_text">Minta értesítésszöveg</string>
+    <string name="editor_test_match">✓ A szabály illeszkedik</string>
+    <string name="editor_test_no_match">✗ Nincs egyezés</string>
+    <plurals name="editor_recent_matches">
+        <item quantity="one">Az utolsó %2$d értesítésből %1$d illeszkedik</item>
+        <item quantity="other">Az utolsó %2$d értesítésből %1$d illeszkedik</item>
+    </plurals>
+    <string name="editor_people_name">Emberek: %1$s</string>
+    <string name="editor_delete_title">Törlöd a szabályt?</string>
+    <string name="editor_delete_message">A(z) „%1$s” szabály és a mentett előzményei törlődnek.</string>
+    <string name="editor_delete">Törlés</string>
+    <string name="editor_choose_app">Válassz alkalmazást</string>
+    <string name="editor_search">Keresés</string>
+
+    <!-- Home: rules list -->
+    <string name="home_stopped_title">A szűrés leállt</string>
+    <string name="home_stopped_body">Az Android leválasztotta a NotiRegX értesítésszűrőjét, így most semmi sincs szűrve. Ha az Újraindítás nem segít, kapcsold ki, majd vissza a NotiRegX értesítési hozzáférését.</string>
+    <string name="home_stopped_action">Újraindítás</string>
+    <string name="home_access_title">Az értesítési hozzáférés ki van kapcsolva</string>
+    <string name="home_access_body">A NotiRegX semmit sem lát és nem tud szűrni, amíg nem engedélyezed az Android beállításaiban.</string>
+    <string name="home_access_action">Hozzáférés megadása</string>
+    <string name="home_post_title">A NotiRegX nem küldhet értesítést</string>
+    <string name="home_post_body">Engedélyezd, hogy a csomagok, az összesítők és a rezgésmentesítési jelzések megjelenhessenek.</string>
+    <string name="home_post_action">Engedélyezés</string>
+    <string name="home_paused_title">A szűrés szünetel</string>
+    <string name="home_paused_body">Minden értesítés átjut. A Beállításokban folytathatod.</string>
+    <string name="home_suggested">Javaslatok neked</string>
+    <string name="home_intro_empty">Még nincs szabályod. Koppints a + gombra egy új létrehozásához, vagy az Archívumban bármelyik értesítésnél a Szabály készítése gombra.</string>
+    <plurals name="home_intro_filtered">
+        <item quantity="one">A szabályaid eddig %1$s értesítést szűrtek ki. A szabályok fentről lefelé futnak; az utolsó egyező szabály dönt. Az átrendezéshez húzd a ≡ jelet.</item>
+        <item quantity="other">A szabályaid eddig %1$s értesítést szűrtek ki. A szabályok fentről lefelé futnak; az utolsó egyező szabály dönt. Az átrendezéshez húzd a ≡ jelet.</item>
+    </plurals>
+    <string name="home_drag_to_reorder">Húzd az átrendezéshez</string>
+    <string name="home_debuzzed">Rezgésmentesítve</string>
+    <string name="home_regex_not">NEM %1$s</string>
+    <string name="home_delivered_at">Kézbesítés: %1$s</string>
+    <string name="home_stale">Az elmúlt 7 napban nem volt egyezés. Ellenőrzöd a regexet vagy az alkalmazást?</string>
+    <plurals name="home_matches_week">
+        <item quantity="one">%1$d egyezés az elmúlt 7 napban</item>
+        <item quantity="other">%1$d egyezés az elmúlt 7 napban</item>
+    </plurals>
+    <string name="home_matches_today">ma %1$d</string>
+    <plurals name="home_caught_total">
+        <item quantity="one">összesen %1$s elkapva</item>
+        <item quantity="other">összesen %1$s elkapva</item>
+    </plurals>
+    <plurals name="home_saved">
+        <item quantity="one">%1$d mentve</item>
+        <item quantity="other">%1$d mentve</item>
+    </plurals>
+    <plurals name="home_unseen">
+        <item quantity="one">%1$d új</item>
+        <item quantity="other">%1$d új</item>
+    </plurals>
+
+    <!-- Archive -->
+    <string name="archive_tab_recent">Legutóbbiak</string>
+    <string name="archive_tab_senders">Küldők</string>
+    <plurals name="archive_recent_intro">
+        <item quantity="one">Az utolsó %1$d beérkezett értesítés, bármi lett is a sorsa.</item>
+        <item quantity="other">Az utolsó %1$d beérkezett értesítés, bármi lett is a sorsa.</item>
+    </plurals>
+    <string name="archive_recent_empty">Még nem érkezett semmi.</string>
+    <string name="archive_saved_of_caught">Az utolsó %1$d a(z) %2$s elkapottból (a korlátot a Beállításokban emelheted)</string>
+    <plurals name="archive_saved">
+        <item quantity="one">%1$d mentve</item>
+        <item quantity="other">%1$d mentve</item>
+    </plurals>
+    <string name="archive_clear_history">Előzmények törlése</string>
+    <string name="archive_rule_empty">Ez a szabály még nem kapott el semmit.</string>
+    <string name="archive_clear_title">Törlöd az előzményeket?</string>
+    <plurals name="archive_clear_message">
+        <item quantity="one">Törli a(z) „%2$s” által mentett %1$d értesítést.</item>
+        <item quantity="other">Törli a(z) „%2$s” által mentett %1$d értesítést.</item>
+    </plurals>
+    <string name="archive_clear">Törlés</string>
+    <string name="archive_restore">Visszaállítás</string>
+    <string name="archive_make_rule">Szabály készítése</string>
+    <string name="archive_open_link">Link megnyitása</string>
+    <string name="archive_open">Megnyitás</string>
+    <string name="archive_open_app">Alkalmazás megnyitása</string>
+</resources>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings screen, rule conditions (schedule, burst, digest) and the senders screen / people picker. -->
+<resources>
+    <!-- Settings -->
+    <string name="settings_section_filtering">Filtering</string>
+    <string name="settings_filter_service">Filter service</string>
+    <string name="settings_filter_service_no_access">Not running: notification access is off.</string>
+    <string name="settings_filter_service_running_hint">Running. NotiRegX checks this regularly and reconnects it if Android stops it.</string>
+    <string name="settings_filter_service_disconnected">Not running. Android disconnected it; tap Restart.</string>
+    <string name="settings_restart">Restart</string>
+    <string name="settings_running">Running</string>
+    <string name="settings_filtering_enabled">Filtering enabled</string>
+    <string name="settings_filtering_enabled_hint">When off, every notification is let through but still shows up in Recent.</string>
+    <!-- %1$d = number of notifications kept per rule -->
+    <string name="settings_saved_per_rule">Saved per rule: %1$d</string>
+    <string name="settings_saved_per_rule_hint">Older notifications are dropped from a rule\'s history beyond this.</string>
+
+    <string name="settings_section_debuzz">De-buzz</string>
+    <string name="settings_debuzz_explanation">Android buzzes before NotiRegX can remove a notification. Rules with De-buzz turned on silence their app instead, and NotiRegX buzzes itself for whatever gets through. A de-buzz rule for one app silences it right away; one for any app silences a notification category the first time it catches something from it. Turning De-buzz off or deleting the rule puts everything back.</string>
+    <string name="settings_debuzz_unsupported">This phone doesn\'t support companion devices, so De-buzz isn\'t available.</string>
+    <string name="settings_debuzz_link_hint">Android only allows this for apps linked to a companion device. Turn on Bluetooth and pick any nearby device (earbuds, watch, speaker, TV). Nothing is ever sent to it.</string>
+    <string name="settings_link_device">Link a device</string>
+    <!-- %1$s = error message -->
+    <string name="settings_debuzz_problem">Problem: %1$s</string>
+    <!-- %d = number of silenced notification channels -->
+    <plurals name="settings_debuzz_ready">
+        <item quantity="one">Ready. %d notification category currently silenced.</item>
+        <item quantity="other">Ready. %d notification categories currently silenced.</item>
+    </plurals>
+    <string name="settings_debuzz_uninstall_hint">Before uninstalling NotiRegX, turn De-buzz off on every rule so the apps get their sound back.</string>
+
+    <string name="settings_section_backup">Backup</string>
+    <string name="settings_backup_hint">Save your rules to a file, or add rules from one (yours or a friend\'s). History isn\'t included.</string>
+    <string name="settings_export_rules">Export rules</string>
+    <string name="settings_import_rules">Import rules</string>
+
+    <string name="settings_section_permissions">Permissions</string>
+    <string name="settings_perm_notification_access">Notification access</string>
+    <string name="settings_perm_notification_access_hint">Required to read and filter notifications.</string>
+    <string name="settings_perm_post_notifications">Post notifications</string>
+    <string name="settings_perm_post_notifications_hint">Required to show bundle notifications.</string>
+    <string name="settings_perm_dnd_access">Do Not Disturb access</string>
+    <string name="settings_perm_dnd_access_hint">Optional. Lets \"Always alert\" rules ring through Do Not Disturb.</string>
+    <string name="settings_perm_battery">Unrestricted battery use</string>
+    <string name="settings_perm_battery_hint">Stops the system from putting NotiRegX to sleep.</string>
+    <string name="settings_granted">Granted</string>
+    <string name="settings_allow">Allow</string>
+
+    <string name="settings_section_samsung">Samsung tips</string>
+    <string name="settings_samsung_tips">If Android says notification access is a \"restricted setting\", open App info, tap ⋮ in the corner and choose \"Allow restricted settings\", then try again.\n\nTo keep filtering reliable, also add NotiRegX to Settings › Battery › Background usage limits › Never sleeping apps.</string>
+    <string name="settings_open_app_info">Open App info</string>
+    <string name="settings_show_tutorial">Show the tutorial again</string>
+
+    <!-- Rule conditions -->
+    <string name="conditions_schedule_title">Only at certain times</string>
+    <string name="conditions_schedule_off">Active all the time.</string>
+    <!-- %1$s = time of day -->
+    <string name="conditions_from_time">From %1$s</string>
+    <string name="conditions_to_time">To %1$s</string>
+    <string name="conditions_schedule_hint">A range that ends before it starts runs overnight. Same start and end means all day.</string>
+    <string name="conditions_burst_title">Only during bursts</string>
+    <!-- %1$d = how many get through, %2$d = minutes -->
+    <string name="conditions_burst_on">The first %1$d within %2$d min get through; the rest are caught.</string>
+    <string name="conditions_burst_off">Applies to every matching notification.</string>
+    <string name="conditions_burst_count">Let through</string>
+    <string name="conditions_burst_window">Within (min)</string>
+    <string name="conditions_digest_title">Deliver as a digest</string>
+    <string name="conditions_digest_off">The bundle shows up as soon as something is caught.</string>
+    <string name="conditions_digest_on">The bundle stays hidden and shows up at these times.</string>
+    <!-- %1$s = time of day -->
+    <string name="conditions_remove_time">Remove %1$s</string>
+    <string name="conditions_add_time">Add time</string>
+
+    <!-- Senders -->
+    <string name="senders_period_today">Today</string>
+    <string name="senders_period_week">7 days</string>
+    <string name="senders_period_month">30 days</string>
+    <string name="senders_period_all">All time</string>
+    <string name="senders_all_apps">All apps</string>
+    <string name="senders_intro">Counts every notification, whatever your rules did with it. For chat apps the sender is the person or group; for others it\'s the notification\'s title. Tap one to make a rule.</string>
+    <string name="senders_empty_period">Nothing counted for this period yet.</string>
+    <!-- %1$s = formatted count, %2$s = app name -->
+    <plurals name="senders_dialog_total">
+        <item quantity="one">%1$s notification from %2$s in total. What should happen to it?</item>
+        <item quantity="other">%1$s notifications from %2$s in total. What should happen to them?</item>
+    </plurals>
+    <string name="senders_always_let_through">Always let through</string>
+    <string name="senders_pick_title">Pick senders</string>
+    <string name="senders_pick_hint">Matches notifications whose title is exactly one of these.</string>
+    <string name="senders_search">Search</string>
+    <string name="senders_none">No senders seen yet.</string>
+    <string name="senders_none_for_app">No senders seen yet for this app.</string>
+    <!-- %1$s = formatted count -->
+    <plurals name="senders_notification_count">
+        <item quantity="one">%1$s notification</item>
+        <item quantity="other">%1$s notifications</item>
+    </plurals>
+    <string name="senders_use">Use</string>
+    <!-- %1$d = number of selected senders -->
+    <string name="senders_use_count">Use %1$d</string>
+</resources>

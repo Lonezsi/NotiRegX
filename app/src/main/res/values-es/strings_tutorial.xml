@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- First-launch tutorial, the dismissal advice card, the "Make a rule" suggestions screen and the main tabs. -->
+<resources>
+    <!-- Tutorial -->
+    <string name="tutorial_skip">Omitir</string>
+    <string name="tutorial_next">Siguiente</string>
+    <string name="tutorial_get_started">Empezar</string>
+
+    <string name="tutorial_welcome_title">Te damos la bienvenida a NotiRegX</string>
+    <string name="tutorial_welcome_body">Tu teléfono recibe un montón de notificaciones. Con NotiRegX decides cuáles merecen tu atención, con reglas que se fijan en la app, el título o el texto.</string>
+    <string name="tutorial_hide_title">Oculta el ruido</string>
+    <string name="tutorial_hide_body">Los likes, las promociones y las reacciones desaparecen, pero quedan guardados en el Archivo por si los quieres ver.</string>
+    <string name="tutorial_bundle_title">Agrupa el resto</string>
+    <string name="tutorial_bundle_body">Reúne lo menos urgente en una sola notificación con un contador, o en un resumen a horas fijas.</string>
+    <string name="tutorial_never_miss_title">No te pierdas lo importante</string>
+    <string name="tutorial_never_miss_body">Deja pasar a las personas importantes y las palabras urgentes, incluso con No molestar activado.</string>
+    <string name="tutorial_what_buzzed_title">Descubre qué ha vibrado</string>
+    <string name="tutorial_what_buzzed_body">Consulta cada vibración, incluidas las vibraciones “fantasma” que no tienen ninguna notificación detrás.</string>
+
+    <string name="tutorial_rules_title">Cómo funcionan las reglas</string>
+    <string name="tutorial_rules_body">Una regla detecta notificaciones por la app y por un patrón en el título o el texto. Las reglas se aplican de arriba abajo, y la última que coincide decide qué pasa.</string>
+    <string name="tutorial_example_title">Ejemplo</string>
+    <string name="tutorial_example_body">Regla 1: ocultar todo lo de Instagram. Regla 2 (debajo): avisar siempre cuando el texto mencione tu nombre. Las menciones pasan y suenan; todo lo demás de Instagram queda oculto.</string>
+
+    <string name="tutorial_permissions_title">Deja que NotiRegX vea las notificaciones</string>
+    <string name="tutorial_permissions_body">Android necesita tu permiso para que una app pueda leer y filtrar notificaciones. Todo se queda en tu teléfono; no se envía nada a ningún sitio.</string>
+    <string name="tutorial_access_title">Acceso a notificaciones</string>
+    <string name="tutorial_access_hint">Obligatorio. Activa NotiRegX en la lista que se abre.</string>
+    <string name="tutorial_post_title">Mostrar notificaciones</string>
+    <string name="tutorial_post_hint">Para grupos, resúmenes y avisos.</string>
+    <string name="tutorial_samsung_restricted_hint">Samsung: si Android dice que el acceso a notificaciones es un “ajuste restringido”, abre Información de la app, toca ⋮, elige “Permitir ajustes restringidos” y vuelve a intentarlo.</string>
+
+    <string name="tutorial_extras_title">Extras opcionales</string>
+    <string name="tutorial_extras_body">Nada de esto hace falta para empezar. Puedes activarlo más tarde en Ajustes.</string>
+    <string name="tutorial_battery_title">Uso de batería sin restricciones</string>
+    <string name="tutorial_battery_hint">Recomendado en Samsung, para que el teléfono no deje dormido el filtro.</string>
+    <string name="tutorial_dnd_title">Acceso a No molestar</string>
+    <string name="tutorial_dnd_hint">Permite que las reglas de “Avisar siempre” suenen aunque esté activado No molestar.</string>
+    <string name="tutorial_debuzz_title">Antivibración (vincular un dispositivo)</string>
+    <string name="tutorial_debuzz_hint">Evita que las notificaciones filtradas vibren. Elige cualquier dispositivo Bluetooth cercano; no se le envía nada.</string>
+    <string name="tutorial_ghost_title">Vibraciones fantasma</string>
+    <!-- %1$s = the adb command, shown as-is -->
+    <string name="tutorial_ghost_body">Para ver las vibraciones que no van acompañadas de ninguna notificación, ejecuta esto una vez desde un ordenador con adb: %1$s</string>
+
+    <string name="tutorial_start_title">Por dónde empezar</string>
+    <string name="tutorial_start_body">Deja que NotiRegX funcione un tiempo y luego convierte lo que veas en reglas.</string>
+    <string name="tutorial_make_rules_title">Crea reglas a partir de notificaciones reales</string>
+    <string name="tutorial_make_rules_body">Archivo › Recientes: toca Crear regla en cualquier cosa que te moleste. NotiRegX sugiere patrones basados en notificaciones parecidas.</string>
+    <string name="tutorial_accept_title">Acepta sugerencias</string>
+    <string name="tutorial_accept_body">Descarta lo que no quieras deslizando, como siempre. Tras unas cuantas, “Sugerencias para ti” te propone reglas en la pestaña Reglas.</string>
+    <string name="tutorial_senders_title">Mira quién envía qué</string>
+    <string name="tutorial_senders_body">Archivo › Remitentes ordena personas y apps según cuánto te envían.</string>
+    <string name="tutorial_check_buzz_title">Comprueba qué ha vibrado</string>
+    <string name="tutorial_check_buzz_body">La pestaña Vibraciones muestra cada vibración. Añade el acceso rápido “Última vibración” para comprobarlo con un toque.</string>
+
+    <!-- Advice card ("you keep swiping these away") -->
+    <!-- %1$s = app name -->
+    <string name="advice_title">¿Ocultar en %1$s?</string>
+    <!-- %1$d = how many were swiped away -->
+    <plurals name="advice_dismissed_never_opened">
+        <item quantity="one">Descartaste %1$d de estas y no la abriste.</item>
+        <item quantity="other">Descartaste %1$d de estas y no abriste ninguna.</item>
+    </plurals>
+    <!-- %1$d = how many were swiped away, %2$d = how many were opened -->
+    <plurals name="advice_dismissed_opened_some">
+        <item quantity="one">Descartaste %1$d de estas y solo abriste %2$d.</item>
+        <item quantity="other">Descartaste %1$d de estas y solo abriste %2$d.</item>
+    </plurals>
+    <!-- %1$s = an example notification -->
+    <string name="advice_example">p. ej. %1$s</string>
+    <string name="advice_not_now">Ahora no</string>
+    <string name="advice_create_rule">Crear regla</string>
+    <!-- Used in a new rule's name: "<app>: everything" -->
+    <string name="advice_rule_name_everything">todo</string>
+
+    <!-- Suggestions ("Make a rule") screen -->
+    <string name="suggestions_title">Crear una regla</string>
+    <string name="suggestions_back">Atrás</string>
+    <string name="suggestions_start_from_scratch">Empezar desde cero</string>
+    <!-- %1$s = app name -->
+    <string name="suggestions_scratch_hint">Abre el editor con %1$s ya elegida. Escribe tu propio patrón o parte de una de las sugerencias de abajo.</string>
+    <!-- %1$d = number of notifications, %2$s = app name -->
+    <plurals name="suggestions_header">
+        <item quantity="one">Sugerencias a partir de %1$d notificación de %2$s</item>
+        <item quantity="other">Sugerencias a partir de %1$d notificaciones de %2$s</item>
+    </plurals>
+    <!-- %1$s = regular expression; an inverted pattern -->
+    <string name="suggestions_regex_not">NO /%1$s/</string>
+    <!-- %1$d = notifications matched, %2$d = notifications seen -->
+    <string name="suggestions_match_count">%1$d de %2$d</string>
+    <!-- %1$s = an example notification -->
+    <string name="suggestions_example">p. ej. %1$s</string>
+    <string name="suggestions_group_similar">Mensajes como este</string>
+    <string name="suggestions_group_contains">Que contienen una palabra</string>
+    <string name="suggestions_group_exact">Exactamente esto</string>
+    <string name="suggestions_group_except">Todo excepto esto</string>
+    <string name="suggestions_group_everything">Todo de la app</string>
+
+    <!-- Main screen -->
+    <string name="root_tab_rules">Reglas</string>
+    <string name="root_tab_archive">Archivo</string>
+    <string name="root_tab_vibrations">Vibraciones</string>
+    <string name="root_tab_settings">Ajustes</string>
+    <string name="root_add_rule">Añadir regla</string>
+</resources>

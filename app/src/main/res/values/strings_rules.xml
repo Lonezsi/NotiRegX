@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rule editor, rules list (home) and archive screens. -->
+<resources>
+    <!-- Rule editor -->
+    <string name="editor_title_new">New rule</string>
+    <string name="editor_title_edit">Edit rule</string>
+    <string name="editor_back">Back</string>
+    <string name="editor_delete_rule">Delete rule</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_name">Name</string>
+    <string name="editor_regex">Regex</string>
+    <string name="editor_regex_hint">Empty matches everything. Start with (?i) to ignore case.</string>
+    <string name="editor_edit_senders">Edit senders</string>
+    <string name="editor_pick_senders">Pick senders…</string>
+    <string name="editor_search_in">Search in</string>
+    <string name="editor_app">App</string>
+    <string name="editor_invert">Invert</string>
+    <string name="editor_invert_description">Match notifications where the regex is NOT found</string>
+    <string name="editor_final_match">When this rule is the final match</string>
+    <string name="editor_dnd_needed">To ring through Do Not Disturb, NotiRegX needs Do Not Disturb access.</string>
+    <string name="editor_allow">Allow</string>
+    <string name="editor_debuzz">De-buzz</string>
+    <string name="editor_debuzz_needs_link">Needs a linked device first (see Settings).</string>
+    <string name="editor_debuzz_any_app">Silences each notification category this rule catches something from; NotiRegX buzzes for whatever gets through instead.</string>
+    <!-- %1$s = app name -->
+    <string name="editor_debuzz_app">Silences %1$s; NotiRegX buzzes for whatever gets through instead, so filtered notifications never buzz.</string>
+    <string name="editor_link">Link</string>
+    <string name="editor_when">When</string>
+    <string name="editor_description">Description (optional)</string>
+    <string name="editor_try_it">Try it</string>
+    <string name="editor_sample_text">Sample notification text</string>
+    <string name="editor_test_match">✓ This rule matches</string>
+    <string name="editor_test_no_match">✗ No match</string>
+    <!-- %1$d = matching notifications, %2$d = recent notifications checked (picks the plural) -->
+    <plurals name="editor_recent_matches">
+        <item quantity="one">Matches %1$d of the last %2$d notification</item>
+        <item quantity="other">Matches %1$d of the last %2$d notifications</item>
+    </plurals>
+    <!-- Default name of a rule made with the sender picker. %1$s = comma-separated sender names -->
+    <string name="editor_people_name">People: %1$s</string>
+    <string name="editor_delete_title">Delete rule?</string>
+    <!-- %1$s = rule name -->
+    <string name="editor_delete_message">“%1$s” and its saved history will be removed.</string>
+    <string name="editor_delete">Delete</string>
+    <string name="editor_choose_app">Choose app</string>
+    <string name="editor_search">Search</string>
+
+    <!-- Home: rules list -->
+    <string name="home_stopped_title">Filtering has stopped</string>
+    <string name="home_stopped_body">Android disconnected NotiRegX\'s notification filter, so nothing is being filtered. If Restart doesn\'t help, turn NotiRegX\'s notification access off and on again.</string>
+    <string name="home_stopped_action">Restart</string>
+    <string name="home_access_title">Notification access is off</string>
+    <string name="home_access_body">NotiRegX can\'t see or filter anything until you allow it in Android settings.</string>
+    <string name="home_access_action">Grant access</string>
+    <string name="home_post_title">NotiRegX can\'t post notifications</string>
+    <string name="home_post_body">Allow it so bundles, digests and de-buzz alerts can show up.</string>
+    <string name="home_post_action">Allow</string>
+    <string name="home_paused_title">Filtering is paused</string>
+    <string name="home_paused_body">Every notification is let through. Resume it in Settings.</string>
+    <string name="home_suggested">Suggested for you</string>
+    <string name="home_intro_empty">No rules yet. Tap + to create one, or Make rule on any notification in the Archive.</string>
+    <!-- %1$s = number of notifications, already formatted with thousands separators -->
+    <plurals name="home_intro_filtered">
+        <item quantity="one">Your rules have filtered %1$s notification so far. Rules run top to bottom; the last rule that matches decides. Drag ≡ to reorder.</item>
+        <item quantity="other">Your rules have filtered %1$s notifications so far. Rules run top to bottom; the last rule that matches decides. Drag ≡ to reorder.</item>
+    </plurals>
+    <string name="home_drag_to_reorder">Drag to reorder</string>
+    <string name="home_debuzzed">De-buzzed</string>
+    <!-- Inverted rule pattern. %1$s = /regex/ -->
+    <string name="home_regex_not">NOT %1$s</string>
+    <!-- %1$s = comma-separated times -->
+    <string name="home_delivered_at">Delivered at %1$s</string>
+    <string name="home_stale">No matches in the last 7 days. Check the regex or app?</string>
+    <plurals name="home_matches_week">
+        <item quantity="one">%1$d match in the last 7 days</item>
+        <item quantity="other">%1$d matches in the last 7 days</item>
+    </plurals>
+    <string name="home_matches_today">%1$d today</string>
+    <!-- %1$s = number, already formatted with thousands separators -->
+    <plurals name="home_caught_total">
+        <item quantity="one">%1$s caught in total</item>
+        <item quantity="other">%1$s caught in total</item>
+    </plurals>
+    <plurals name="home_saved">
+        <item quantity="one">%1$d saved</item>
+        <item quantity="other">%1$d saved</item>
+    </plurals>
+    <plurals name="home_unseen">
+        <item quantity="one">%1$d unseen</item>
+        <item quantity="other">%1$d unseen</item>
+    </plurals>
+
+    <!-- Archive -->
+    <string name="archive_tab_recent">Recent</string>
+    <string name="archive_tab_senders">Senders</string>
+    <plurals name="archive_recent_intro">
+        <item quantity="one">The last %1$d notification received, whatever the outcome.</item>
+        <item quantity="other">The last %1$d notifications received, whatever the outcome.</item>
+    </plurals>
+    <string name="archive_recent_empty">Nothing received yet.</string>
+    <!-- %1$d = saved, %2$s = total caught, already formatted with thousands separators -->
+    <string name="archive_saved_of_caught">Last %1$d of %2$s caught (raise the limit in Settings)</string>
+    <plurals name="archive_saved">
+        <item quantity="one">%1$d saved</item>
+        <item quantity="other">%1$d saved</item>
+    </plurals>
+    <string name="archive_clear_history">Clear history</string>
+    <string name="archive_rule_empty">This rule hasn\'t caught anything yet.</string>
+    <string name="archive_clear_title">Clear history?</string>
+    <!-- %1$d = number of notifications, %2$s = rule name -->
+    <plurals name="archive_clear_message">
+        <item quantity="one">Deletes the %1$d notification saved by “%2$s”.</item>
+        <item quantity="other">Deletes the %1$d notifications saved by “%2$s”.</item>
+    </plurals>
+    <string name="archive_clear">Clear</string>
+    <string name="archive_restore">Restore</string>
+    <string name="archive_make_rule">Make rule</string>
+    <string name="archive_open_link">Open link</string>
+    <string name="archive_open">Open</string>
+    <string name="archive_open_app">Open app</string>
+</resources>

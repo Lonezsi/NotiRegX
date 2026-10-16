@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Text shared across screens: rule actions, match fields, vibration kinds, suggestion and schedule wording. -->
+<resources>
+    <string name="type_hide">Hide</string>
+    <string name="type_hide_short">Hide</string>
+    <string name="type_hide_explanation">Removed from the phone and saved to this rule\'s history.</string>
+    <string name="type_bundle">Bundle</string>
+    <string name="type_bundle_short">Bundle</string>
+    <string name="type_bundle_explanation">Removed from the phone and collected into this rule\'s bundle notification.</string>
+    <string name="type_allow">Let through</string>
+    <string name="type_allow_short">Allow</string>
+    <string name="type_allow_explanation">Delivered normally. Use it below a Hide/Bundle rule to make an exception.</string>
+    <string name="type_alert">Always alert</string>
+    <string name="type_alert_short">Alert</string>
+    <string name="type_alert_explanation">Delivered, and always alerts: NotiRegX buzzes and rings for it even in Do Not Disturb or when the app is silenced. Use it for urgent words or important people.</string>
+
+    <string name="field_any">Title + text</string>
+    <string name="field_title">Title</string>
+    <string name="field_text">Text</string>
+
+    <string name="kind_notification">Notification</string>
+    <string name="kind_notification_chip">Notifications</string>
+    <string name="kind_estimate">Notification (estimated)</string>
+    <string name="kind_estimate_chip">Estimated</string>
+    <string name="kind_call">Call</string>
+    <string name="kind_call_chip">Calls</string>
+    <string name="kind_alarm">Alarm</string>
+    <string name="kind_alarm_chip">Alarms</string>
+    <string name="kind_ghost">Ghost vibration</string>
+    <string name="kind_ghost_chip">Ghosts</string>
+
+    <!-- %1$s = "Title" or "Text", %2$s = the matched text -->
+    <string name="suggestion_like">%1$s like “%2$s”</string>
+    <string name="suggestion_starts_with">%1$s starts with “%2$s”</string>
+    <string name="suggestion_ends_with">%1$s ends with “%2$s”</string>
+    <string name="suggestion_contains">%1$s contains “%2$s”</string>
+    <string name="suggestion_is">%1$s is “%2$s”</string>
+    <!-- %1$s = the matched text -->
+    <string name="suggestion_mentions">Mentions “%1$s”</string>
+    <string name="suggestion_except_title">Everything except title “%1$s”</string>
+    <string name="suggestion_except_titles_like">Everything except titles like “%1$s”</string>
+    <!-- %1$s = app name -->
+    <string name="suggestion_everything">Everything from %1$s</string>
+
+    <string name="schedule_every_day">Every day</string>
+    <string name="schedule_weekdays">Weekdays</string>
+    <string name="schedule_weekends">Weekends</string>
+    <!-- %1$s = days -->
+    <string name="schedule_all_day">%1$s, all day</string>
+    <!-- %1$s = days, %2$s = start time, %3$s = end time -->
+    <string name="schedule_range">%1$s, %2$s–%3$s</string>
+    <!-- %1$d = how many get through, %2$d = minutes -->
+    <string name="burst_summary">After %1$d within %2$d min</string>
+
+    <string name="outcome_paused">Filtering paused</string>
+    <string name="outcome_no_match">No match</string>
+    <!-- %1$s = rule name -->
+    <string name="outcome_hidden">Hidden by %1$s</string>
+    <string name="outcome_bundled">Bundled by %1$s</string>
+    <string name="outcome_let_through">Let through by %1$s</string>
+
+    <string name="any_app">Any app</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="language_title">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_change">Change</string>
+</resources>

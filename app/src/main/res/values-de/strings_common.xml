@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_hide">Ausblenden</string>
+    <string name="type_hide_short">Ausblenden</string>
+    <string name="type_hide_explanation">Verschwindet vom Handy und wird im Verlauf dieser Regel gespeichert.</string>
+    <string name="type_bundle">Bündeln</string>
+    <string name="type_bundle_short">Bündeln</string>
+    <string name="type_bundle_explanation">Verschwindet vom Handy und landet in der Bündel-Benachrichtigung dieser Regel.</string>
+    <string name="type_allow">Durchlassen</string>
+    <string name="type_allow_short">Erlauben</string>
+    <string name="type_allow_explanation">Wird normal zugestellt. Unter einer Ausblenden-/Bündeln-Regel macht sie eine Ausnahme.</string>
+    <string name="type_alert">Immer melden</string>
+    <string name="type_alert_short">Melden</string>
+    <string name="type_alert_explanation">Wird zugestellt und meldet sich immer: NotiRegX vibriert und klingelt auch bei „Bitte nicht stören“ oder wenn die App stummgeschaltet ist. Gut für dringende Wörter oder wichtige Personen.</string>
+
+    <string name="field_any">Titel + Text</string>
+    <string name="field_title">Titel</string>
+    <string name="field_text">Text</string>
+
+    <string name="kind_notification">Benachrichtigung</string>
+    <string name="kind_notification_chip">Benachrichtigungen</string>
+    <string name="kind_estimate">Benachrichtigung (geschätzt)</string>
+    <string name="kind_estimate_chip">Geschätzt</string>
+    <string name="kind_call">Anruf</string>
+    <string name="kind_call_chip">Anrufe</string>
+    <string name="kind_alarm">Wecker</string>
+    <string name="kind_alarm_chip">Wecker</string>
+    <string name="kind_ghost">Geistervibration</string>
+    <string name="kind_ghost_chip">Geister</string>
+
+    <string name="suggestion_like">%1$s ähnlich wie „%2$s“</string>
+    <string name="suggestion_starts_with">%1$s beginnt mit „%2$s“</string>
+    <string name="suggestion_ends_with">%1$s endet mit „%2$s“</string>
+    <string name="suggestion_contains">%1$s enthält „%2$s“</string>
+    <string name="suggestion_is">%1$s ist „%2$s“</string>
+    <string name="suggestion_mentions">Erwähnt „%1$s“</string>
+    <string name="suggestion_except_title">Alles außer Titel „%1$s“</string>
+    <string name="suggestion_except_titles_like">Alles außer Titeln wie „%1$s“</string>
+    <string name="suggestion_everything">Alles von %1$s</string>
+
+    <string name="schedule_every_day">Jeden Tag</string>
+    <string name="schedule_weekdays">Werktags</string>
+    <string name="schedule_weekends">Am Wochenende</string>
+    <string name="schedule_all_day">%1$s, ganztägig</string>
+    <string name="schedule_range">%1$s, %2$s–%3$s</string>
+    <string name="burst_summary">Nach %1$d innerhalb von %2$d Min.</string>
+
+    <string name="outcome_paused">Filter pausiert</string>
+    <string name="outcome_no_match">Kein Treffer</string>
+    <string name="outcome_hidden">Ausgeblendet von %1$s</string>
+    <string name="outcome_bundled">Gebündelt von %1$s</string>
+    <string name="outcome_let_through">Durchgelassen von %1$s</string>
+
+    <string name="any_app">Jede App</string>
+    <string name="cancel">Abbrechen</string>
+
+    <string name="language_title">Sprache</string>
+    <string name="language_system">Systemstandard</string>
+    <string name="language_change">Ändern</string>
+</resources>

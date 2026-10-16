@@ -4,13 +4,14 @@ import android.app.NotificationChannel
 import android.content.Context
 import android.os.Process
 import android.service.notification.NotificationListenerService
+import com.notiregx.app.R
 
 /**
  * Turns vibration off for an app's notification categories (sound and pop-ups stay), remembering
  * each category's original vibration so it can be restored. Like [ChannelMuter], this needs a
  * companion device association; without one, calls fail and an error message is returned.
  */
-class VibrationMuter(private val listener: NotificationListenerService, context: Context) {
+class VibrationMuter(private val listener: NotificationListenerService, private val context: Context) {
     /** "pkg\u0000channelId" -> original vibration pattern ("" for the default pattern). */
     private val prefs = context.getSharedPreferences("vibration_muted", Context.MODE_PRIVATE)
 
@@ -69,7 +70,7 @@ class VibrationMuter(private val listener: NotificationListenerService, context:
             block()
             null
         } catch (e: SecurityException) {
-            "Android refused to change this app's notification settings. Link a companion device in Settings."
+            context.getString(R.string.muter_vibration_refused)
         } catch (e: RuntimeException) {
             e.message ?: e.javaClass.simpleName
         }

@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.notiregx.app.NotiRegXApp
+import com.notiregx.app.R
 import com.notiregx.app.model.Notification
 
 class MainActivity : ComponentActivity() {
@@ -44,9 +45,9 @@ class MainActivity : ComponentActivity() {
         uri ?: return@registerForActivityResult
         try {
             contentResolver.openOutputStream(uri)?.use { it.write(app.exportRules().toByteArray()) }
-            toast("Rules exported")
+            toast(getString(R.string.main_rules_exported))
         } catch (e: Exception) {
-            toast("Export failed: ${e.message}")
+            toast(getString(R.string.main_export_failed, e.message))
         }
     }
 
@@ -55,9 +56,9 @@ class MainActivity : ComponentActivity() {
         try {
             val json = contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: return@registerForActivityResult
             val added = app.importRules(json)
-            toast(if (added == 0) "No new rules in that file" else "Imported $added rule${if (added == 1) "" else "s"}")
+            toast(if (added == 0) getString(R.string.main_no_new_rules) else resources.getQuantityString(R.plurals.main_imported_rules, added, added))
         } catch (e: Exception) {
-            toast("That doesn't look like a NotiRegX export")
+            toast(getString(R.string.main_not_an_export))
         }
     }
 
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
             linkCompanion = ::linkCompanion,
             exportRules = { exportFile.launch("notiregx-rules.json") },
             importRules = { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
-            restore = { app.restore(it); toast("Put back in your notifications") },
+            restore = { app.restore(it); toast(getString(R.string.main_restored)) },
             canOpenDirectly = { app.contentIntents.get(it.id) != null },
         )
         setContent {
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
             }
 
             override fun onFailure(error: CharSequence?) {
-                toast("Couldn't link a device${error?.let { ": $it" } ?: ""}")
+                toast(error?.let { getString(R.string.main_link_failed_reason, it) } ?: getString(R.string.main_link_failed))
             }
         }
         @Suppress("DEPRECATION")
@@ -133,7 +134,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         val launch = packageManager.getLaunchIntentForPackage(n.packageName)
-        if (launch != null) startSafely(launch) else toast("Can't open ${n.appName}")
+        if (launch != null) startSafely(launch) else toast(getString(R.string.main_cant_open, n.appName))
     }
 
     @Suppress("DEPRECATION")
@@ -152,7 +153,7 @@ class MainActivity : ComponentActivity() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            toast("Nothing on this phone can open that")
+            toast(getString(R.string.main_nothing_can_open))
         }
     }
 

@@ -35,6 +35,8 @@ Hide the noise, bundle the rest, never miss what matters, and find out what just
 - **Senders.** See who sends you the most, per app, today / this week / this month / ever.
 - **Schedules, burst limits, digests, stats, backup/restore of rules**, and a watchdog that keeps the filter running.
 
+- **Languages:** English, Magyar, Deutsch, Español. Pick one in Settings, or follow the phone's language.
+
 Everything stays on your phone. NotiRegX has no internet permission.
 
 ## Install

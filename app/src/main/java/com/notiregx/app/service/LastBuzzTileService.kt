@@ -7,6 +7,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.text.format.DateUtils
 import com.notiregx.app.NotiRegXApp
+import com.notiregx.app.R
 import com.notiregx.app.model.VibrationLog
 import com.notiregx.app.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -54,15 +55,15 @@ class LastBuzzTileService : TileService() {
         val last = VibrationLog.timeline(app.vibrationLog.events.value).firstOrNull()
         val text = last?.let {
             val ago = DateUtils.getRelativeTimeSpanString(it.event.time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
-            (if (it.isGhost) "Ghost · " else "") + "${it.event.appName} · $ago"
-        } ?: "Nothing yet"
+            getString(if (it.isGhost) R.string.tile_entry_ghost else R.string.tile_entry, it.event.appName, ago)
+        } ?: getString(R.string.tile_nothing_yet)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tile.label = "Last buzz"
+            tile.label = getString(R.string.tile_label)
             tile.subtitle = text
         } else {
             tile.label = text
         }
-        tile.contentDescription = "Last vibration: $text"
+        tile.contentDescription = getString(R.string.tile_content_description, text)
         tile.state = Tile.STATE_INACTIVE
         tile.updateTile()
     }

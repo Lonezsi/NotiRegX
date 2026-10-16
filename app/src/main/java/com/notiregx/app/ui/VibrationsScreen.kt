@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.VibrationEvent
 import com.notiregx.app.model.VibrationKind
@@ -49,15 +51,6 @@ private const val DAY_MS = 24 * 60 * 60 * 1000L
 private val KIND_ORDER = listOf(
     VibrationKind.GHOST, VibrationKind.NOTIFICATION, VibrationKind.ESTIMATE, VibrationKind.CALL, VibrationKind.ALARM,
 )
-
-private val VibrationKind.chipLabel: String
-    get() = when (this) {
-        VibrationKind.GHOST -> "Ghosts"
-        VibrationKind.NOTIFICATION -> "Notifications"
-        VibrationKind.ESTIMATE -> "Estimated"
-        VibrationKind.CALL -> "Calls"
-        VibrationKind.ALARM -> "Alarms"
-    }
 
 @Composable
 fun VibrationsScreen(
@@ -102,32 +95,26 @@ fun VibrationsScreen(
             ElevatedCard {
                 Column(Modifier.padding(16.dp)) {
                     if (systemLogAvailable) {
-                        Text("System vibration log: on", style = MaterialTheme.typography.titleSmall)
-                        Hint(
-                            "Android's own vibration history is read every 2 minutes. Vibrations with no " +
-                                "notification, call or alarm behind them are marked as ghosts."
-                        )
+                        Text(stringResource(R.string.vibrations_log_on), style = MaterialTheme.typography.titleSmall)
+                        Hint(stringResource(R.string.vibrations_log_on_hint))
                         Row {
-                            TextButton(onClick = { scope.launch { onRefresh() } }) { Text("Refresh now") }
+                            TextButton(onClick = { scope.launch { onRefresh() } }) { Text(stringResource(R.string.vibrations_refresh_now)) }
                             TextButton(onClick = {
                                 val dump = lastDump()
                                 if (dump != null) {
                                     clipboard.setText(AnnotatedString(dump))
-                                    Toast.makeText(context, "Raw system log copied", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.vibrations_raw_log_copied), Toast.LENGTH_SHORT).show()
                                 }
-                            }) { Text("Copy raw log") }
+                            }) { Text(stringResource(R.string.vibrations_copy_raw_log)) }
                         }
                     } else {
-                        Text("System vibration log: off", style = MaterialTheme.typography.titleSmall)
-                        Hint(
-                            "Only notifications that should have vibrated are listed. To also catch ghost vibrations " +
-                                "from apps that never show a notification, run this once from a computer with adb:"
-                        )
+                        Text(stringResource(R.string.vibrations_log_off), style = MaterialTheme.typography.titleSmall)
+                        Hint(stringResource(R.string.vibrations_log_off_hint))
                         Text(GRANT_COMMAND, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
                         TextButton(onClick = {
                             clipboard.setText(AnnotatedString(GRANT_COMMAND))
-                            Toast.makeText(context, "Command copied", Toast.LENGTH_SHORT).show()
-                        }) { Text("Copy command") }
+                            Toast.makeText(context, context.getString(R.string.vibrations_command_copied), Toast.LENGTH_SHORT).show()
+                        }) { Text(stringResource(R.string.vibrations_copy_command)) }
                     }
                 }
             }
@@ -138,7 +125,7 @@ fun VibrationsScreen(
                     FilterChip(
                         selected = kindFilter == null,
                         onClick = { kindFilter = null; appFilter = null },
-                        label = { Text("All · ${rows.size}") },
+                        label = { Text(stringResource(R.string.vibrations_chip_all, rows.size)) },
                     )
                 }
                 items(KIND_ORDER.filter { (kindCounts[it] ?: 0) > 0 || it == kindFilter }) { kind ->
@@ -148,21 +135,21 @@ fun VibrationsScreen(
                             kindFilter = if (kindFilter == kind) null else kind
                             appFilter = null
                         },
-                        label = { Text("${kind.chipLabel} · ${kindCounts[kind] ?: 0}") },
+                        label = { Text(stringResource(R.string.vibrations_chip_count, stringResource(kind.chipLabel), kindCounts[kind] ?: 0)) },
                     )
                 }
             }
         }
         if (topApps.isNotEmpty()) {
             item {
-                Hint("Apps, last 24 hours")
+                Hint(stringResource(R.string.vibrations_top_apps))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(topApps, key = { it.first }) { (pkg, name, count) ->
                         FilterChip(
                             selected = appFilter == pkg,
                             onClick = { appFilter = if (appFilter == pkg) null else pkg },
                             leadingIcon = { AppIcon(pkg, size = 18.dp) },
-                            label = { Text("$name · $count") },
+                            label = { Text(stringResource(R.string.vibrations_chip_count, name, count)) },
                         )
                     }
                 }
@@ -171,17 +158,21 @@ fun VibrationsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Hint(
-                    if (shown.size == rows.size) "${rows.size} vibrations" else "Showing ${shown.size} of ${rows.size}",
+                    if (shown.size == rows.size) {
+                        context.resources.getQuantityString(R.plurals.vibrations_count, rows.size, rows.size)
+                    } else {
+                        stringResource(R.string.vibrations_showing_of, shown.size, rows.size)
+                    },
                     Modifier.weight(1f),
                 )
-                if (rows.isNotEmpty()) TextButton(onClick = { confirmClear = true }) { Text("Clear") }
+                if (rows.isNotEmpty()) TextButton(onClick = { confirmClear = true }) { Text(stringResource(R.string.vibrations_clear)) }
             }
         }
         if (shown.isEmpty()) {
             item {
                 Column(Modifier.padding(vertical = 24.dp)) {
-                    Hint(if (rows.isEmpty()) "Nothing yet. Vibrations will appear here as they happen." else "Nothing matches these filters.")
-                    if (rows.isNotEmpty()) TextButton(onClick = { kindFilter = null; appFilter = null }) { Text("Clear filters") }
+                    Hint(stringResource(if (rows.isEmpty()) R.string.vibrations_empty else R.string.vibrations_no_match))
+                    if (rows.isNotEmpty()) TextButton(onClick = { kindFilter = null; appFilter = null }) { Text(stringResource(R.string.vibrations_clear_filters)) }
                 }
             }
         }
@@ -206,9 +197,9 @@ fun VibrationsScreen(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear vibration log?") },
-            confirmButton = { TextButton(onClick = { onClear(); confirmClear = false }) { Text("Clear") } },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.vibrations_clear_confirm_title)) },
+            confirmButton = { TextButton(onClick = { onClear(); confirmClear = false }) { Text(stringResource(R.string.vibrations_clear)) } },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -231,14 +222,16 @@ private fun VibrationCard(row: VibrationRow, onClick: () -> Unit) {
             }
             val title = row.notification?.detail?.takeIf { it.isNotEmpty() }
                 ?: e.detail.takeIf { row.kind == VibrationKind.ESTIMATE && it.isNotEmpty() }
+            val label = stringResource(row.kind.label)
             Text(
-                row.kind.label + (title?.let { ": $it" } ?: ""),
+                title?.let { stringResource(R.string.vibrations_card_title, label, it) } ?: label,
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (row.isGhost) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface,
             )
+            val durationText = e.durationMs?.let { stringResource(R.string.vibrations_duration_ms, it) }
             val extra = listOfNotNull(
                 e.usage?.lowercase()?.replace('_', ' '),
-                e.durationMs?.let { "$it ms" },
+                durationText,
                 e.detail.takeIf { row.isGhost && it.isNotEmpty() },
             ).distinctBy { it.lowercase() }
             if (extra.isNotEmpty()) {

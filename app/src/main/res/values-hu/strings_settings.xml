@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings -->
+    <string name="settings_section_filtering">Szűrés</string>
+    <string name="settings_filter_service">Szűrőszolgáltatás</string>
+    <string name="settings_filter_service_no_access">Nem fut: az értesítésekhez való hozzáférés ki van kapcsolva.</string>
+    <string name="settings_filter_service_running_hint">Fut. A NotiRegX rendszeresen ellenőrzi, és újracsatlakoztatja, ha az Android leállítja.</string>
+    <string name="settings_filter_service_disconnected">Nem fut. Az Android lecsatlakoztatta; koppints az Újraindítás gombra.</string>
+    <string name="settings_restart">Újraindítás</string>
+    <string name="settings_running">Fut</string>
+    <string name="settings_filtering_enabled">Szűrés bekapcsolva</string>
+    <string name="settings_filtering_enabled_hint">Kikapcsolva minden értesítés átjut, de a Legutóbbiak között továbbra is megjelenik.</string>
+    <string name="settings_saved_per_rule">Mentett értesítések szabályonként: %1$d</string>
+    <string name="settings_saved_per_rule_hint">Ezen felül a régebbi értesítések kikerülnek a szabály előzményeiből.</string>
+
+    <string name="settings_section_debuzz">Rezgésmentesítés</string>
+    <string name="settings_debuzz_explanation">Az Android már azelőtt rezeg, hogy a NotiRegX eltávolíthatna egy értesítést. A bekapcsolt Rezgésmentesítéssel rendelkező szabályok ehelyett lenémítják az alkalmazásukat, és a NotiRegX maga rezeg mindarra, ami átjut. Az egy alkalmazásra szóló rezgésmentesítő szabály azonnal lenémítja azt; a bármely alkalmazásra szóló pedig egy értesítési kategóriát némít le, amikor először elkap belőle valamit. Ha kikapcsolod a Rezgésmentesítést vagy törlöd a szabályt, minden visszaáll.</string>
+    <string name="settings_debuzz_unsupported">Ez a telefon nem támogatja a társeszközöket, ezért a Rezgésmentesítés nem érhető el.</string>
+    <string name="settings_debuzz_link_hint">Az Android ezt csak társeszközhöz kapcsolt alkalmazásoknak engedi. Kapcsold be a Bluetooth-t, és válassz bármelyik közeli eszközt (fülhallgató, óra, hangszóró, tévé). Az eszköz soha nem kap semmit.</string>
+    <string name="settings_link_device">Eszköz kapcsolása</string>
+    <string name="settings_debuzz_problem">Hiba: %1$s</string>
+    <plurals name="settings_debuzz_ready">
+        <item quantity="one">Kész. Jelenleg %d értesítési kategória van lenémítva.</item>
+        <item quantity="other">Kész. Jelenleg %d értesítési kategória van lenémítva.</item>
+    </plurals>
+    <string name="settings_debuzz_uninstall_hint">A NotiRegX eltávolítása előtt kapcsold ki a Rezgésmentesítést minden szabályban, hogy az alkalmazások visszakapják a hangjukat.</string>
+
+    <string name="settings_section_backup">Biztonsági mentés</string>
+    <string name="settings_backup_hint">Mentsd fájlba a szabályaidat, vagy adj hozzá szabályokat egy fájlból (a sajátodból vagy egy barátodéból). Az előzmények nem kerülnek bele.</string>
+    <string name="settings_export_rules">Szabályok exportálása</string>
+    <string name="settings_import_rules">Szabályok importálása</string>
+
+    <string name="settings_section_permissions">Engedélyek</string>
+    <string name="settings_perm_notification_access">Hozzáférés az értesítésekhez</string>
+    <string name="settings_perm_notification_access_hint">Az értesítések olvasásához és szűréséhez szükséges.</string>
+    <string name="settings_perm_post_notifications">Értesítések küldése</string>
+    <string name="settings_perm_post_notifications_hint">A csomagértesítések megjelenítéséhez szükséges.</string>
+    <string name="settings_perm_dnd_access">Hozzáférés a Ne zavarjanak módhoz</string>
+    <string name="settings_perm_dnd_access_hint">Nem kötelező. A „Mindig jelezzen” szabályok így Ne zavarjanak módban is megszólalnak.</string>
+    <string name="settings_perm_battery">Korlátlan akkumulátorhasználat</string>
+    <string name="settings_perm_battery_hint">Megakadályozza, hogy a rendszer alvó állapotba tegye a NotiRegX-et.</string>
+    <string name="settings_granted">Megadva</string>
+    <string name="settings_allow">Engedélyezés</string>
+
+    <string name="settings_section_samsung">Tippek Samsunghoz</string>
+    <string name="settings_samsung_tips">Ha az Android azt írja, hogy az értesítésekhez való hozzáférés „korlátozott beállítás”, nyisd meg az Alkalmazásinformációt, koppints a sarokban lévő ⋮ ikonra, válaszd a „Korlátozott beállítások engedélyezése” lehetőséget, majd próbáld újra.\n\nA megbízható szűréshez add hozzá a NotiRegX-et ehhez is: Beállítások › Akkumulátor › Háttérhasználati korlátok › Soha nem alvó alkalmazások.</string>
+    <string name="settings_open_app_info">Alkalmazásinformáció megnyitása</string>
+    <string name="settings_show_tutorial">Útmutató megtekintése újra</string>
+
+    <!-- Rule conditions -->
+    <string name="conditions_schedule_title">Csak bizonyos időpontokban</string>
+    <string name="conditions_schedule_off">Mindig aktív.</string>
+    <string name="conditions_from_time">Ettől: %1$s</string>
+    <string name="conditions_to_time">Eddig: %1$s</string>
+    <string name="conditions_schedule_hint">Ha a vége korábbi, mint a kezdete, az időszak átnyúlik éjfélen. Azonos kezdet és vég egész napot jelent.</string>
+    <string name="conditions_burst_title">Csak értesítésáradatnál</string>
+    <string name="conditions_burst_on">%2$d percen belül az első %1$d átjut, a többit elkapja.</string>
+    <string name="conditions_burst_off">Minden egyező értesítésre vonatkozik.</string>
+    <string name="conditions_burst_count">Átenged</string>
+    <string name="conditions_burst_window">Ennyin belül (perc)</string>
+    <string name="conditions_digest_title">Kézbesítés összesítőként</string>
+    <string name="conditions_digest_off">A csomag azonnal megjelenik, amint elkap valamit.</string>
+    <string name="conditions_digest_on">A csomag rejtve marad, és ezekben az időpontokban jelenik meg.</string>
+    <string name="conditions_remove_time">%1$s eltávolítása</string>
+    <string name="conditions_add_time">Időpont hozzáadása</string>
+
+    <!-- Senders -->
+    <string name="senders_period_today">Ma</string>
+    <string name="senders_period_week">7 nap</string>
+    <string name="senders_period_month">30 nap</string>
+    <string name="senders_period_all">Összes</string>
+    <string name="senders_all_apps">Minden alkalmazás</string>
+    <string name="senders_intro">Minden értesítést számol, bármit is csináltak vele a szabályaid. Csevegőalkalmazásoknál a küldő a személy vagy a csoport, a többinél az értesítés címe. Koppints egyre, hogy szabályt készíts belőle.</string>
+    <string name="senders_empty_period">Ebben az időszakban még nincs mit számolni.</string>
+    <plurals name="senders_dialog_total">
+        <item quantity="one">Összesen %1$s értesítés innen: %2$s. Mi történjen vele?</item>
+        <item quantity="other">Összesen %1$s értesítés innen: %2$s. Mi történjen velük?</item>
+    </plurals>
+    <string name="senders_always_let_through">Mindig engedd át</string>
+    <string name="senders_pick_title">Küldők kiválasztása</string>
+    <string name="senders_pick_hint">Azokra az értesítésekre illeszkedik, amelyek címe pontosan megegyezik ezek egyikével.</string>
+    <string name="senders_search">Keresés</string>
+    <string name="senders_none">Még nincsenek küldők.</string>
+    <string name="senders_none_for_app">Ennél az alkalmazásnál még nincsenek küldők.</string>
+    <plurals name="senders_notification_count">
+        <item quantity="one">%1$s értesítés</item>
+        <item quantity="other">%1$s értesítés</item>
+    </plurals>
+    <string name="senders_use">Kész</string>
+    <string name="senders_use_count">Kész (%1$d)</string>
+</resources>

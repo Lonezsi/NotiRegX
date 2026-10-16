@@ -47,10 +47,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.MatchField
 import com.notiregx.app.model.PeoplePattern
@@ -90,6 +92,7 @@ fun RuleEditorScreen(
     var testText by remember { mutableStateOf("") }
     var pickingApp by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val draft = initial.copy(
         name = name.trim(),
@@ -111,15 +114,15 @@ fun RuleEditorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isNew) "New rule" else "Edit rule") },
+                title = { Text(stringResource(if (isNew) R.string.editor_title_new else R.string.editor_title_edit)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.editor_back)) }
                 },
                 actions = {
                     if (!isNew) {
-                        IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, contentDescription = "Delete rule") }
+                        IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.editor_delete_rule)) }
                     }
-                    TextButton(onClick = { onSave(draft) }, enabled = canSave) { Text("Save") }
+                    TextButton(onClick = { onSave(draft) }, enabled = canSave) { Text(stringResource(R.string.editor_save)) }
                 },
             )
         },
@@ -134,89 +137,92 @@ fun RuleEditorScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.editor_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = regex,
                 onValueChange = { regex = it },
-                label = { Text("Regex") },
+                label = { Text(stringResource(R.string.editor_regex)) },
                 isError = regexError != null,
                 supportingText = {
-                    Text(regexError ?: "Empty matches everything. Start with (?i) to ignore case.")
+                    Text(regexError ?: stringResource(R.string.editor_regex_hint))
                 },
                 textStyle = TextStyle(fontFamily = FontFamily.Monospace),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedButton(onClick = { pickingPeople = true }) {
-                Text(if (PeoplePattern.parse(regex) != null && field == MatchField.TITLE) "Edit senders" else "Pick senders…")
+                Text(
+                    stringResource(
+                        if (PeoplePattern.parse(regex) != null && field == MatchField.TITLE) R.string.editor_edit_senders
+                        else R.string.editor_pick_senders,
+                    ),
+                )
             }
-            Text("Search in", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.editor_search_in), style = MaterialTheme.typography.labelLarge)
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 MatchField.entries.forEachIndexed { i, f ->
                     SegmentedButton(
                         selected = field == f,
                         onClick = { field = f },
                         shape = SegmentedButtonDefaults.itemShape(i, MatchField.entries.size),
-                    ) { Text(f.label, maxLines = 1) }
+                    ) { Text(stringResource(f.label), maxLines = 1) }
                 }
             }
             OutlinedCard(onClick = { pickingApp = true }, modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("App", style = MaterialTheme.typography.labelMedium)
-                        Text(app?.label ?: "Any app", style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.editor_app), style = MaterialTheme.typography.labelMedium)
+                        Text(app?.label ?: stringResource(R.string.any_app), style = MaterialTheme.typography.bodyLarge)
                     }
                     if (app != null) {
-                        IconButton(onClick = { app = null }) { Icon(Icons.Default.Clear, contentDescription = "Any app") }
+                        IconButton(onClick = { app = null }) { Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.any_app)) }
                     }
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Invert", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.editor_invert), style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "Match notifications where the regex is NOT found",
+                        stringResource(R.string.editor_invert_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Switch(checked = invert, onCheckedChange = { invert = it })
             }
-            Text("When this rule is the final match", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.editor_final_match), style = MaterialTheme.typography.labelLarge)
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 RuleType.entries.forEachIndexed { i, t ->
                     SegmentedButton(
                         selected = type == t,
                         onClick = { type = t },
                         shape = SegmentedButtonDefaults.itemShape(i, RuleType.entries.size),
-                    ) { Text(t.shortLabel, maxLines = 1) }
+                    ) { Text(stringResource(t.shortLabel), maxLines = 1) }
                 }
             }
-            Text(type.explanation, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(type.explanation), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (type == RuleType.ALERT && !dndAccess) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "To ring through Do Not Disturb, NotiRegX needs Do Not Disturb access.",
+                        stringResource(R.string.editor_dnd_needed),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = onGrantDnd) { Text("Allow") }
+                    TextButton(onClick = onGrantDnd) { Text(stringResource(R.string.editor_allow)) }
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("De-buzz", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.editor_debuzz), style = MaterialTheme.typography.bodyLarge)
                     Text(
                         when {
-                            !companionLinked -> "Needs a linked device first (see Settings)."
-                            app == null -> "Silences each notification category this rule catches something from; " +
-                                "NotiRegX buzzes for whatever gets through instead."
-                            else -> "Silences ${app?.label}; NotiRegX buzzes for whatever gets through instead, " +
-                                "so filtered notifications never buzz."
+                            !companionLinked -> stringResource(R.string.editor_debuzz_needs_link)
+                            app == null -> stringResource(R.string.editor_debuzz_any_app)
+                            else -> stringResource(R.string.editor_debuzz_app, app?.label.orEmpty())
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -225,11 +231,11 @@ fun RuleEditorScreen(
                 if (companionLinked) {
                     Switch(checked = debuzz, onCheckedChange = { debuzz = it })
                 } else {
-                    TextButton(onClick = onLinkCompanion) { Text("Link") }
+                    TextButton(onClick = onLinkCompanion) { Text(stringResource(R.string.editor_link)) }
                 }
             }
             HorizontalDivider()
-            Text("When", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.editor_when), style = MaterialTheme.typography.titleSmall)
             RuleConditions(
                 schedule = schedule,
                 onSchedule = { schedule = it },
@@ -243,17 +249,17 @@ fun RuleEditorScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description (optional)") },
+                label = { Text(stringResource(R.string.editor_description)) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             HorizontalDivider()
-            Text("Try it", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.editor_try_it), style = MaterialTheme.typography.titleSmall)
             OutlinedTextField(
                 value = testText,
                 onValueChange = { testText = it },
-                label = { Text("Sample notification text") },
+                label = { Text(stringResource(R.string.editor_sample_text)) },
                 modifier = Modifier.fillMaxWidth(),
             )
             if (testText.isNotEmpty() && regexError == null) {
@@ -267,14 +273,14 @@ fun RuleEditorScreen(
                 )
                 val hit = draft.copy(enabled = true).matches(sample)
                 Text(
-                    if (hit) "✓ This rule matches" else "✗ No match",
+                    stringResource(if (hit) R.string.editor_test_match else R.string.editor_test_no_match),
                     color = if (hit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 )
             }
             if (regexError == null && recent.isNotEmpty()) {
                 val hits = recent.filter { draft.copy(enabled = true).matches(it.notification) }
                 Text(
-                    "Matches ${hits.size} of the last ${recent.size} notifications",
+                    context.resources.getQuantityString(R.plurals.editor_recent_matches, recent.size, hits.size, recent.size),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 hits.take(5).forEach { entry ->
@@ -298,7 +304,7 @@ fun RuleEditorScreen(
             onDone = { names ->
                 regex = PeoplePattern.build(names)
                 field = MatchField.TITLE
-                if (name.isBlank()) name = "People: " + names.sorted().joinToString(", ").take(50)
+                if (name.isBlank()) name = context.getString(R.string.editor_people_name, names.sorted().joinToString(", ").take(50))
                 pickingPeople = false
             },
             onDismiss = { pickingPeople = false },
@@ -315,10 +321,10 @@ fun RuleEditorScreen(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete rule?") },
-            text = { Text("\"${initial.name}\" and its saved history will be removed.") },
-            confirmButton = { TextButton(onClick = onDelete) { Text("Delete") } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.editor_delete_title)) },
+            text = { Text(stringResource(R.string.editor_delete_message, initial.name)) },
+            confirmButton = { TextButton(onClick = onDelete) { Text(stringResource(R.string.editor_delete)) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -336,14 +342,14 @@ private fun AppPickerDialog(extraApps: List<AppInfo>, onPick: (AppInfo?) -> Unit
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-        title = { Text("Choose app") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        title = { Text(stringResource(R.string.editor_choose_app)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search") },
+                    label = { Text(stringResource(R.string.editor_search)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -358,7 +364,7 @@ private fun AppPickerDialog(extraApps: List<AppInfo>, onPick: (AppInfo?) -> Unit
                         if (query.isEmpty()) {
                             item {
                                 ListItem(
-                                    headlineContent = { Text("Any app") },
+                                    headlineContent = { Text(stringResource(R.string.any_app)) },
                                     modifier = Modifier.clickable { onPick(null) },
                                 )
                             }

@@ -28,7 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.LoggedNotification
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Rule
@@ -62,13 +65,13 @@ fun ArchiveScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {
-                FilterChip(selected = selectedRuleId == null, onClick = { onSelect(null) }, label = { Text("Recent") })
+                FilterChip(selected = selectedRuleId == null, onClick = { onSelect(null) }, label = { Text(stringResource(R.string.archive_tab_recent)) })
             }
             item {
                 FilterChip(
                     selected = selectedRuleId == SENDERS_TAB,
                     onClick = { onSelect(SENDERS_TAB) },
-                    label = { Text("Senders") },
+                    label = { Text(stringResource(R.string.archive_tab_senders)) },
                 )
             }
             items(archivable, key = { it.id }) { rule ->
@@ -93,20 +96,21 @@ fun ArchiveScreen(
 
 @Composable
 private fun RecentList(recent: List<LoggedNotification>, onCreateRule: (Notification) -> Unit, actions: AppActions) {
+    val context = LocalContext.current
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Text(
-                "The last ${recent.size} notifications received, whatever the outcome.",
+                context.resources.getQuantityString(R.plurals.archive_recent_intro, recent.size, recent.size),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (recent.isEmpty()) item { EmptyText("Nothing received yet.") }
+        if (recent.isEmpty()) item { EmptyText(stringResource(R.string.archive_recent_empty)) }
         items(recent, key = { it.notification.id }) { entry ->
             NotificationCard(
                 n = entry.notification,
                 unseen = false,
-                outcome = entry.outcomeLabel,
+                outcome = context.outcomeLabel(entry),
                 actions = actions,
                 onCreateRule = { onCreateRule(entry.notification) },
             )
@@ -129,24 +133,25 @@ private fun RuleHistory(
         if (rule.bundle.count > 0) onMarkSeen(rule.id)
     }
     var confirmClear by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     if (rule.totalCaught > rule.history.size) {
-                        "Last ${rule.history.size} of ${"%,d".format(rule.totalCaught)} caught (raise the limit in Settings)"
+                        stringResource(R.string.archive_saved_of_caught, rule.history.size, "%,d".format(rule.totalCaught))
                     } else {
-                        "${rule.history.size} saved"
+                        context.resources.getQuantityString(R.plurals.archive_saved, rule.history.size, rule.history.size)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                if (rule.history.isNotEmpty()) TextButton(onClick = { confirmClear = true }) { Text("Clear history") }
+                if (rule.history.isNotEmpty()) TextButton(onClick = { confirmClear = true }) { Text(stringResource(R.string.archive_clear_history)) }
             }
         }
-        if (rule.history.isEmpty()) item { EmptyText("This rule hasn't caught anything yet.") }
+        if (rule.history.isEmpty()) item { EmptyText(stringResource(R.string.archive_rule_empty)) }
         items(rule.history, key = { it.id }) { n ->
             NotificationCard(
                 n = n,
@@ -162,12 +167,14 @@ private fun RuleHistory(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text("Clear history?") },
-            text = { Text("Deletes the ${rule.history.size} notifications saved by \"${rule.name}\".") },
-            confirmButton = {
-                TextButton(onClick = { onClearHistory(rule.id); confirmClear = false }) { Text("Clear") }
+            title = { Text(stringResource(R.string.archive_clear_title)) },
+            text = {
+                Text(context.resources.getQuantityString(R.plurals.archive_clear_message, rule.history.size, rule.history.size, rule.name))
             },
-            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Cancel") } },
+            confirmButton = {
+                TextButton(onClick = { onClearHistory(rule.id); confirmClear = false }) { Text(stringResource(R.string.archive_clear)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -205,11 +212,11 @@ private fun NotificationCard(
             }
             Row {
                 Spacer(Modifier.weight(1f))
-                if (onRestore != null) TextButton(onClick = onRestore) { Text("Restore") }
-                if (onCreateRule != null) TextButton(onClick = onCreateRule) { Text("Make rule") }
-                n.url?.let { url -> TextButton(onClick = { actions.openUrl(url) }) { Text("Open link") } }
+                if (onRestore != null) TextButton(onClick = onRestore) { Text(stringResource(R.string.archive_restore)) }
+                if (onCreateRule != null) TextButton(onClick = onCreateRule) { Text(stringResource(R.string.archive_make_rule)) }
+                n.url?.let { url -> TextButton(onClick = { actions.openUrl(url) }) { Text(stringResource(R.string.archive_open_link)) } }
                 TextButton(onClick = { actions.openNotification(n) }) {
-                    Text(if (actions.canOpenDirectly(n)) "Open" else "Open app")
+                    Text(stringResource(if (actions.canOpenDirectly(n)) R.string.archive_open else R.string.archive_open_app))
                 }
             }
         }

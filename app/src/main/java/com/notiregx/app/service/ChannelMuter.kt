@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Process
 import android.service.notification.NotificationListenerService
+import com.notiregx.app.R
 
 /**
  * Silences other apps' notification channels so filtered notifications never buzz or pop up,
@@ -14,7 +15,7 @@ import android.service.notification.NotificationListenerService
  * companion device association; without one every call here fails with a SecurityException,
  * reported back as an error message.
  */
-class ChannelMuter(private val listener: NotificationListenerService, context: Context) {
+class ChannelMuter(private val listener: NotificationListenerService, private val context: Context) {
     private val prefs = context.getSharedPreferences("muted_channels", Context.MODE_PRIVATE)
     private val user = Process.myUserHandle()
 
@@ -103,7 +104,7 @@ class ChannelMuter(private val listener: NotificationListenerService, context: C
             block()
             null
         } catch (e: SecurityException) {
-            "Android refused to change channels. Link a companion device again."
+            context.getString(R.string.muter_channels_refused)
         } catch (e: RuntimeException) {
             e.message ?: e.javaClass.simpleName
         }

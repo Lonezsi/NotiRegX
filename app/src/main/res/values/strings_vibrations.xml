@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vibration log, vibration details, quick-settings tile, the main activity's toasts and the services' notifications. -->
+<resources>
+    <!-- Vibrations screen -->
+    <string name="vibrations_log_on">System vibration log: on</string>
+    <string name="vibrations_log_on_hint">Android\'s own vibration history is read every 2 minutes. Vibrations with no notification, call or alarm behind them are marked as ghosts.</string>
+    <string name="vibrations_refresh_now">Refresh now</string>
+    <string name="vibrations_raw_log_copied">Raw system log copied</string>
+    <string name="vibrations_copy_raw_log">Copy raw log</string>
+    <string name="vibrations_log_off">System vibration log: off</string>
+    <string name="vibrations_log_off_hint">Only notifications that should have vibrated are listed. To also catch ghost vibrations from apps that never show a notification, run this once from a computer with adb:</string>
+    <string name="vibrations_command_copied">Command copied</string>
+    <string name="vibrations_copy_command">Copy command</string>
+    <!-- %1$d = number of vibrations -->
+    <string name="vibrations_chip_all">All · %1$d</string>
+    <!-- Filter chip: %1$s = kind or app name, %2$d = number of vibrations -->
+    <string name="vibrations_chip_count">%1$s · %2$d</string>
+    <string name="vibrations_top_apps">Apps, last 24 hours</string>
+    <plurals name="vibrations_count">
+        <item quantity="one">%d vibration</item>
+        <item quantity="other">%d vibrations</item>
+    </plurals>
+    <!-- %1$d = shown, %2$d = total -->
+    <string name="vibrations_showing_of">Showing %1$d of %2$d</string>
+    <string name="vibrations_clear">Clear</string>
+    <string name="vibrations_empty">Nothing yet. Vibrations will appear here as they happen.</string>
+    <string name="vibrations_no_match">Nothing matches these filters.</string>
+    <string name="vibrations_clear_filters">Clear filters</string>
+    <string name="vibrations_clear_confirm_title">Clear vibration log?</string>
+    <!-- %1$s = kind of vibration, %2$s = notification title -->
+    <string name="vibrations_card_title">%1$s: %2$s</string>
+    <!-- %1$d = vibration length in milliseconds -->
+    <string name="vibrations_duration_ms">%1$d ms</string>
+    <!-- App name shown for vibrations played by Android itself -->
+    <string name="vibrations_android_system">Android system</string>
+
+    <!-- Vibration detail sheet -->
+    <!-- %1$s = Android's raw reason text -->
+    <string name="vibration_sheet_android_reason">Android\'s reason: %1$s</string>
+    <string name="vibration_sheet_the_notification">The notification</string>
+    <string name="vibration_sheet_open_notification">Open notification</string>
+    <string name="vibration_sheet_make_rule">Make rule</string>
+    <string name="vibration_sheet_notification_unseen">Android says a notification caused this, but NotiRegX didn\'t see it (it may be from before NotiRegX was set up, or the app removed it straight away).</string>
+    <!-- %1$s = app name -->
+    <string name="vibration_sheet_ghost_explanation">No notification was shown for this vibration: %1$s buzzed the phone directly, usually from something running in the background.</string>
+    <string name="vibration_sheet_was_call">This was a call, not a notification.</string>
+    <string name="vibration_sheet_was_alarm">This was an alarm, not a notification.</string>
+    <!-- Fallback for other kinds; %1$s = kind of vibration -->
+    <string name="vibration_sheet_was_other">%1$s, not a notification.</string>
+    <!-- %1$s = app name -->
+    <string name="vibration_sheet_nearby_from_app">Notifications from %1$s around then</string>
+    <string name="vibration_sheet_nearby_other">Other notifications around then</string>
+    <string name="vibration_sheet_do_something">Do something about it</string>
+    <string name="vibration_sheet_open_app">Open app</string>
+    <string name="vibration_sheet_app_info">App info</string>
+    <!-- %1$s = app name -->
+    <string name="vibration_sheet_notifications_muted_title">%1$s\'s notifications don\'t vibrate</string>
+    <string name="vibration_sheet_mute_notification_title">Mute %1$s\'s notification vibration</string>
+    <string name="vibration_sheet_mute_notification_hint">Turns vibration off for %1$s\'s notifications. Sound and pop-ups stay as they are.</string>
+    <string name="vibration_sheet_needs_companion">Android only allows this for apps linked to a companion device.</string>
+    <string name="vibration_sheet_link_device">Link a device</string>
+    <string name="vibration_sheet_unmute">Let it vibrate again</string>
+    <string name="vibration_sheet_mute">Mute vibration</string>
+    <!-- %1$s = app name -->
+    <string name="vibration_sheet_mute_direct_title">Mute %1$s\'s vibrations</string>
+    <string name="vibration_sheet_system_app_warning">%1$s is part of the phone itself. Muting it can also silence keyboard, gesture and other system vibrations you may want to keep.</string>
+    <string name="vibration_sheet_mute_direct_hint">%1$s vibrated the phone directly, not through a notification. Android only lets you block that from a computer with adb. Run this once (it stays until you undo it):</string>
+    <string name="vibration_sheet_undo_copied">Undo command copied</string>
+    <string name="vibration_sheet_copy_undo">Copy undo</string>
+
+    <!-- Main activity toasts -->
+    <string name="main_rules_exported">Rules exported</string>
+    <!-- %1$s = error message -->
+    <string name="main_export_failed">Export failed: %1$s</string>
+    <string name="main_no_new_rules">No new rules in that file</string>
+    <plurals name="main_imported_rules">
+        <item quantity="one">Imported %d rule</item>
+        <item quantity="other">Imported %d rules</item>
+    </plurals>
+    <string name="main_not_an_export">That doesn\'t look like a NotiRegX export</string>
+    <string name="main_restored">Put back in your notifications</string>
+    <string name="main_link_failed">Couldn\'t link a device</string>
+    <!-- %1$s = error from Android -->
+    <string name="main_link_failed_reason">Couldn\'t link a device: %1$s</string>
+    <!-- %1$s = app name -->
+    <string name="main_cant_open">Can\'t open %1$s</string>
+    <string name="main_nothing_can_open">Nothing on this phone can open that</string>
+
+    <!-- Alerts NotiRegX posts itself (channel names and descriptions appear in Android's notification settings) -->
+    <string name="alert_channel_popup">Alerts (pop up)</string>
+    <string name="alert_channel_popup_description">Let-through notifications from apps NotiRegX silenced that used to pop up</string>
+    <string name="alert_channel_sound">Alerts (sound only)</string>
+    <string name="alert_channel_sound_description">Let-through notifications from apps NotiRegX silenced that used to make a sound</string>
+    <string name="alert_channel_restored">Restored</string>
+    <string name="alert_channel_restored_description">Filtered notifications you put back from the archive</string>
+    <string name="alert_channel_always">Always alert</string>
+    <string name="alert_channel_always_description">Notifications matched by an \"Always alert\" rule</string>
+    <!-- %1$s = app name -->
+    <string name="alert_restored_subtext">%1$s · restored</string>
+
+    <!-- Watchdog -->
+    <string name="watchdog_channel_name">Problems</string>
+    <string name="watchdog_channel_description">Warnings when NotiRegX stops filtering</string>
+    <string name="watchdog_title">NotiRegX stopped filtering</string>
+    <string name="watchdog_text">Android disconnected the notification filter. Tap to fix.</string>
+    <string name="watchdog_text_long">Android disconnected the notification filter and reconnecting didn\'t work. Open NotiRegX and tap Restart, or turn its notification access off and on again.</string>
+
+    <!-- Quick-settings tile -->
+    <string name="tile_label">Last buzz</string>
+    <string name="tile_nothing_yet">Nothing yet</string>
+    <!-- %1$s = app name, %2$s = relative time ("5 min. ago") -->
+    <string name="tile_entry">%1$s · %2$s</string>
+    <string name="tile_entry_ghost">Ghost · %1$s · %2$s</string>
+    <!-- %1$s = the tile's text -->
+    <string name="tile_content_description">Last vibration: %1$s</string>
+
+    <!-- Bundle notifications -->
+    <string name="bundle_channel_name">Bundles</string>
+    <string name="bundle_channel_description">One notification per bundle rule, with its unseen count</string>
+    <string name="bundle_digest_channel_name">Digests</string>
+    <string name="bundle_digest_channel_description">Bundles delivered at their set times</string>
+    <plurals name="bundle_unseen">
+        <item quantity="one">%d unseen notification</item>
+        <item quantity="other">%d unseen notifications</item>
+    </plurals>
+    <plurals name="bundle_more">
+        <item quantity="one">+%d more</item>
+        <item quantity="other">+%d more</item>
+    </plurals>
+
+    <!-- Errors when changing other apps' notification settings -->
+    <string name="muter_vibration_refused">Android refused to change this app\'s notification settings. Link a companion device in Settings.</string>
+    <string name="muter_channels_refused">Android refused to change channels. Link a companion device again.</string>
+</resources>

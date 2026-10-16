@@ -1,5 +1,7 @@
 package com.notiregx.app.model
 
+import androidx.annotation.StringRes
+import com.notiregx.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,16 +31,16 @@ data class VibrationEvent(
     val key: String get() = "$source|$packageName|$time"
 }
 
-enum class VibrationKind(val label: String) {
-    NOTIFICATION("Notification"),
+enum class VibrationKind(@StringRes val label: Int, @StringRes val chipLabel: Int) {
+    NOTIFICATION(R.string.kind_notification, R.string.kind_notification_chip),
 
     /** NotiRegX thinks a notification vibrated, but Android's log doesn't confirm it (or isn't readable). */
-    ESTIMATE("Notification (estimated)"),
-    CALL("Call"),
-    ALARM("Alarm"),
+    ESTIMATE(R.string.kind_estimate, R.string.kind_estimate_chip),
+    CALL(R.string.kind_call, R.string.kind_call_chip),
+    ALARM(R.string.kind_alarm, R.string.kind_alarm_chip),
 
     /** Logged by Android with no notification, call or alarm behind it. */
-    GHOST("Ghost vibration"),
+    GHOST(R.string.kind_ghost, R.string.kind_ghost_chip),
 }
 
 /**

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rule editor -->
+    <string name="editor_title_new">Nueva regla</string>
+    <string name="editor_title_edit">Editar regla</string>
+    <string name="editor_back">Atrás</string>
+    <string name="editor_delete_rule">Eliminar regla</string>
+    <string name="editor_save">Guardar</string>
+    <string name="editor_name">Nombre</string>
+    <string name="editor_regex">Regex</string>
+    <string name="editor_regex_hint">Si está vacía, coincide con todo. Empieza con (?i) para no distinguir mayúsculas.</string>
+    <string name="editor_edit_senders">Editar remitentes</string>
+    <string name="editor_pick_senders">Elegir remitentes…</string>
+    <string name="editor_search_in">Buscar en</string>
+    <string name="editor_app">App</string>
+    <string name="editor_invert">Invertir</string>
+    <string name="editor_invert_description">Coincide con las notificaciones en las que NO se encuentra la regex</string>
+    <string name="editor_final_match">Cuando esta regla es la última que coincide</string>
+    <string name="editor_dnd_needed">Para sonar aunque esté activado No molestar, NotiRegX necesita acceso a No molestar.</string>
+    <string name="editor_allow">Permitir</string>
+    <string name="editor_debuzz">Antivibración</string>
+    <string name="editor_debuzz_needs_link">Primero necesitas vincular un dispositivo (ve a Ajustes).</string>
+    <string name="editor_debuzz_any_app">Silencia cada categoría de notificaciones de la que esta regla atrape algo; en su lugar, NotiRegX vibra por lo que pase el filtro.</string>
+    <string name="editor_debuzz_app">Silencia %1$s; en su lugar, NotiRegX vibra por lo que pase el filtro, así que las notificaciones filtradas nunca vibran.</string>
+    <string name="editor_link">Vincular</string>
+    <string name="editor_when">Cuándo</string>
+    <string name="editor_description">Descripción (opcional)</string>
+    <string name="editor_try_it">Pruébala</string>
+    <string name="editor_sample_text">Texto de notificación de ejemplo</string>
+    <string name="editor_test_match">✓ Esta regla coincide</string>
+    <string name="editor_test_no_match">✗ Sin coincidencia</string>
+    <plurals name="editor_recent_matches">
+        <item quantity="one">Coincide con %1$d de la última notificación</item>
+        <item quantity="other">Coincide con %1$d de las últimas %2$d notificaciones</item>
+    </plurals>
+    <string name="editor_people_name">Personas: %1$s</string>
+    <string name="editor_delete_title">¿Eliminar la regla?</string>
+    <string name="editor_delete_message">Se eliminarán «%1$s» y su historial guardado.</string>
+    <string name="editor_delete">Eliminar</string>
+    <string name="editor_choose_app">Elegir app</string>
+    <string name="editor_search">Buscar</string>
+
+    <!-- Home: rules list -->
+    <string name="home_stopped_title">El filtrado se ha detenido</string>
+    <string name="home_stopped_body">Android ha desconectado el filtro de notificaciones de NotiRegX, así que no se está filtrando nada. Si Reiniciar no funciona, desactiva y vuelve a activar el acceso a notificaciones de NotiRegX.</string>
+    <string name="home_stopped_action">Reiniciar</string>
+    <string name="home_access_title">El acceso a notificaciones está desactivado</string>
+    <string name="home_access_body">NotiRegX no puede ver ni filtrar nada hasta que lo permitas en los ajustes de Android.</string>
+    <string name="home_access_action">Dar acceso</string>
+    <string name="home_post_title">NotiRegX no puede publicar notificaciones</string>
+    <string name="home_post_body">Permítelo para que se muestren los grupos, los resúmenes y los avisos de Antivibración.</string>
+    <string name="home_post_action">Permitir</string>
+    <string name="home_paused_title">El filtrado está en pausa</string>
+    <string name="home_paused_body">Se dejan pasar todas las notificaciones. Reanúdalo en Ajustes.</string>
+    <string name="home_suggested">Sugerencias para ti</string>
+    <string name="home_intro_empty">Aún no hay reglas. Toca + para crear una, o Crear regla en cualquier notificación del Archivo.</string>
+    <plurals name="home_intro_filtered">
+        <item quantity="one">Tus reglas han filtrado %1$s notificación hasta ahora. Las reglas se aplican de arriba abajo; decide la última que coincide. Arrastra ≡ para reordenar.</item>
+        <item quantity="other">Tus reglas han filtrado %1$s notificaciones hasta ahora. Las reglas se aplican de arriba abajo; decide la última que coincide. Arrastra ≡ para reordenar.</item>
+    </plurals>
+    <string name="home_drag_to_reorder">Arrastra para reordenar</string>
+    <string name="home_debuzzed">Antivibración activa</string>
+    <string name="home_regex_not">NO %1$s</string>
+    <string name="home_delivered_at">Entrega a las %1$s</string>
+    <string name="home_stale">Sin coincidencias en los últimos 7 días. ¿Revisas la regex o la app?</string>
+    <plurals name="home_matches_week">
+        <item quantity="one">%1$d coincidencia en los últimos 7 días</item>
+        <item quantity="other">%1$d coincidencias en los últimos 7 días</item>
+    </plurals>
+    <string name="home_matches_today">%1$d hoy</string>
+    <plurals name="home_caught_total">
+        <item quantity="one">%1$s atrapada en total</item>
+        <item quantity="other">%1$s atrapadas en total</item>
+    </plurals>
+    <plurals name="home_saved">
+        <item quantity="one">%1$d guardada</item>
+        <item quantity="other">%1$d guardadas</item>
+    </plurals>
+    <plurals name="home_unseen">
+        <item quantity="one">%1$d nueva</item>
+        <item quantity="other">%1$d nuevas</item>
+    </plurals>
+
+    <!-- Archive -->
+    <string name="archive_tab_recent">Recientes</string>
+    <string name="archive_tab_senders">Remitentes</string>
+    <plurals name="archive_recent_intro">
+        <item quantity="one">La última notificación recibida, sea cual sea el resultado.</item>
+        <item quantity="other">Las últimas %1$d notificaciones recibidas, sea cual sea el resultado.</item>
+    </plurals>
+    <string name="archive_recent_empty">Aún no se ha recibido nada.</string>
+    <string name="archive_saved_of_caught">Últimas %1$d de %2$s atrapadas (sube el límite en Ajustes)</string>
+    <plurals name="archive_saved">
+        <item quantity="one">%1$d guardada</item>
+        <item quantity="other">%1$d guardadas</item>
+    </plurals>
+    <string name="archive_clear_history">Borrar historial</string>
+    <string name="archive_rule_empty">Esta regla aún no ha atrapado nada.</string>
+    <string name="archive_clear_title">¿Borrar el historial?</string>
+    <plurals name="archive_clear_message">
+        <item quantity="one">Elimina la notificación guardada por «%2$s».</item>
+        <item quantity="other">Elimina las %1$d notificaciones guardadas por «%2$s».</item>
+    </plurals>
+    <string name="archive_clear">Borrar</string>
+    <string name="archive_restore">Restaurar</string>
+    <string name="archive_make_rule">Crear regla</string>
+    <string name="archive_open_link">Abrir enlace</string>
+    <string name="archive_open">Abrir</string>
+    <string name="archive_open_app">Abrir app</string>
+</resources>

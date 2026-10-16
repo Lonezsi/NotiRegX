@@ -9,8 +9,12 @@ enum class SuggestionGroup(val title: String) {
     EVERYTHING("Everything from the app"),
 }
 
+/** The wording of a suggestion, so the UI can phrase it in any language. */
+enum class SuggestionKind { LIKE, STARTS_WITH, ENDS_WITH, CONTAINS, IS, MENTIONS, EXCEPT_TITLE, EXCEPT_TITLES_LIKE, EVERYTHING }
+
 /** A guessed rule for "make a rule from this notification", with how much of the app it would catch. */
 data class Suggestion(
+    /** English description, e.g. "Title like “# new messages”" (the UI uses [kind] and [value] instead). */
     val label: String,
     val field: MatchField,
     val regex: String,
@@ -21,6 +25,9 @@ data class Suggestion(
     val group: SuggestionGroup = SuggestionGroup.SIMILAR,
     /** A few other notifications it would also catch, to show what it means in practice. */
     val examples: List<Notification> = emptyList(),
+    val kind: SuggestionKind = SuggestionKind.LIKE,
+    /** The text shown inside the quotes (or the app name, for [SuggestionKind.EVERYTHING]). */
+    val value: String = "",
 )
 
 /**
@@ -40,7 +47,15 @@ object RuleSuggester {
         "hogy", "nem", "egy", "van", "vagy", "csak", "mint", "már",
     )
 
-    private data class Candidate(val field: MatchField, val regex: String, val invert: Boolean, val label: String, val group: SuggestionGroup)
+    private data class Candidate(
+        val field: MatchField,
+        val regex: String,
+        val invert: Boolean,
+        val label: String,
+        val group: SuggestionGroup,
+        val kind: SuggestionKind,
+        val value: String,
+    )
 
     fun suggest(target: Notification, others: List<Notification>): List<Suggestion> {
         val samples = (listOf(target) + others.filter { it.packageName == target.packageName })
@@ -49,35 +64,34 @@ object RuleSuggester {
         // Insertion order is priority: when two patterns catch exactly the same notifications,
         // the earlier (more general) one is kept.
         val candidates = ArrayList<Candidate>()
-        fun add(field: MatchField, regex: String, label: String, group: SuggestionGroup, invert: Boolean = false) {
+        fun add(field: MatchField, regex: String, kind: SuggestionKind, value: String, group: SuggestionGroup, invert: Boolean = false) {
             if (candidates.none { it.field == field && it.regex == regex && it.invert == invert }) {
-                candidates += Candidate(field, regex, invert, label, group)
+                candidates += Candidate(field, regex, invert, englishLabel(kind, field, value), group, kind, value)
             }
         }
         for (field in listOf(MatchField.TITLE, MatchField.TEXT)) {
             val value = field.of(target).trim()
             if (value.isEmpty()) continue
             val values = samples.map { field.of(it).trim() }
-            val name = field.label
-            template(value, values)?.let { (re, shown) -> add(field, re, "$name like “$shown”", SuggestionGroup.SIMILAR) }
-            digitPattern(value)?.let { (re, shown) -> add(field, re, "$name like “$shown”", SuggestionGroup.SIMILAR) }
-            commonPrefixes(value, values).forEach { add(field, "^" + Rule.escape(it), "$name starts with “$it”", SuggestionGroup.SIMILAR) }
-            commonSuffixes(value, values).forEach { add(field, Rule.escape(it) + "$", "$name ends with “$it”", SuggestionGroup.SIMILAR) }
+            template(value, values)?.let { (re, shown) -> add(field, re, SuggestionKind.LIKE, shown, SuggestionGroup.SIMILAR) }
+            digitPattern(value)?.let { (re, shown) -> add(field, re, SuggestionKind.LIKE, shown, SuggestionGroup.SIMILAR) }
+            commonPrefixes(value, values).forEach { add(field, "^" + Rule.escape(it), SuggestionKind.STARTS_WITH, it, SuggestionGroup.SIMILAR) }
+            commonSuffixes(value, values).forEach { add(field, Rule.escape(it) + "$", SuggestionKind.ENDS_WITH, it, SuggestionGroup.SIMILAR) }
             recurringWords(value, values).forEach {
-                add(field, "(?i)\\b" + Rule.escape(it) + "\\b", "$name contains “$it”", SuggestionGroup.CONTAINS)
+                add(field, "(?i)\\b" + Rule.escape(it) + "\\b", SuggestionKind.CONTAINS, it, SuggestionGroup.CONTAINS)
             }
-            add(field, "^" + Rule.escape(value) + "$", "$name is “${shorten(value)}”", SuggestionGroup.EXACT)
+            add(field, "^" + Rule.escape(value) + "$", SuggestionKind.IS, shorten(value), SuggestionGroup.EXACT)
         }
         // Words from anywhere in the notification, for rules that don't care where they appear.
         recurringWords(target.content, samples.map { it.content }).forEach {
-            add(MatchField.ANY, "(?i)\\b" + Rule.escape(it) + "\\b", "Mentions “$it”", SuggestionGroup.CONTAINS)
+            add(MatchField.ANY, "(?i)\\b" + Rule.escape(it) + "\\b", SuggestionKind.MENTIONS, it, SuggestionGroup.CONTAINS)
         }
         // Exceptions: catch the rest of the app, but not things like this one.
         target.title.trim().takeIf { it.isNotEmpty() }?.let { title ->
-            add(MatchField.TITLE, "^" + Rule.escape(title) + "$", "Everything except title “${shorten(title)}”", SuggestionGroup.EXCEPT, invert = true)
+            add(MatchField.TITLE, "^" + Rule.escape(title) + "$", SuggestionKind.EXCEPT_TITLE, shorten(title), SuggestionGroup.EXCEPT, invert = true)
         }
         template(target.title.trim(), samples.map { it.title.trim() })?.let { (re, shown) ->
-            add(MatchField.TITLE, re, "Everything except titles like “$shown”", SuggestionGroup.EXCEPT, invert = true)
+            add(MatchField.TITLE, re, SuggestionKind.EXCEPT_TITLES_LIKE, shown, SuggestionGroup.EXCEPT, invert = true)
         }
 
         val everythingSet = samples.indices.toSet()
@@ -87,7 +101,7 @@ object RuleSuggester {
             // A rule made from a notification must catch it; an exception must leave it out.
             if ((0 in hits) == c.invert || hits.isEmpty()) return@mapNotNull null
             val examples = hits.filter { it != 0 }.sorted().take(EXAMPLES).map { samples[it] }
-            Suggestion(c.label, c.field, c.regex, hits.size, samples.size, c.invert, c.group, examples) to hits
+            Suggestion(c.label, c.field, c.regex, hits.size, samples.size, c.invert, c.group, examples, c.kind, c.value) to hits
         }
             .filter { it.second != everythingSet || samples.size == 1 }
             // Same notifications caught the same way is a duplicate; a different field or kind of
@@ -100,8 +114,25 @@ object RuleSuggester {
             "Everything from ${target.appName}", MatchField.ANY, "", samples.size, samples.size,
             group = SuggestionGroup.EVERYTHING,
             examples = samples.drop(1).take(EXAMPLES),
+            kind = SuggestionKind.EVERYTHING,
+            value = target.appName,
         )
         return scored.take(MAX - 1) + everything
+    }
+
+    private fun englishLabel(kind: SuggestionKind, field: MatchField, value: String): String {
+        val name = if (field == MatchField.TEXT) "Text" else "Title"
+        return when (kind) {
+            SuggestionKind.LIKE -> "$name like “$value”"
+            SuggestionKind.STARTS_WITH -> "$name starts with “$value”"
+            SuggestionKind.ENDS_WITH -> "$name ends with “$value”"
+            SuggestionKind.CONTAINS -> "$name contains “$value”"
+            SuggestionKind.IS -> "$name is “$value”"
+            SuggestionKind.MENTIONS -> "Mentions “$value”"
+            SuggestionKind.EXCEPT_TITLE -> "Everything except title “$value”"
+            SuggestionKind.EXCEPT_TITLES_LIKE -> "Everything except titles like “$value”"
+            SuggestionKind.EVERYTHING -> "Everything from $value"
+        }
     }
 
     /**

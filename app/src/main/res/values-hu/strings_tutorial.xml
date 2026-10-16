@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- First-launch tutorial, the dismissal advice card, the "Make a rule" suggestions screen and the main tabs. -->
+<resources>
+    <!-- Tutorial -->
+    <string name="tutorial_skip">Kihagyás</string>
+    <string name="tutorial_next">Tovább</string>
+    <string name="tutorial_get_started">Kezdjük!</string>
+
+    <string name="tutorial_welcome_title">Üdv a NotiRegX-ben!</string>
+    <string name="tutorial_welcome_body">A telefonod rengeteg értesítést kap. A NotiRegX-szel te döntöd el, melyik érdemli meg a figyelmedet – szabályokkal, amelyek az alkalmazás, a cím vagy a szöveg alapján válogatnak.</string>
+    <string name="tutorial_hide_title">Tüntesd el a zajt</string>
+    <string name="tutorial_hide_body">A lájkok, reklámok és reakciók eltűnnek, de megmaradnak az Archívumban, ha mégis kellenének.</string>
+    <string name="tutorial_bundle_title">Gyűjtsd csomagba a többit</string>
+    <string name="tutorial_bundle_body">A kevésbé sürgős dolgok egyetlen értesítésbe kerülnek egy számlálóval, vagy egy összesítőbe a megadott időpontokban.</string>
+    <string name="tutorial_never_miss_title">Ne maradj le a fontosról</string>
+    <string name="tutorial_never_miss_body">A fontos emberek és a sürgős szavak átjutnak, még Ne zavarjanak módban is.</string>
+    <string name="tutorial_what_buzzed_title">Derítsd ki, mi rezgett</string>
+    <string name="tutorial_what_buzzed_body">Minden rezgést látsz, azokat a „szellemrezgéseket” is, amelyek mögött nincs értesítés.</string>
+
+    <string name="tutorial_rules_title">Így működnek a szabályok</string>
+    <string name="tutorial_rules_body">Egy szabály az alkalmazás és a címben vagy szövegben lévő minta alapján választja ki az értesítéseket. A szabályok fentről lefelé futnak, és az utolsó illeszkedő szabály dönt.</string>
+    <string name="tutorial_example_title">Példa</string>
+    <string name="tutorial_example_body">1. szabály: minden elrejtése az Instagramról. 2. szabály (alatta): mindig jelezzen, ha a szövegben szerepel a neved. Az említések átjutnak és csörögnek, minden más az Instagramról rejtve marad.</string>
+
+    <string name="tutorial_permissions_title">Engedd, hogy a NotiRegX lássa az értesítéseket</string>
+    <string name="tutorial_permissions_body">Az Android csak az engedélyeddel enged egy alkalmazást értesítéseket olvasni és szűrni. Minden a telefonodon marad, semmit nem küldünk el sehova.</string>
+    <string name="tutorial_access_title">Értesítési hozzáférés</string>
+    <string name="tutorial_access_hint">Kötelező. A megnyíló listában kapcsold be a NotiRegX-et.</string>
+    <string name="tutorial_post_title">Értesítések megjelenítése</string>
+    <string name="tutorial_post_hint">A csomagokhoz, összesítőkhöz és jelzésekhez kell.</string>
+    <string name="tutorial_samsung_restricted_hint">Samsung: ha az Android szerint az értesítési hozzáférés „korlátozott beállítás”, nyisd meg az Alkalmazásadatokat, koppints a ⋮ ikonra, válaszd a „Korlátozott beállítások engedélyezése” lehetőséget, majd próbáld újra.</string>
+
+    <string name="tutorial_extras_title">Választható extrák</string>
+    <string name="tutorial_extras_body">Az induláshoz egyik sem kell. Később a Beállításokban is bekapcsolhatod őket.</string>
+    <string name="tutorial_battery_title">Korlátlan akkuhasználat</string>
+    <string name="tutorial_battery_hint">Samsungon ajánlott, hogy a telefon ne altassa el a szűrőt.</string>
+    <string name="tutorial_dnd_title">Ne zavarjanak hozzáférés</string>
+    <string name="tutorial_dnd_hint">Így a „Mindig jelezzen” szabályok Ne zavarjanak módban is csöröghetnek.</string>
+    <string name="tutorial_debuzz_title">Rezgésmentesítés (eszköz társítása)</string>
+    <string name="tutorial_debuzz_hint">A kiszűrt értesítések egyáltalán nem rezegnek. Válassz bármilyen közeli Bluetooth-eszközt, semmit nem küldünk neki.</string>
+    <string name="tutorial_ghost_title">Szellemrezgések</string>
+    <!-- %1$s = the adb command, shown as-is -->
+    <string name="tutorial_ghost_body">Ha az értesítés nélküli rezgéseket is látni szeretnéd, futtasd ezt egyszer egy számítógépről, adb-vel: %1$s</string>
+
+    <string name="tutorial_start_title">Hol kezdd?</string>
+    <string name="tutorial_start_body">Hagyd egy ideig futni a NotiRegX-et, aztán alakítsd szabályokká, amit látsz.</string>
+    <string name="tutorial_make_rules_title">Szabályok valódi értesítésekből</string>
+    <string name="tutorial_make_rules_body">Archívum › Legutóbbiak: koppints a Szabály készítése gombra bárminél, ami idegesít. A NotiRegX a hasonló értesítések alapján mintákat javasol.</string>
+    <string name="tutorial_accept_title">Fogadd el a javaslatokat</string>
+    <string name="tutorial_accept_body">Söpörd el, ami nem kell, ahogy eddig. Néhány után a Szabályok lapon a „Javaslatok neked” rész szabályokat ajánl.</string>
+    <string name="tutorial_senders_title">Nézd meg, ki mit küld</string>
+    <string name="tutorial_senders_body">Az Archívum › Küldők rangsorolja az embereket és alkalmazásokat aszerint, mennyit küldenek neked.</string>
+    <string name="tutorial_check_buzz_title">Nézd meg, mi rezgett</string>
+    <string name="tutorial_check_buzz_body">A Rezgések lap minden rezgést listáz. Add hozzá az „Utolsó rezgés” gyorsbeállítás-csempét, és egy koppintással ellenőrizheted.</string>
+
+    <!-- Advice card ("you keep swiping these away") -->
+    <!-- %1$s = app name -->
+    <string name="advice_title">%1$s: elrejted ezeket?</string>
+    <!-- %1$d = how many were swiped away -->
+    <plurals name="advice_dismissed_never_opened">
+        <item quantity="one">%1$d ilyet söpörtél el, és egyet sem nyitottál meg.</item>
+        <item quantity="other">%1$d ilyet söpörtél el, és egyet sem nyitottál meg.</item>
+    </plurals>
+    <!-- %1$d = how many were swiped away, %2$d = how many were opened -->
+    <plurals name="advice_dismissed_opened_some">
+        <item quantity="one">%1$d ilyet söpörtél el, és csak %2$d darabot nyitottál meg.</item>
+        <item quantity="other">%1$d ilyet söpörtél el, és csak %2$d darabot nyitottál meg.</item>
+    </plurals>
+    <!-- %1$s = an example notification -->
+    <string name="advice_example">pl. %1$s</string>
+    <string name="advice_not_now">Most nem</string>
+    <string name="advice_create_rule">Szabály létrehozása</string>
+    <!-- Used in a new rule's name: "<app>: everything" -->
+    <string name="advice_rule_name_everything">minden</string>
+
+    <!-- Suggestions ("Make a rule") screen -->
+    <string name="suggestions_title">Szabály készítése</string>
+    <string name="suggestions_back">Vissza</string>
+    <string name="suggestions_start_from_scratch">Kezdés a nulláról</string>
+    <!-- %1$s = app name -->
+    <string name="suggestions_scratch_hint">Megnyílik a szerkesztő, benne már kiválasztva: %1$s. Írj saját mintát, vagy indulj ki valamelyik alábbi javaslatból.</string>
+    <!-- %1$d = number of notifications, %2$s = app name -->
+    <plurals name="suggestions_header">
+        <item quantity="one">Javaslatok %1$d látott értesítés alapján (%2$s)</item>
+        <item quantity="other">Javaslatok %1$d látott értesítés alapján (%2$s)</item>
+    </plurals>
+    <!-- %1$s = regular expression; an inverted pattern -->
+    <string name="suggestions_regex_not">NEM /%1$s/</string>
+    <!-- %1$d = notifications matched, %2$d = notifications seen -->
+    <string name="suggestions_match_count">%1$d / %2$d</string>
+    <!-- %1$s = an example notification -->
+    <string name="suggestions_example">pl. %1$s</string>
+    <string name="suggestions_group_similar">Ehhez hasonló üzenetek</string>
+    <string name="suggestions_group_contains">Egy adott szót tartalmaz</string>
+    <string name="suggestions_group_exact">Pontosan ez</string>
+    <string name="suggestions_group_except">Minden, kivéve ezt</string>
+    <string name="suggestions_group_everything">Minden az alkalmazásból</string>
+
+    <!-- Main screen -->
+    <string name="root_tab_rules">Szabályok</string>
+    <string name="root_tab_archive">Archívum</string>
+    <string name="root_tab_vibrations">Rezgések</string>
+    <string name="root_tab_settings">Beállítások</string>
+    <string name="root_add_rule">Szabály hozzáadása</string>
+</resources>

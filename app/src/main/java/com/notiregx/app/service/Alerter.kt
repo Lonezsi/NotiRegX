@@ -22,14 +22,14 @@ class Alerter(private val context: Context) {
     init {
         manager.createNotificationChannels(
             listOf(
-                NotificationChannel(POPUP, "Alerts (pop up)", NotificationManager.IMPORTANCE_HIGH).apply {
-                    description = "Let-through notifications from apps NotiRegX silenced that used to pop up"
+                NotificationChannel(POPUP, context.getString(R.string.alert_channel_popup), NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = context.getString(R.string.alert_channel_popup_description)
                 },
-                NotificationChannel(SOUND, "Alerts (sound only)", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "Let-through notifications from apps NotiRegX silenced that used to make a sound"
+                NotificationChannel(SOUND, context.getString(R.string.alert_channel_sound), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = context.getString(R.string.alert_channel_sound_description)
                 },
-                NotificationChannel(RESTORED, "Restored", NotificationManager.IMPORTANCE_LOW).apply {
-                    description = "Filtered notifications you put back from the archive"
+                NotificationChannel(RESTORED, context.getString(R.string.alert_channel_restored), NotificationManager.IMPORTANCE_LOW).apply {
+                    description = context.getString(R.string.alert_channel_restored_description)
                 },
             )
         )
@@ -61,8 +61,8 @@ class Alerter(private val context: Context) {
         val id = if (canBypass) BREAKTHROUGH_DND else BREAKTHROUGH
         if (manager.getNotificationChannel(id) == null) {
             manager.createNotificationChannel(
-                NotificationChannel(id, "Always alert", NotificationManager.IMPORTANCE_HIGH).apply {
-                    description = "Notifications matched by an \"Always alert\" rule"
+                NotificationChannel(id, context.getString(R.string.alert_channel_always), NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = context.getString(R.string.alert_channel_always_description)
                     enableVibration(true)
                     setBypassDnd(canBypass)
                 }
@@ -89,7 +89,7 @@ class Alerter(private val context: Context) {
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(n.title.ifEmpty { n.appName })
             .setContentText(n.text)
-            .setSubText("${n.appName} · restored")
+            .setSubText(context.getString(R.string.alert_restored_subtext, n.appName))
             .setStyle(NotificationCompat.BigTextStyle().bigText(n.text))
             .setWhen(n.postedAt)
             .setShowWhen(true)

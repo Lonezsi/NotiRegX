@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vibrations screen -->
+    <string name="vibrations_log_on">System-Vibrationsprotokoll: an</string>
+    <string name="vibrations_log_on_hint">Der Vibrationsverlauf von Android wird alle 2 Minuten gelesen. Vibrationen ohne Benachrichtigung, Anruf oder Wecker dahinter werden als Geistervibrationen markiert.</string>
+    <string name="vibrations_refresh_now">Jetzt aktualisieren</string>
+    <string name="vibrations_raw_log_copied">Rohes Systemprotokoll kopiert</string>
+    <string name="vibrations_copy_raw_log">Rohprotokoll kopieren</string>
+    <string name="vibrations_log_off">System-Vibrationsprotokoll: aus</string>
+    <string name="vibrations_log_off_hint">Hier stehen nur Benachrichtigungen, die vibriert haben sollten. Um auch Geistervibrationen von Apps zu erfassen, die nie eine Benachrichtigung zeigen, führe das einmal an einem Computer mit adb aus:</string>
+    <string name="vibrations_command_copied">Befehl kopiert</string>
+    <string name="vibrations_copy_command">Befehl kopieren</string>
+    <string name="vibrations_chip_all">Alle · %1$d</string>
+    <string name="vibrations_chip_count">%1$s · %2$d</string>
+    <string name="vibrations_top_apps">Apps, letzte 24 Stunden</string>
+    <plurals name="vibrations_count">
+        <item quantity="one">%d Vibration</item>
+        <item quantity="other">%d Vibrationen</item>
+    </plurals>
+    <string name="vibrations_showing_of">%1$d von %2$d angezeigt</string>
+    <string name="vibrations_clear">Löschen</string>
+    <string name="vibrations_empty">Noch nichts. Vibrationen erscheinen hier, sobald sie passieren.</string>
+    <string name="vibrations_no_match">Nichts passt zu diesen Filtern.</string>
+    <string name="vibrations_clear_filters">Filter zurücksetzen</string>
+    <string name="vibrations_clear_confirm_title">Vibrationsprotokoll löschen?</string>
+    <string name="vibrations_card_title">%1$s: %2$s</string>
+    <string name="vibrations_duration_ms">%1$d ms</string>
+    <string name="vibrations_android_system">Android-System</string>
+
+    <!-- Vibration detail sheet -->
+    <string name="vibration_sheet_android_reason">Grund laut Android: %1$s</string>
+    <string name="vibration_sheet_the_notification">Die Benachrichtigung</string>
+    <string name="vibration_sheet_open_notification">Benachrichtigung öffnen</string>
+    <string name="vibration_sheet_make_rule">Regel erstellen</string>
+    <string name="vibration_sheet_notification_unseen">Laut Android kam das von einer Benachrichtigung, aber NotiRegX hat sie nicht gesehen (vielleicht kam sie, bevor NotiRegX eingerichtet war, oder die App hat sie sofort wieder entfernt).</string>
+    <string name="vibration_sheet_ghost_explanation">Zu dieser Vibration wurde keine Benachrichtigung angezeigt: %1$s hat das Handy direkt vibrieren lassen, meist durch etwas, das im Hintergrund läuft.</string>
+    <string name="vibration_sheet_was_call">Das war ein Anruf, keine Benachrichtigung.</string>
+    <string name="vibration_sheet_was_alarm">Das war ein Wecker, keine Benachrichtigung.</string>
+    <string name="vibration_sheet_was_other">%1$s, keine Benachrichtigung.</string>
+    <string name="vibration_sheet_nearby_from_app">Benachrichtigungen von %1$s um diese Zeit</string>
+    <string name="vibration_sheet_nearby_other">Andere Benachrichtigungen um diese Zeit</string>
+    <string name="vibration_sheet_do_something">Was du tun kannst</string>
+    <string name="vibration_sheet_open_app">App öffnen</string>
+    <string name="vibration_sheet_app_info">App-Info</string>
+    <string name="vibration_sheet_notifications_muted_title">Benachrichtigungen von %1$s vibrieren nicht</string>
+    <string name="vibration_sheet_mute_notification_title">Benachrichtigungsvibration von %1$s stummschalten</string>
+    <string name="vibration_sheet_mute_notification_hint">Schaltet die Vibration für Benachrichtigungen von %1$s aus. Ton und Pop-ups bleiben, wie sie sind.</string>
+    <string name="vibration_sheet_needs_companion">Android erlaubt das nur für Apps, die mit einem Companion-Gerät verknüpft sind.</string>
+    <string name="vibration_sheet_link_device">Gerät verknüpfen</string>
+    <string name="vibration_sheet_unmute">Wieder vibrieren lassen</string>
+    <string name="vibration_sheet_mute">Vibration stummschalten</string>
+    <string name="vibration_sheet_mute_direct_title">Vibrationen von %1$s stummschalten</string>
+    <string name="vibration_sheet_system_app_warning">%1$s gehört zum Handy selbst. Wenn du es stummschaltest, verstummen eventuell auch Tastatur-, Gesten- und andere Systemvibrationen, die du behalten möchtest.</string>
+    <string name="vibration_sheet_mute_direct_hint">%1$s hat das Handy direkt vibrieren lassen, nicht über eine Benachrichtigung. Android lässt dich das nur von einem Computer mit adb aus blockieren. Führe das einmal aus (es bleibt aktiv, bis du es rückgängig machst):</string>
+    <string name="vibration_sheet_undo_copied">Befehl zum Rückgängigmachen kopiert</string>
+    <string name="vibration_sheet_copy_undo">Rückgängig kopieren</string>
+
+    <!-- Main activity toasts -->
+    <string name="main_rules_exported">Regeln exportiert</string>
+    <string name="main_export_failed">Export fehlgeschlagen: %1$s</string>
+    <string name="main_no_new_rules">Keine neuen Regeln in dieser Datei</string>
+    <plurals name="main_imported_rules">
+        <item quantity="one">%d Regel importiert</item>
+        <item quantity="other">%d Regeln importiert</item>
+    </plurals>
+    <string name="main_not_an_export">Das sieht nicht nach einem NotiRegX-Export aus</string>
+    <string name="main_restored">Zurück in deinen Benachrichtigungen</string>
+    <string name="main_link_failed">Gerät konnte nicht verknüpft werden</string>
+    <string name="main_link_failed_reason">Gerät konnte nicht verknüpft werden: %1$s</string>
+    <string name="main_cant_open">%1$s lässt sich nicht öffnen</string>
+    <string name="main_nothing_can_open">Keine App auf diesem Handy kann das öffnen</string>
+
+    <!-- Alerts -->
+    <string name="alert_channel_popup">Hinweise (Pop-up)</string>
+    <string name="alert_channel_popup_description">Durchgelassene Benachrichtigungen von Apps, die NotiRegX stummgeschaltet hat und die vorher aufgepoppt sind</string>
+    <string name="alert_channel_sound">Hinweise (nur Ton)</string>
+    <string name="alert_channel_sound_description">Durchgelassene Benachrichtigungen von Apps, die NotiRegX stummgeschaltet hat und die vorher einen Ton gemacht haben</string>
+    <string name="alert_channel_restored">Wiederhergestellt</string>
+    <string name="alert_channel_restored_description">Gefilterte Benachrichtigungen, die du aus dem Archiv zurückgeholt hast</string>
+    <string name="alert_channel_always">Immer melden</string>
+    <string name="alert_channel_always_description">Benachrichtigungen, auf die eine „Immer melden“-Regel zutrifft</string>
+    <string name="alert_restored_subtext">%1$s · wiederhergestellt</string>
+
+    <!-- Watchdog -->
+    <string name="watchdog_channel_name">Probleme</string>
+    <string name="watchdog_channel_description">Warnungen, wenn NotiRegX nicht mehr filtert</string>
+    <string name="watchdog_title">NotiRegX filtert nicht mehr</string>
+    <string name="watchdog_text">Android hat den Benachrichtigungsfilter getrennt. Zum Beheben tippen.</string>
+    <string name="watchdog_text_long">Android hat den Benachrichtigungsfilter getrennt, und die Neuverbindung hat nicht geklappt. Öffne NotiRegX und tippe auf „Neu starten“, oder schalte den Benachrichtigungszugriff aus und wieder ein.</string>
+
+    <!-- Quick-settings tile -->
+    <string name="tile_label">Letzte Vibration</string>
+    <string name="tile_nothing_yet">Noch nichts</string>
+    <string name="tile_entry">%1$s · %2$s</string>
+    <string name="tile_entry_ghost">Geist · %1$s · %2$s</string>
+    <string name="tile_content_description">Letzte Vibration: %1$s</string>
+
+    <!-- Bundle notifications -->
+    <string name="bundle_channel_name">Bündel</string>
+    <string name="bundle_channel_description">Eine Benachrichtigung pro Bündelregel, mit der Anzahl ungesehener Benachrichtigungen</string>
+    <string name="bundle_digest_channel_name">Zusammenfassungen</string>
+    <string name="bundle_digest_channel_description">Bündel, die zu ihren festgelegten Zeiten zugestellt werden</string>
+    <plurals name="bundle_unseen">
+        <item quantity="one">%d ungesehene Benachrichtigung</item>
+        <item quantity="other">%d ungesehene Benachrichtigungen</item>
+    </plurals>
+    <plurals name="bundle_more">
+        <item quantity="one">+%d weitere</item>
+        <item quantity="other">+%d weitere</item>
+    </plurals>
+
+    <!-- Muter errors -->
+    <string name="muter_vibration_refused">Android hat das Ändern der Benachrichtigungseinstellungen dieser App abgelehnt. Verknüpfe in den Einstellungen ein Companion-Gerät.</string>
+    <string name="muter_channels_refused">Android hat das Ändern der Kanäle abgelehnt. Verknüpfe erneut ein Companion-Gerät.</string>
+</resources>

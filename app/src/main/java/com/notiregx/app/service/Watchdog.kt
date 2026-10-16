@@ -28,8 +28,8 @@ class Watchdog(private val app: NotiRegXApp) {
 
     init {
         manager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Problems", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Warnings when NotiRegX stops filtering"
+            NotificationChannel(CHANNEL_ID, app.getString(R.string.watchdog_channel_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = app.getString(R.string.watchdog_channel_description)
             }
         )
     }
@@ -73,14 +73,9 @@ class Watchdog(private val app: NotiRegXApp) {
         )
         val notification = NotificationCompat.Builder(app, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("NotiRegX stopped filtering")
-            .setContentText("Android disconnected the notification filter. Tap to fix.")
-            .setStyle(
-                NotificationCompat.BigTextStyle().bigText(
-                    "Android disconnected the notification filter and reconnecting didn't work. Open NotiRegX " +
-                        "and tap Restart, or turn its notification access off and on again."
-                )
-            )
+            .setContentTitle(app.getString(R.string.watchdog_title))
+            .setContentText(app.getString(R.string.watchdog_text))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(app.getString(R.string.watchdog_text_long)))
             .setContentIntent(open)
             .setOnlyAlertOnce(true)
             .setAutoCancel(true)

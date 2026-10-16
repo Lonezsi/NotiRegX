@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings -->
+    <string name="settings_section_filtering">Filtrado</string>
+    <string name="settings_filter_service">Servicio de filtrado</string>
+    <string name="settings_filter_service_no_access">No está activo: el acceso a notificaciones está desactivado.</string>
+    <string name="settings_filter_service_running_hint">Activo. NotiRegX lo comprueba con regularidad y lo vuelve a conectar si Android lo detiene.</string>
+    <string name="settings_filter_service_disconnected">No está activo. Android lo desconectó; toca Reiniciar.</string>
+    <string name="settings_restart">Reiniciar</string>
+    <string name="settings_running">Activo</string>
+    <string name="settings_filtering_enabled">Filtrado activado</string>
+    <string name="settings_filtering_enabled_hint">Si está desactivado, todas las notificaciones pasan, pero siguen apareciendo en Recientes.</string>
+    <string name="settings_saved_per_rule">Guardadas por regla: %1$d</string>
+    <string name="settings_saved_per_rule_hint">A partir de este número, las notificaciones más antiguas se eliminan del historial de la regla.</string>
+
+    <string name="settings_section_debuzz">Antivibración</string>
+    <string name="settings_debuzz_explanation">Android vibra antes de que NotiRegX pueda quitar una notificación. Las reglas con Antivibración activada silencian su app en su lugar, y NotiRegX vibra por su cuenta para lo que sí pasa. Una regla con Antivibración para una sola app la silencia de inmediato; una para cualquier app silencia una categoría de notificaciones la primera vez que atrapa algo de ella. Al desactivar Antivibración o eliminar la regla, todo vuelve a la normalidad.</string>
+    <string name="settings_debuzz_unsupported">Este teléfono no admite dispositivos complementarios, así que Antivibración no está disponible.</string>
+    <string name="settings_debuzz_link_hint">Android solo lo permite a las apps vinculadas a un dispositivo complementario. Activa el Bluetooth y elige cualquier dispositivo cercano (auriculares, reloj, altavoz, TV). Nunca se le envía nada.</string>
+    <string name="settings_link_device">Vincular un dispositivo</string>
+    <string name="settings_debuzz_problem">Problema: %1$s</string>
+    <plurals name="settings_debuzz_ready">
+        <item quantity="one">Listo. %d categoría de notificaciones silenciada ahora mismo.</item>
+        <item quantity="other">Listo. %d categorías de notificaciones silenciadas ahora mismo.</item>
+    </plurals>
+    <string name="settings_debuzz_uninstall_hint">Antes de desinstalar NotiRegX, desactiva Antivibración en todas las reglas para que las apps recuperen su sonido.</string>
+
+    <string name="settings_section_backup">Copia de seguridad</string>
+    <string name="settings_backup_hint">Guarda tus reglas en un archivo o añade reglas desde uno (tuyo o de un amigo). El historial no se incluye.</string>
+    <string name="settings_export_rules">Exportar reglas</string>
+    <string name="settings_import_rules">Importar reglas</string>
+
+    <string name="settings_section_permissions">Permisos</string>
+    <string name="settings_perm_notification_access">Acceso a notificaciones</string>
+    <string name="settings_perm_notification_access_hint">Necesario para leer y filtrar notificaciones.</string>
+    <string name="settings_perm_post_notifications">Mostrar notificaciones</string>
+    <string name="settings_perm_post_notifications_hint">Necesario para mostrar las notificaciones agrupadas.</string>
+    <string name="settings_perm_dnd_access">Acceso a No molestar</string>
+    <string name="settings_perm_dnd_access_hint">Opcional. Permite que las reglas \"Avisar siempre\" suenen aunque esté activado No molestar.</string>
+    <string name="settings_perm_battery">Uso de batería sin restricciones</string>
+    <string name="settings_perm_battery_hint">Evita que el sistema ponga NotiRegX en suspensión.</string>
+    <string name="settings_granted">Concedido</string>
+    <string name="settings_allow">Permitir</string>
+
+    <string name="settings_section_samsung">Consejos para Samsung</string>
+    <string name="settings_samsung_tips">Si Android dice que el acceso a notificaciones es un \"ajuste restringido\", abre Información de la aplicación, toca ⋮ en la esquina, elige \"Permitir ajustes restringidos\" y vuelve a intentarlo.\n\nPara que el filtrado sea fiable, añade también NotiRegX en Ajustes › Batería › Límites de uso en segundo plano › Aplicaciones que nunca entran en suspensión.</string>
+    <string name="settings_open_app_info">Abrir Información de la aplicación</string>
+    <string name="settings_show_tutorial">Ver el tutorial otra vez</string>
+
+    <!-- Rule conditions -->
+    <string name="conditions_schedule_title">Solo a ciertas horas</string>
+    <string name="conditions_schedule_off">Siempre activa.</string>
+    <string name="conditions_from_time">Desde %1$s</string>
+    <string name="conditions_to_time">Hasta %1$s</string>
+    <string name="conditions_schedule_hint">Un intervalo que termina antes de empezar abarca la noche. Si el inicio y el fin coinciden, es todo el día.</string>
+    <string name="conditions_burst_title">Solo en ráfagas</string>
+    <string name="conditions_burst_on">Las primeras %1$d en %2$d min pasan; el resto se atrapa.</string>
+    <string name="conditions_burst_off">Se aplica a todas las notificaciones que coincidan.</string>
+    <string name="conditions_burst_count">Dejar pasar</string>
+    <string name="conditions_burst_window">En (min)</string>
+    <string name="conditions_digest_title">Entregar como resumen</string>
+    <string name="conditions_digest_off">El grupo aparece en cuanto se atrapa algo.</string>
+    <string name="conditions_digest_on">El grupo permanece oculto y aparece a estas horas.</string>
+    <string name="conditions_remove_time">Quitar %1$s</string>
+    <string name="conditions_add_time">Añadir hora</string>
+
+    <!-- Senders -->
+    <string name="senders_period_today">Hoy</string>
+    <string name="senders_period_week">7 días</string>
+    <string name="senders_period_month">30 días</string>
+    <string name="senders_period_all">Siempre</string>
+    <string name="senders_all_apps">Todas las apps</string>
+    <string name="senders_intro">Cuenta todas las notificaciones, hicieran lo que hicieran tus reglas con ellas. En las apps de chat, el remitente es la persona o el grupo; en las demás, el título de la notificación. Toca uno para crear una regla.</string>
+    <string name="senders_empty_period">Todavía no hay nada contado en este periodo.</string>
+    <plurals name="senders_dialog_total">
+        <item quantity="one">%1$s notificación de %2$s en total. ¿Qué quieres hacer con ella?</item>
+        <item quantity="other">%1$s notificaciones de %2$s en total. ¿Qué quieres hacer con ellas?</item>
+    </plurals>
+    <string name="senders_always_let_through">Dejar pasar siempre</string>
+    <string name="senders_pick_title">Elegir remitentes</string>
+    <string name="senders_pick_hint">Coincide con las notificaciones cuyo título sea exactamente uno de estos.</string>
+    <string name="senders_search">Buscar</string>
+    <string name="senders_none">Aún no se ha visto ningún remitente.</string>
+    <string name="senders_none_for_app">Aún no se ha visto ningún remitente de esta app.</string>
+    <plurals name="senders_notification_count">
+        <item quantity="one">%1$s notificación</item>
+        <item quantity="other">%1$s notificaciones</item>
+    </plurals>
+    <string name="senders_use">Usar</string>
+    <string name="senders_use_count">Usar %1$d</string>
+</resources>

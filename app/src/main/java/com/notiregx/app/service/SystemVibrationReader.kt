@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Process
+import com.notiregx.app.R
 import com.notiregx.app.model.LoggedVibration
 import com.notiregx.app.model.VibrationDumpParser
 import com.notiregx.app.model.VibrationEvent
@@ -37,6 +38,7 @@ class SystemVibrationReader(private val context: Context, private val reader: No
             ?: v.uid?.let(::packageForUid)
             ?: "uid ${v.uid}"
         val detail = when {
+            // Stored marker, not display text: Storage.kt and VibrationDetailSheet compare against it. Keep it English.
             v.viaNotification -> "Notification"
             v.reason != null -> v.reason
             else -> v.usage?.lowercase()?.replace('_', ' ') ?: ""
@@ -44,7 +46,7 @@ class SystemVibrationReader(private val context: Context, private val reader: No
         return VibrationEvent(
             time = v.time,
             packageName = pkg,
-            appName = if (pkg == "android") "Android system" else reader.appName(pkg),
+            appName = if (pkg == "android") context.getString(R.string.vibrations_android_system) else reader.appName(pkg),
             source = VibrationSource.SYSTEM,
             detail = detail,
             usage = v.usage,

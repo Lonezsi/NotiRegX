@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vibrations screen -->
+    <string name="vibrations_log_on">Rendszer rezgésnaplója: be</string>
+    <string name="vibrations_log_on_hint">Az Android saját rezgéselőzményeit 2 percenként olvassuk be. Azok a rezgések, amelyek mögött nincs értesítés, hívás vagy ébresztő, szellemrezgésként jelennek meg.</string>
+    <string name="vibrations_refresh_now">Frissítés most</string>
+    <string name="vibrations_raw_log_copied">Nyers rendszernapló kimásolva</string>
+    <string name="vibrations_copy_raw_log">Nyers napló másolása</string>
+    <string name="vibrations_log_off">Rendszer rezgésnaplója: ki</string>
+    <string name="vibrations_log_off_hint">Csak azok az értesítések látszanak, amelyeknek rezegniük kellett. Ha az értesítést sosem mutató alkalmazások szellemrezgéseit is el akarod kapni, futtasd le egyszer ezt egy számítógépről adb-vel:</string>
+    <string name="vibrations_command_copied">Parancs kimásolva</string>
+    <string name="vibrations_copy_command">Parancs másolása</string>
+    <string name="vibrations_chip_all">Mind · %1$d</string>
+    <string name="vibrations_chip_count">%1$s · %2$d</string>
+    <string name="vibrations_top_apps">Alkalmazások, elmúlt 24 óra</string>
+    <plurals name="vibrations_count">
+        <item quantity="one">%d rezgés</item>
+        <item quantity="other">%d rezgés</item>
+    </plurals>
+    <string name="vibrations_showing_of">%2$d rezgésből %1$d látszik</string>
+    <string name="vibrations_clear">Törlés</string>
+    <string name="vibrations_empty">Még semmi. A rezgések itt jelennek meg, ahogy történnek.</string>
+    <string name="vibrations_no_match">Semmi sem felel meg ezeknek a szűrőknek.</string>
+    <string name="vibrations_clear_filters">Szűrők törlése</string>
+    <string name="vibrations_clear_confirm_title">Törlöd a rezgésnaplót?</string>
+    <string name="vibrations_card_title">%1$s: %2$s</string>
+    <string name="vibrations_duration_ms">%1$d ms</string>
+    <string name="vibrations_android_system">Android-rendszer</string>
+
+    <!-- Vibration detail sheet -->
+    <string name="vibration_sheet_android_reason">Az Android indoklása: %1$s</string>
+    <string name="vibration_sheet_the_notification">Az értesítés</string>
+    <string name="vibration_sheet_open_notification">Értesítés megnyitása</string>
+    <string name="vibration_sheet_make_rule">Szabály készítése</string>
+    <string name="vibration_sheet_notification_unseen">Az Android szerint egy értesítés okozta, de a NotiRegX nem látta (lehet, hogy még a NotiRegX beállítása előtt jött, vagy az alkalmazás azonnal eltávolította).</string>
+    <string name="vibration_sheet_ghost_explanation">Ehhez a rezgéshez nem jelent meg értesítés: %1$s közvetlenül rezegtette meg a telefont, általában valamilyen háttérben futó folyamat miatt.</string>
+    <string name="vibration_sheet_was_call">Ez egy hívás volt, nem értesítés.</string>
+    <string name="vibration_sheet_was_alarm">Ez egy ébresztő volt, nem értesítés.</string>
+    <string name="vibration_sheet_was_other">%1$s, nem értesítés.</string>
+    <string name="vibration_sheet_nearby_from_app">%1$s értesítései ez idő tájt</string>
+    <string name="vibration_sheet_nearby_other">Más értesítések ez idő tájt</string>
+    <string name="vibration_sheet_do_something">Mit tehetsz ellene?</string>
+    <string name="vibration_sheet_open_app">Alkalmazás megnyitása</string>
+    <string name="vibration_sheet_app_info">Alkalmazásinfó</string>
+    <string name="vibration_sheet_notifications_muted_title">%1$s értesítései nem rezegnek</string>
+    <string name="vibration_sheet_mute_notification_title">Értesítési rezgés némítása: %1$s</string>
+    <string name="vibration_sheet_mute_notification_hint">Kikapcsolja a rezgést %1$s értesítéseinél. A hang és a felugró értesítések maradnak.</string>
+    <string name="vibration_sheet_needs_companion">Az Android ezt csak társeszközhöz kapcsolt alkalmazásoknál engedi.</string>
+    <string name="vibration_sheet_link_device">Eszköz társítása</string>
+    <string name="vibration_sheet_unmute">Rezeghet újra</string>
+    <string name="vibration_sheet_mute">Rezgés némítása</string>
+    <string name="vibration_sheet_mute_direct_title">Rezgések némítása: %1$s</string>
+    <string name="vibration_sheet_system_app_warning">%1$s a telefon része. Ha némítod, a billentyűzet, a kézmozdulatok és más rendszerrezgések is elnémulhatnak, amelyeket talán megtartanál.</string>
+    <string name="vibration_sheet_mute_direct_hint">%1$s közvetlenül rezegtette meg a telefont, nem értesítéssel. Ezt az Android csak számítógépről, adb-vel engedi letiltani. Futtasd le egyszer (addig érvényes, amíg vissza nem vonod):</string>
+    <string name="vibration_sheet_undo_copied">Visszavonó parancs kimásolva</string>
+    <string name="vibration_sheet_copy_undo">Visszavonás másolása</string>
+
+    <!-- Main activity toasts -->
+    <string name="main_rules_exported">Szabályok exportálva</string>
+    <string name="main_export_failed">Sikertelen exportálás: %1$s</string>
+    <string name="main_no_new_rules">Nincs új szabály ebben a fájlban</string>
+    <plurals name="main_imported_rules">
+        <item quantity="one">%d szabály importálva</item>
+        <item quantity="other">%d szabály importálva</item>
+    </plurals>
+    <string name="main_not_an_export">Ez nem tűnik NotiRegX-exportnak</string>
+    <string name="main_restored">Visszatéve az értesítéseid közé</string>
+    <string name="main_link_failed">Nem sikerült eszközt társítani</string>
+    <string name="main_link_failed_reason">Nem sikerült eszközt társítani: %1$s</string>
+    <string name="main_cant_open">Nem nyitható meg: %1$s</string>
+    <string name="main_nothing_can_open">Ezen a telefonon semmi sem tudja ezt megnyitni</string>
+
+    <!-- Alerts -->
+    <string name="alert_channel_popup">Jelzések (felugró)</string>
+    <string name="alert_channel_popup_description">Átengedett értesítések a NotiRegX által elnémított alkalmazásoktól, amelyek korábban felugrottak</string>
+    <string name="alert_channel_sound">Jelzések (csak hang)</string>
+    <string name="alert_channel_sound_description">Átengedett értesítések a NotiRegX által elnémított alkalmazásoktól, amelyek korábban hangot adtak</string>
+    <string name="alert_channel_restored">Visszaállítottak</string>
+    <string name="alert_channel_restored_description">Szűrt értesítések, amelyeket visszatettél az archívumból</string>
+    <string name="alert_channel_always">Mindig jelezzen</string>
+    <string name="alert_channel_always_description">Értesítések, amelyekre egy „Mindig jelezzen” szabály illeszkedik</string>
+    <string name="alert_restored_subtext">%1$s · visszaállítva</string>
+
+    <!-- Watchdog -->
+    <string name="watchdog_channel_name">Problémák</string>
+    <string name="watchdog_channel_description">Figyelmeztetés, ha a NotiRegX leáll a szűréssel</string>
+    <string name="watchdog_title">A NotiRegX leállt a szűréssel</string>
+    <string name="watchdog_text">Az Android leválasztotta az értesítésszűrőt. Koppints a javításhoz.</string>
+    <string name="watchdog_text_long">Az Android leválasztotta az értesítésszűrőt, és az újracsatlakozás nem sikerült. Nyisd meg a NotiRegX-et, és koppints az Újraindításra, vagy kapcsold ki, majd vissza az értesítési hozzáférését.</string>
+
+    <!-- Quick-settings tile -->
+    <string name="tile_label">Utolsó rezgés</string>
+    <string name="tile_nothing_yet">Még semmi</string>
+    <string name="tile_entry">%1$s · %2$s</string>
+    <string name="tile_entry_ghost">Szellem · %1$s · %2$s</string>
+    <string name="tile_content_description">Utolsó rezgés: %1$s</string>
+
+    <!-- Bundle notifications -->
+    <string name="bundle_channel_name">Csomagok</string>
+    <string name="bundle_channel_description">Csomagszabályonként egy értesítés, a meg nem nézett értesítések számával</string>
+    <string name="bundle_digest_channel_name">Összesítők</string>
+    <string name="bundle_digest_channel_description">A beállított időpontokban kézbesített csomagok</string>
+    <plurals name="bundle_unseen">
+        <item quantity="one">%d meg nem nézett értesítés</item>
+        <item quantity="other">%d meg nem nézett értesítés</item>
+    </plurals>
+    <plurals name="bundle_more">
+        <item quantity="one">+%d további</item>
+        <item quantity="other">+%d további</item>
+    </plurals>
+
+    <!-- Muter errors -->
+    <string name="muter_vibration_refused">Az Android nem engedte módosítani az alkalmazás értesítési beállításait. Társíts egy eszközt a Beállításokban.</string>
+    <string name="muter_channels_refused">Az Android nem engedte módosítani a csatornákat. Társíts újra egy eszközt.</string>
+</resources>

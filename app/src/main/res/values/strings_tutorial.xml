@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- First-launch tutorial, the dismissal advice card, the "Make a rule" suggestions screen and the main tabs. -->
+<resources>
+    <!-- Tutorial -->
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_get_started">Get started</string>
+
+    <string name="tutorial_welcome_title">Welcome to NotiRegX</string>
+    <string name="tutorial_welcome_body">Your phone gets a lot of notifications. NotiRegX lets you decide which ones deserve your attention, using rules that match the app, the title or the text.</string>
+    <string name="tutorial_hide_title">Hide the noise</string>
+    <string name="tutorial_hide_body">Likes, promos and reactions disappear, but stay saved in the Archive in case you want them.</string>
+    <string name="tutorial_bundle_title">Bundle the rest</string>
+    <string name="tutorial_bundle_body">Collect less urgent things into one notification with a count, or a digest at set times.</string>
+    <string name="tutorial_never_miss_title">Never miss what matters</string>
+    <string name="tutorial_never_miss_body">Let important people and urgent words through, even in Do Not Disturb.</string>
+    <string name="tutorial_what_buzzed_title">Find out what buzzed</string>
+    <string name="tutorial_what_buzzed_body">See every vibration, including \"ghost\" buzzes with no notification behind them.</string>
+
+    <string name="tutorial_rules_title">How rules work</string>
+    <string name="tutorial_rules_body">A rule matches notifications by app and by a pattern in the title or text. Rules run from top to bottom, and the last rule that matches decides what happens.</string>
+    <string name="tutorial_example_title">Example</string>
+    <string name="tutorial_example_body">Rule 1: Hide everything from Instagram. Rule 2 (below it): Always alert when the text mentions your name. Mentions get through and ring; everything else from Instagram is hidden.</string>
+
+    <string name="tutorial_permissions_title">Let NotiRegX see notifications</string>
+    <string name="tutorial_permissions_body">Android needs your permission before an app can read and filter notifications. Everything stays on your phone; nothing is sent anywhere.</string>
+    <string name="tutorial_access_title">Notification access</string>
+    <string name="tutorial_access_hint">Required. Turn NotiRegX on in the list that opens.</string>
+    <string name="tutorial_post_title">Post notifications</string>
+    <string name="tutorial_post_hint">For bundles, digests and alerts.</string>
+    <string name="tutorial_samsung_restricted_hint">Samsung: if Android says notification access is a \"restricted setting\", open App info, tap ⋮ and choose \"Allow restricted settings\", then try again.</string>
+
+    <string name="tutorial_extras_title">Optional extras</string>
+    <string name="tutorial_extras_body">None of these are needed to start. You can turn them on later in Settings.</string>
+    <string name="tutorial_battery_title">Unrestricted battery use</string>
+    <string name="tutorial_battery_hint">Recommended on Samsung, so the phone doesn\'t put the filter to sleep.</string>
+    <string name="tutorial_dnd_title">Do Not Disturb access</string>
+    <string name="tutorial_dnd_hint">Lets \"Always alert\" rules ring through Do Not Disturb.</string>
+    <string name="tutorial_debuzz_title">De-buzz (link a device)</string>
+    <string name="tutorial_debuzz_hint">Stops filtered notifications from buzzing at all. Pick any nearby Bluetooth device; nothing is sent to it.</string>
+    <string name="tutorial_ghost_title">Ghost vibrations</string>
+    <!-- %1$s = the adb command, shown as-is -->
+    <string name="tutorial_ghost_body">To see vibrations that come with no notification, run this once from a computer with adb: %1$s</string>
+
+    <string name="tutorial_start_title">Where to start</string>
+    <string name="tutorial_start_body">Let NotiRegX run for a while, then turn what you see into rules.</string>
+    <string name="tutorial_make_rules_title">Make rules from real notifications</string>
+    <string name="tutorial_make_rules_body">Archive › Recent: tap Make rule on anything annoying. NotiRegX suggests patterns based on similar notifications.</string>
+    <string name="tutorial_accept_title">Accept suggestions</string>
+    <string name="tutorial_accept_body">Swipe away what you don\'t want as usual. After a few, \"Suggested for you\" proposes rules on the Rules tab.</string>
+    <string name="tutorial_senders_title">See who sends what</string>
+    <string name="tutorial_senders_body">Archive › Senders ranks people and apps by how much they send you.</string>
+    <string name="tutorial_check_buzz_title">Check what buzzed</string>
+    <string name="tutorial_check_buzz_body">The Vibrations tab lists every buzz. Add the \"Last buzz\" quick-settings tile to check in one tap.</string>
+
+    <!-- Advice card ("you keep swiping these away") -->
+    <!-- %1$s = app name -->
+    <string name="advice_title">Hide in %1$s?</string>
+    <!-- %1$d = how many were swiped away -->
+    <plurals name="advice_dismissed_never_opened">
+        <item quantity="one">You swiped away %1$d of these and never opened it.</item>
+        <item quantity="other">You swiped away %1$d of these and never opened one.</item>
+    </plurals>
+    <!-- %1$d = how many were swiped away, %2$d = how many were opened -->
+    <plurals name="advice_dismissed_opened_some">
+        <item quantity="one">You swiped away %1$d of these and opened only %2$d.</item>
+        <item quantity="other">You swiped away %1$d of these and opened only %2$d.</item>
+    </plurals>
+    <!-- %1$s = an example notification -->
+    <string name="advice_example">e.g. %1$s</string>
+    <string name="advice_not_now">Not now</string>
+    <string name="advice_create_rule">Create rule</string>
+    <!-- Used in a new rule's name: "<app>: everything" -->
+    <string name="advice_rule_name_everything">everything</string>
+
+    <!-- Suggestions ("Make a rule") screen -->
+    <string name="suggestions_title">Make a rule</string>
+    <string name="suggestions_back">Back</string>
+    <string name="suggestions_start_from_scratch">Start from scratch</string>
+    <!-- %1$s = app name -->
+    <string name="suggestions_scratch_hint">Opens the editor with %1$s already picked. Write your own pattern, or start from one of the suggestions below.</string>
+    <!-- %1$d = number of notifications, %2$s = app name -->
+    <plurals name="suggestions_header">
+        <item quantity="one">Suggestions from %1$d notification seen from %2$s</item>
+        <item quantity="other">Suggestions from %1$d notifications seen from %2$s</item>
+    </plurals>
+    <!-- %1$s = regular expression; an inverted pattern -->
+    <string name="suggestions_regex_not">NOT /%1$s/</string>
+    <!-- %1$d = notifications matched, %2$d = notifications seen -->
+    <string name="suggestions_match_count">%1$d of %2$d</string>
+    <!-- %1$s = an example notification -->
+    <string name="suggestions_example">e.g. %1$s</string>
+    <string name="suggestions_group_similar">Messages like this one</string>
+    <string name="suggestions_group_contains">Containing a word</string>
+    <string name="suggestions_group_exact">Exactly this</string>
+    <string name="suggestions_group_except">Everything except this</string>
+    <string name="suggestions_group_everything">Everything from the app</string>
+
+    <!-- Main screen -->
+    <string name="root_tab_rules">Rules</string>
+    <string name="root_tab_archive">Archive</string>
+    <string name="root_tab_vibrations">Vibrations</string>
+    <string name="root_tab_settings">Settings</string>
+    <string name="root_add_rule">Add rule</string>
+</resources>

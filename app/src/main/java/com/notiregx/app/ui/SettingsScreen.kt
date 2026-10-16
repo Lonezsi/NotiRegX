@@ -21,8 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.notiregx.app.MuteStatus
+import com.notiregx.app.R
 import com.notiregx.app.Settings
 import kotlin.math.roundToInt
 
@@ -48,6 +51,7 @@ fun SettingsScreen(
     val canPost = remember(resumeTick) { settings.canPostNotifications() }
     val unrestricted = remember(resumeTick) { settings.isIgnoringBatteryOptimizations() }
     val dndAccess = remember(resumeTick) { settings.hasDndAccess() }
+    val context = LocalContext.current
 
     Column(
         Modifier
@@ -55,34 +59,36 @@ fun SettingsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Section("Filtering")
+        LanguageSetting()
+        HorizontalDivider()
+        Section(stringResource(R.string.settings_section_filtering))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Filter service", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.settings_filter_service), style = MaterialTheme.typography.bodyLarge)
                 Hint(
                     when {
-                        !hasAccess -> "Not running: notification access is off."
-                        listenerConnected -> "Running. NotiRegX checks this regularly and reconnects it if Android stops it."
-                        else -> "Not running. Android disconnected it; tap Restart."
+                        !hasAccess -> stringResource(R.string.settings_filter_service_no_access)
+                        listenerConnected -> stringResource(R.string.settings_filter_service_running_hint)
+                        else -> stringResource(R.string.settings_filter_service_disconnected)
                     }
                 )
             }
             if (hasAccess && !listenerConnected) {
-                TextButton(onClick = onRestartListener) { Text("Restart") }
+                TextButton(onClick = onRestartListener) { Text(stringResource(R.string.settings_restart)) }
             } else if (hasAccess) {
-                Text("Running", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.settings_running), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Filtering enabled", style = MaterialTheme.typography.bodyLarge)
-                Hint("When off, every notification is let through but still shows up in Recent.")
+                Text(stringResource(R.string.settings_filtering_enabled), style = MaterialTheme.typography.bodyLarge)
+                Hint(stringResource(R.string.settings_filtering_enabled_hint))
             }
             Switch(checked = filtering, onCheckedChange = settings::setFilteringEnabled)
         }
         Column {
-            Text("Saved per rule: ${sliderValue.roundToInt()}", style = MaterialTheme.typography.bodyLarge)
-            Hint("Older notifications are dropped from a rule's history beyond this.")
+            Text(stringResource(R.string.settings_saved_per_rule, sliderValue.roundToInt()), style = MaterialTheme.typography.bodyLarge)
+            Hint(stringResource(R.string.settings_saved_per_rule_hint))
             Slider(
                 value = sliderValue,
                 onValueChange = { sliderValue = (it / 10).roundToInt() * 10f },
@@ -92,76 +98,65 @@ fun SettingsScreen(
         }
 
         HorizontalDivider()
-        Section("De-buzz")
-        Hint(
-            "Android buzzes before NotiRegX can remove a notification. Rules with De-buzz turned on silence their " +
-                "app instead, and NotiRegX buzzes itself for whatever gets through. A de-buzz rule for one app " +
-                "silences it right away; one for any app silences a notification category the first time it " +
-                "catches something from it. Turning De-buzz off or deleting the rule puts everything back."
-        )
+        Section(stringResource(R.string.settings_section_debuzz))
+        Hint(stringResource(R.string.settings_debuzz_explanation))
         when {
-            !settings.supportsCompanionDevices() -> Hint("This phone doesn't support companion devices, so De-buzz isn't available.")
+            !settings.supportsCompanionDevices() -> Hint(stringResource(R.string.settings_debuzz_unsupported))
             !companionLinked -> {
-                Hint(
-                    "Android only allows this for apps linked to a companion device. Turn on Bluetooth and pick any " +
-                        "nearby device (earbuds, watch, speaker, TV). Nothing is ever sent to it."
-                )
-                TextButton(onClick = onLinkCompanion) { Text("Link a device") }
+                Hint(stringResource(R.string.settings_debuzz_link_hint))
+                TextButton(onClick = onLinkCompanion) { Text(stringResource(R.string.settings_link_device)) }
             }
             else -> Hint(
-                muteStatus.error?.let { "Problem: $it" }
-                    ?: "Ready. ${muteStatus.mutedChannels} notification categories currently silenced."
+                muteStatus.error?.let { stringResource(R.string.settings_debuzz_problem, it) }
+                    ?: context.resources.getQuantityString(
+                        R.plurals.settings_debuzz_ready, muteStatus.mutedChannels, muteStatus.mutedChannels,
+                    )
             )
         }
-        Hint("Before uninstalling NotiRegX, turn De-buzz off on every rule so the apps get their sound back.")
+        Hint(stringResource(R.string.settings_debuzz_uninstall_hint))
 
         HorizontalDivider()
-        Section("Backup")
-        Hint("Save your rules to a file, or add rules from one (yours or a friend's). History isn't included.")
+        Section(stringResource(R.string.settings_section_backup))
+        Hint(stringResource(R.string.settings_backup_hint))
         Row {
-            TextButton(onClick = onExport) { Text("Export rules") }
-            TextButton(onClick = onImport) { Text("Import rules") }
+            TextButton(onClick = onExport) { Text(stringResource(R.string.settings_export_rules)) }
+            TextButton(onClick = onImport) { Text(stringResource(R.string.settings_import_rules)) }
         }
 
         HorizontalDivider()
-        Section("Permissions")
+        Section(stringResource(R.string.settings_section_permissions))
         PermissionRow(
-            title = "Notification access",
-            hint = "Required to read and filter notifications.",
+            title = stringResource(R.string.settings_perm_notification_access),
+            hint = stringResource(R.string.settings_perm_notification_access_hint),
             granted = hasAccess,
             onFix = { onOpenIntent(settings.notificationAccessIntent()) },
         )
         PermissionRow(
-            title = "Post notifications",
-            hint = "Required to show bundle notifications.",
+            title = stringResource(R.string.settings_perm_post_notifications),
+            hint = stringResource(R.string.settings_perm_post_notifications_hint),
             granted = canPost,
             onFix = { onOpenIntent(settings.appNotificationSettingsIntent()) },
         )
         PermissionRow(
-            title = "Do Not Disturb access",
-            hint = "Optional. Lets \"Always alert\" rules ring through Do Not Disturb.",
+            title = stringResource(R.string.settings_perm_dnd_access),
+            hint = stringResource(R.string.settings_perm_dnd_access_hint),
             granted = dndAccess,
             onFix = { onOpenIntent(settings.dndAccessIntent()) },
         )
         PermissionRow(
-            title = "Unrestricted battery use",
-            hint = "Stops the system from putting NotiRegX to sleep.",
+            title = stringResource(R.string.settings_perm_battery),
+            hint = stringResource(R.string.settings_perm_battery_hint),
             granted = unrestricted,
             onFix = { onOpenIntent(settings.batteryOptimizationIntent()) },
         )
 
         HorizontalDivider()
-        Section("Samsung tips")
-        Hint(
-            "If Android says notification access is a \"restricted setting\", open App info, tap ⋮ in the corner " +
-                "and choose \"Allow restricted settings\", then try again.\n\n" +
-                "To keep filtering reliable, also add NotiRegX to Settings › Battery › Background usage limits › " +
-                "Never sleeping apps."
-        )
-        TextButton(onClick = { onOpenIntent(settings.appDetailsIntent()) }) { Text("Open App info") }
+        Section(stringResource(R.string.settings_section_samsung))
+        Hint(stringResource(R.string.settings_samsung_tips))
+        TextButton(onClick = { onOpenIntent(settings.appDetailsIntent()) }) { Text(stringResource(R.string.settings_open_app_info)) }
 
         HorizontalDivider()
-        TextButton(onClick = onShowTutorial) { Text("Show the tutorial again") }
+        TextButton(onClick = onShowTutorial) { Text(stringResource(R.string.settings_show_tutorial)) }
     }
 }
 
@@ -183,9 +178,9 @@ internal fun PermissionRow(title: String, hint: String, granted: Boolean, onFix:
             Hint(hint)
         }
         if (granted) {
-            Text("Granted", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.settings_granted), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         } else {
-            TextButton(onClick = onFix) { Text("Allow") }
+            TextButton(onClick = onFix) { Text(stringResource(R.string.settings_allow)) }
         }
     }
 }

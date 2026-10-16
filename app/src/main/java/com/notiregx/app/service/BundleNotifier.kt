@@ -22,11 +22,11 @@ class BundleNotifier(private val context: Context) {
     init {
         manager.createNotificationChannels(
             listOf(
-                NotificationChannel(CHANNEL_ID, "Bundles", NotificationManager.IMPORTANCE_LOW).apply {
-                    description = "One notification per bundle rule, with its unseen count"
+                NotificationChannel(CHANNEL_ID, context.getString(R.string.bundle_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
+                    description = context.getString(R.string.bundle_channel_description)
                 },
-                NotificationChannel(DIGEST_CHANNEL_ID, "Digests", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "Bundles delivered at their set times"
+                NotificationChannel(DIGEST_CHANNEL_ID, context.getString(R.string.bundle_digest_channel_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = context.getString(R.string.bundle_digest_channel_description)
                 },
             )
         )
@@ -51,7 +51,7 @@ class BundleNotifier(private val context: Context) {
         val count = rule.bundle.count
         val style = NotificationCompat.InboxStyle()
         unseen.take(PREVIEW_LINES).forEach { style.addLine("${it.appName}: ${it.title.ifEmpty { it.text }}") }
-        if (count > PREVIEW_LINES) style.setSummaryText("+${count - PREVIEW_LINES} more")
+        if (count > PREVIEW_LINES) style.setSummaryText(context.resources.getQuantityString(R.plurals.bundle_more, count - PREVIEW_LINES, count - PREVIEW_LINES))
 
         val uri = Uri.parse("notiregx://bundle/${rule.id}")
         val open = PendingIntent.getActivity(
@@ -71,7 +71,7 @@ class BundleNotifier(private val context: Context) {
         val notification = NotificationCompat.Builder(context, if (rule.isDigest) DIGEST_CHANNEL_ID else CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(rule.name)
-            .setContentText(if (count == 1) "1 unseen notification" else "$count unseen notifications")
+            .setContentText(context.resources.getQuantityString(R.plurals.bundle_unseen, count, count))
             .setNumber(count)
             .setStyle(style)
             .setOnlyAlertOnce(true)

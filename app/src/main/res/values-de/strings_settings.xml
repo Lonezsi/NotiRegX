@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings -->
+    <string name="settings_section_filtering">Filtern</string>
+    <string name="settings_filter_service">Filterdienst</string>
+    <string name="settings_filter_service_no_access">Läuft nicht: Der Benachrichtigungszugriff ist aus.</string>
+    <string name="settings_filter_service_running_hint">Läuft. NotiRegX prüft das regelmäßig und verbindet ihn neu, falls Android ihn beendet.</string>
+    <string name="settings_filter_service_disconnected">Läuft nicht. Android hat die Verbindung getrennt; tippe auf Neu starten.</string>
+    <string name="settings_restart">Neu starten</string>
+    <string name="settings_running">Läuft</string>
+    <string name="settings_filtering_enabled">Filtern aktiviert</string>
+    <string name="settings_filtering_enabled_hint">Wenn aus, wird jede Benachrichtigung durchgelassen, erscheint aber weiterhin unter Neueste.</string>
+    <string name="settings_saved_per_rule">Gespeichert pro Regel: %1$d</string>
+    <string name="settings_saved_per_rule_hint">Ältere Benachrichtigungen darüber hinaus werden aus dem Verlauf der Regel entfernt.</string>
+
+    <string name="settings_section_debuzz">Vibrationsstopp</string>
+    <string name="settings_debuzz_explanation">Android vibriert, bevor NotiRegX eine Benachrichtigung entfernen kann. Regeln mit aktiviertem Vibrationsstopp schalten stattdessen ihre App stumm, und NotiRegX vibriert selbst für alles, was durchkommt. Eine solche Regel für eine einzelne App schaltet sie sofort stumm; eine für beliebige Apps schaltet eine Benachrichtigungskategorie stumm, sobald sie zum ersten Mal etwas daraus abfängt. Wenn du den Vibrationsstopp ausschaltest oder die Regel löschst, wird alles wiederhergestellt.</string>
+    <string name="settings_debuzz_unsupported">Dieses Handy unterstützt keine Companion-Geräte, daher ist der Vibrationsstopp nicht verfügbar.</string>
+    <string name="settings_debuzz_link_hint">Android erlaubt das nur Apps, die mit einem Companion-Gerät verknüpft sind. Schalte Bluetooth ein und wähle ein beliebiges Gerät in der Nähe (Kopfhörer, Uhr, Lautsprecher, TV). Es wird nie etwas an das Gerät gesendet.</string>
+    <string name="settings_link_device">Gerät verknüpfen</string>
+    <string name="settings_debuzz_problem">Problem: %1$s</string>
+    <plurals name="settings_debuzz_ready">
+        <item quantity="one">Bereit. %d Benachrichtigungskategorie ist gerade stummgeschaltet.</item>
+        <item quantity="other">Bereit. %d Benachrichtigungskategorien sind gerade stummgeschaltet.</item>
+    </plurals>
+    <string name="settings_debuzz_uninstall_hint">Schalte vor dem Deinstallieren von NotiRegX den Vibrationsstopp bei jeder Regel aus, damit die Apps ihren Ton zurückbekommen.</string>
+
+    <string name="settings_section_backup">Sicherung</string>
+    <string name="settings_backup_hint">Speichere deine Regeln in einer Datei oder füge Regeln aus einer Datei hinzu (deine eigene oder die von Freunden). Der Verlauf ist nicht enthalten.</string>
+    <string name="settings_export_rules">Regeln exportieren</string>
+    <string name="settings_import_rules">Regeln importieren</string>
+
+    <string name="settings_section_permissions">Berechtigungen</string>
+    <string name="settings_perm_notification_access">Benachrichtigungszugriff</string>
+    <string name="settings_perm_notification_access_hint">Erforderlich, um Benachrichtigungen zu lesen und zu filtern.</string>
+    <string name="settings_perm_post_notifications">Benachrichtigungen senden</string>
+    <string name="settings_perm_post_notifications_hint">Erforderlich, um Bündel-Benachrichtigungen anzuzeigen.</string>
+    <string name="settings_perm_dnd_access">Zugriff auf „Nicht stören“</string>
+    <string name="settings_perm_dnd_access_hint">Optional. Damit klingeln „Immer melden“-Regeln auch bei „Nicht stören“.</string>
+    <string name="settings_perm_battery">Uneingeschränkte Akkunutzung</string>
+    <string name="settings_perm_battery_hint">Verhindert, dass das System NotiRegX in den Ruhezustand versetzt.</string>
+    <string name="settings_granted">Erteilt</string>
+    <string name="settings_allow">Erlauben</string>
+
+    <string name="settings_section_samsung">Samsung-Tipps</string>
+    <string name="settings_samsung_tips">Wenn Android meldet, der Benachrichtigungszugriff sei eine „eingeschränkte Einstellung“, öffne die App-Info, tippe oben in der Ecke auf ⋮, wähle „Eingeschränkte Einstellungen zulassen“ und versuche es erneut.\n\nDamit das Filtern zuverlässig funktioniert, füge NotiRegX außerdem unter Einstellungen › Akku › Hintergrundnutzungslimits › Apps, die nie in Standby wechseln hinzu.</string>
+    <string name="settings_open_app_info">App-Info öffnen</string>
+    <string name="settings_show_tutorial">Anleitung erneut anzeigen</string>
+
+    <!-- Rule conditions -->
+    <string name="conditions_schedule_title">Nur zu bestimmten Zeiten</string>
+    <string name="conditions_schedule_off">Immer aktiv.</string>
+    <string name="conditions_from_time">Von %1$s</string>
+    <string name="conditions_to_time">Bis %1$s</string>
+    <string name="conditions_schedule_hint">Endet der Zeitraum vor seinem Beginn, läuft er über Nacht. Gleicher Beginn und gleiches Ende bedeutet ganztägig.</string>
+    <string name="conditions_burst_title">Nur bei Häufung</string>
+    <string name="conditions_burst_on">Die ersten %1$d innerhalb von %2$d Min. kommen durch, der Rest wird abgefangen.</string>
+    <string name="conditions_burst_off">Gilt für jede passende Benachrichtigung.</string>
+    <string name="conditions_burst_count">Durchlassen</string>
+    <string name="conditions_burst_window">Innerhalb (Min.)</string>
+    <string name="conditions_digest_title">Als Zusammenfassung zustellen</string>
+    <string name="conditions_digest_off">Das Bündel erscheint, sobald etwas abgefangen wird.</string>
+    <string name="conditions_digest_on">Das Bündel bleibt verborgen und erscheint zu diesen Zeiten.</string>
+    <string name="conditions_remove_time">%1$s entfernen</string>
+    <string name="conditions_add_time">Zeit hinzufügen</string>
+
+    <!-- Senders -->
+    <string name="senders_period_today">Heute</string>
+    <string name="senders_period_week">7 Tage</string>
+    <string name="senders_period_month">30 Tage</string>
+    <string name="senders_period_all">Gesamt</string>
+    <string name="senders_all_apps">Alle Apps</string>
+    <string name="senders_intro">Zählt jede Benachrichtigung, egal was deine Regeln damit gemacht haben. Bei Chat-Apps ist der Absender die Person oder Gruppe, bei anderen der Titel der Benachrichtigung. Tippe auf einen Eintrag, um eine Regel zu erstellen.</string>
+    <string name="senders_empty_period">Für diesen Zeitraum wurde noch nichts gezählt.</string>
+    <plurals name="senders_dialog_total">
+        <item quantity="one">Insgesamt %1$s Benachrichtigung von %2$s. Was soll damit passieren?</item>
+        <item quantity="other">Insgesamt %1$s Benachrichtigungen von %2$s. Was soll damit passieren?</item>
+    </plurals>
+    <string name="senders_always_let_through">Immer durchlassen</string>
+    <string name="senders_pick_title">Absender auswählen</string>
+    <string name="senders_pick_hint">Trifft auf Benachrichtigungen zu, deren Titel genau einem davon entspricht.</string>
+    <string name="senders_search">Suchen</string>
+    <string name="senders_none">Noch keine Absender gesehen.</string>
+    <string name="senders_none_for_app">Für diese App noch keine Absender gesehen.</string>
+    <plurals name="senders_notification_count">
+        <item quantity="one">%1$s Benachrichtigung</item>
+        <item quantity="other">%1$s Benachrichtigungen</item>
+    </plurals>
+    <string name="senders_use">Übernehmen</string>
+    <string name="senders_use_count">%1$d übernehmen</string>
+</resources>

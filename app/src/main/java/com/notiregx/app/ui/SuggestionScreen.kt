@@ -2,6 +2,8 @@
 
 package com.notiregx.app.ui
 
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,10 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleSuggester
@@ -55,13 +60,14 @@ fun SuggestionScreen(
     val suggestions = remember(target.id) { RuleSuggester.suggest(target, known) }
     val total = suggestions.lastOrNull()?.total ?: 1
     val groups = remember(suggestions) { suggestions.groupBy { it.group }.toSortedMap(compareBy { it.ordinal }) }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Make a rule") },
+                title = { Text(stringResource(R.string.suggestions_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.suggestions_back)) }
                 },
             )
         },
@@ -79,11 +85,10 @@ fun SuggestionScreen(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
-                    Text("Start from scratch", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.suggestions_start_from_scratch), style = MaterialTheme.typography.titleMedium)
                 }
                 Text(
-                    "Opens the editor with ${target.appName} already picked. Write your own pattern, " +
-                        "or start from one of the suggestions below.",
+                    stringResource(R.string.suggestions_scratch_hint, target.appName),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp),
@@ -91,7 +96,7 @@ fun SuggestionScreen(
             }
             item {
                 Text(
-                    "Suggestions from $total notification${if (total == 1) "" else "s"} seen from ${target.appName}",
+                    context.resources.getQuantityString(R.plurals.suggestions_header, total, total, target.appName),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(top = 12.dp),
                 )
@@ -99,14 +104,14 @@ fun SuggestionScreen(
             groups.forEach { (group, list) ->
                 item(key = "header-${group.name}") {
                     Text(
-                        group.title,
+                        stringResource(group.titleRes()),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
                 items(list, key = { "${it.group}|${it.field}|${it.invert}|${it.regex}" }) { s ->
-                    SuggestionCard(s, onClick = { onPick(ruleFor(target, s)) })
+                    SuggestionCard(s, onClick = { onPick(ruleFor(context, target, s)) })
                 }
             }
         }
@@ -134,10 +139,10 @@ private fun SourceCard(n: Notification) {
 private fun SuggestionCard(s: Suggestion, onClick: () -> Unit) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(s.label, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(s.text(), style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
             if (s.regex.isNotEmpty()) {
                 Text(
-                    (if (s.invert) "NOT " else "") + "/${s.regex}/",
+                    if (s.invert) stringResource(R.string.suggestions_regex_not, s.regex) else "/${s.regex}/",
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -152,14 +157,17 @@ private fun SuggestionCard(s: Suggestion, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.size(10.dp))
                 Text(
-                    "${s.matches} of ${s.total}",
+                    stringResource(R.string.suggestions_match_count, s.matches, s.total),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                 )
             }
             s.examples.forEach { e ->
                 Text(
-                    "e.g. " + listOf(e.title, e.text).filter { it.isNotEmpty() }.joinToString(": ").replace('\n', ' '),
+                    stringResource(
+                        R.string.suggestions_example,
+                        listOf(e.title, e.text).filter { it.isNotEmpty() }.joinToString(": ").replace('\n', ' '),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -174,7 +182,17 @@ private fun SuggestionCard(s: Suggestion, onClick: () -> Unit) {
 private fun scratchRule(target: Notification) =
     Rule(name = target.appName, packageName = target.packageName, appName = target.appName)
 
-private fun ruleFor(target: Notification, s: Suggestion): Rule {
-    val name = if (s.group == SuggestionGroup.EVERYTHING) target.appName else "${target.appName}: ${s.label}"
+private fun ruleFor(context: Context, target: Notification, s: Suggestion): Rule {
+    val name = if (s.group == SuggestionGroup.EVERYTHING) target.appName else "${target.appName}: ${context.suggestionText(s)}"
     return scratchRule(target).copy(name = name.take(60), regex = s.regex, field = s.field, invert = s.invert)
+}
+
+/** Heading for a group of suggestions, in the app's language. */
+@StringRes
+private fun SuggestionGroup.titleRes(): Int = when (this) {
+    SuggestionGroup.SIMILAR -> R.string.suggestions_group_similar
+    SuggestionGroup.CONTAINS -> R.string.suggestions_group_contains
+    SuggestionGroup.EXACT -> R.string.suggestions_group_exact
+    SuggestionGroup.EXCEPT -> R.string.suggestions_group_except
+    SuggestionGroup.EVERYTHING -> R.string.suggestions_group_everything
 }

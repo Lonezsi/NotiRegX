@@ -32,10 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.notiregx.app.R
 import com.notiregx.app.model.MatchField
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleAdvice
@@ -43,6 +46,9 @@ import com.notiregx.app.model.RuleType
 import com.notiregx.app.model.formatMinute
 
 private const val DAY_MS = 24 * 60 * 60 * 1000L
+
+/** A Long count as the Int that getQuantityString picks the plural form by. */
+private fun Long.quantity(): Int = coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
 
 @Composable
 fun HomeScreen(
@@ -98,10 +104,9 @@ fun HomeScreen(
         if (listenerStopped) {
             item(key = "notice-stopped") {
                 NoticeCard(
-                    title = "Filtering has stopped",
-                    body = "Android disconnected NotiRegX's notification filter, so nothing is being filtered. " +
-                        "If Restart doesn't help, turn NotiRegX's notification access off and on again.",
-                    action = "Restart",
+                    title = stringResource(R.string.home_stopped_title),
+                    body = stringResource(R.string.home_stopped_body),
+                    action = stringResource(R.string.home_stopped_action),
                     onAction = onRestartListener,
                 )
             }
@@ -109,9 +114,9 @@ fun HomeScreen(
         if (!hasAccess) {
             item(key = "notice-access") {
                 NoticeCard(
-                    title = "Notification access is off",
-                    body = "NotiRegX can't see or filter anything until you allow it in Android settings.",
-                    action = "Grant access",
+                    title = stringResource(R.string.home_access_title),
+                    body = stringResource(R.string.home_access_body),
+                    action = stringResource(R.string.home_access_action),
                     onAction = onGrantAccess,
                 )
             }
@@ -119,21 +124,21 @@ fun HomeScreen(
         if (!canPost && rules.any { it.type == RuleType.BUNDLE || it.debuzz }) {
             item(key = "notice-post") {
                 NoticeCard(
-                    title = "NotiRegX can't post notifications",
-                    body = "Allow it so bundles, digests and de-buzz alerts can show up.",
-                    action = "Allow",
+                    title = stringResource(R.string.home_post_title),
+                    body = stringResource(R.string.home_post_body),
+                    action = stringResource(R.string.home_post_action),
                     onAction = onGrantPost,
                 )
             }
         }
         if (!filteringEnabled) {
             item(key = "notice-paused") {
-                NoticeCard(title = "Filtering is paused", body = "Every notification is let through. Resume it in Settings.")
+                NoticeCard(title = stringResource(R.string.home_paused_title), body = stringResource(R.string.home_paused_body))
             }
         }
         if (advice.isNotEmpty()) {
             item(key = "advice-header") {
-                Text("Suggested for you", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.home_suggested), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             }
             items(advice, key = { "advice-" + it.key }) { a ->
                 AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a.key) })
@@ -142,9 +147,9 @@ fun HomeScreen(
         item(key = "intro") {
             val filtered = rules.filter { !it.type.letsThrough }.sumOf { it.totalCaught }
             Text(
-                if (rules.isEmpty()) "No rules yet. Tap + to create one, or Make rule on any notification in the Archive."
-                else "Your rules have filtered ${"%,d".format(filtered)} notifications so far. Rules run top to bottom; " +
-                    "the last rule that matches decides. Drag ≡ to reorder.",
+                if (rules.isEmpty()) stringResource(R.string.home_intro_empty)
+                else LocalContext.current.resources
+                    .getQuantityString(R.plurals.home_intro_filtered, filtered.quantity(), "%,d".format(filtered)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 4.dp),
@@ -188,6 +193,7 @@ private fun RuleCard(
     onOpenArchive: () -> Unit,
 ) {
     val now = remember { System.currentTimeMillis() }
+    val context = LocalContext.current
     ElevatedCard(
         onClick = onClick,
         modifier = modifier,
@@ -197,7 +203,7 @@ private fun RuleCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Default.Menu,
-                    contentDescription = "Drag to reorder",
+                    contentDescription = stringResource(R.string.home_drag_to_reorder),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = handle.padding(8.dp),
                 )
@@ -206,7 +212,11 @@ private fun RuleCard(
                 Column(Modifier.weight(1f)) {
                     Text(rule.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(
-                        listOfNotNull(rule.type.label, rule.appName ?: "Any app", "De-buzzed".takeIf { rule.debuzz })
+                        listOfNotNull(
+                            stringResource(rule.type.label),
+                            rule.appName ?: stringResource(R.string.any_app),
+                            stringResource(R.string.home_debuzzed).takeIf { rule.debuzz },
+                        )
                             .joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -216,17 +226,19 @@ private fun RuleCard(
             }
             Column(Modifier.padding(start = 44.dp, top = 4.dp)) {
                 Text(
-                    (if (rule.field == MatchField.ANY) "" else "${rule.field.label.lowercase()}: ") +
-                        (if (rule.invert) "NOT " else "") + "/${rule.regex}/",
+                    (if (rule.field == MatchField.ANY) "" else "${stringResource(rule.field.label).lowercase()}: ") +
+                        "/${rule.regex}/".let { if (rule.invert) stringResource(R.string.home_regex_not, it) else it },
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 val conditions = listOfNotNull(
-                    rule.schedule?.summary,
-                    rule.burst?.summary,
-                    rule.deliveryTimes.takeIf { rule.isDigest }?.let { t -> "Delivered at " + t.sorted().joinToString(", ") { formatMinute(it) } },
+                    rule.schedule?.let { context.scheduleSummary(it) },
+                    rule.burst?.let { context.burstSummary(it) },
+                    rule.deliveryTimes.takeIf { rule.isDigest }?.let { t ->
+                        context.getString(R.string.home_delivered_at, t.sorted().joinToString(", ") { formatMinute(it) })
+                    },
                 )
                 if (conditions.isNotEmpty()) {
                     Text(conditions.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
@@ -234,9 +246,13 @@ private fun RuleCard(
                 val week = rule.hitsSince(now - Rule.STATS_WINDOW_MS)
                 val stale = week == 0 && rule.enabled && now - rule.createdAt > DAY_MS
                 Text(
-                    if (stale) "No matches in the last 7 days. Check the regex or app?"
-                    else "$week match${if (week == 1) "" else "es"} in the last 7 days · ${rule.hitsSince(now - DAY_MS)} today" +
-                        if (!rule.type.letsThrough) " · ${"%,d".format(rule.totalCaught)} caught in total" else "",
+                    if (stale) stringResource(R.string.home_stale)
+                    else listOfNotNull(
+                        context.resources.getQuantityString(R.plurals.home_matches_week, week, week),
+                        stringResource(R.string.home_matches_today, rule.hitsSince(now - DAY_MS)),
+                        context.resources.getQuantityString(R.plurals.home_caught_total, rule.totalCaught.quantity(), "%,d".format(rule.totalCaught))
+                            .takeIf { !rule.type.letsThrough },
+                    ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (stale) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -245,7 +261,10 @@ private fun RuleCard(
                 if (!rule.type.letsThrough) {
                     val unseen = rule.bundle.count
                     TextButton(onClick = onOpenArchive) {
-                        Text("${rule.history.size} saved" + if (unseen > 0) " · $unseen unseen" else "")
+                        Text(
+                            context.resources.getQuantityString(R.plurals.home_saved, rule.history.size, rule.history.size) +
+                                if (unseen > 0) " · " + context.resources.getQuantityString(R.plurals.home_unseen, unseen, unseen) else "",
+                        )
                     }
                 }
             }

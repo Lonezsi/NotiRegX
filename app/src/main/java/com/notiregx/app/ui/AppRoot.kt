@@ -5,6 +5,7 @@ package com.notiregx.app.ui
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -31,7 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.notiregx.app.R
 import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Notification
@@ -43,11 +46,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-private enum class Tab(val title: String) {
-    RULES("Rules"),
-    ARCHIVE("Archive"),
-    VIBRATIONS("Vibrations"),
-    SETTINGS("Settings");
+private enum class Tab(@StringRes val title: Int) {
+    RULES(R.string.root_tab_rules),
+    ARCHIVE(R.string.root_tab_archive),
+    VIBRATIONS(R.string.root_tab_vibrations),
+    SETTINGS(R.string.root_tab_settings);
 
     @Composable
     fun Icon() = when (this) {
@@ -66,6 +69,7 @@ fun AppRoot(
     resumeTick: Int,
     actions: AppActions,
 ) {
+    val context = LocalContext.current
     val manager = app.ruleManager
     val rules by manager.rules.collectAsState()
     val recent by manager.recent.collectAsState()
@@ -173,7 +177,7 @@ fun AppRoot(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (tab == Tab.RULES) "NotiRegX" else tab.title) }) },
+        topBar = { TopAppBar(title = { Text(if (tab == Tab.RULES) "NotiRegX" else stringResource(tab.title)) }) },
         bottomBar = {
             NavigationBar {
                 Tab.entries.forEach {
@@ -181,7 +185,7 @@ fun AppRoot(
                         selected = tab == it,
                         onClick = { tab = it },
                         icon = { it.Icon() },
-                        label = { Text(it.title) },
+                        label = { Text(stringResource(it.title)) },
                     )
                 }
             }
@@ -189,7 +193,7 @@ fun AppRoot(
         floatingActionButton = {
             if (tab == Tab.RULES) {
                 FloatingActionButton(onClick = { editing = Rule(name = "") }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add rule")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.root_add_rule))
                 }
             }
         },
@@ -210,7 +214,7 @@ fun AppRoot(
                     onToggle = manager::setEnabled,
                     onOpenArchive = { archiveRuleId = it; tab = Tab.ARCHIVE },
                     advice = advice,
-                    onUseAdvice = { editing = ruleFromAdvice(it) },
+                    onUseAdvice = { editing = ruleFromAdvice(context, it) },
                     onIgnoreAdvice = app.settings::ignoreAdvice,
                 )
                 Tab.ARCHIVE -> ArchiveScreen(

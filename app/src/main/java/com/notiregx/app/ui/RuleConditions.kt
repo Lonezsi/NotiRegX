@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.Burst
 import com.notiregx.app.model.Schedule
 import com.notiregx.app.model.formatMinute
@@ -55,8 +57,8 @@ fun RuleConditions(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SwitchRow(
-            title = "Only at certain times",
-            hint = schedule?.summary ?: "Active all the time.",
+            title = stringResource(R.string.conditions_schedule_title),
+            hint = schedule?.let { context.scheduleSummary(it) } ?: stringResource(R.string.conditions_schedule_off),
             checked = schedule != null,
             onChecked = { onSchedule(if (it) Schedule() else null) },
         )
@@ -69,40 +71,40 @@ fun RuleConditions(
                             val days = if (day in schedule.days) schedule.days - day else schedule.days + day
                             if (days.isNotEmpty()) onSchedule(schedule.copy(days = days))
                         },
-                        label = { Text(Schedule.DAY_NAMES.getValue(day)) },
+                        label = { Text(context.dayName(day)) },
                     )
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { pickTime(schedule.startMinute) { onSchedule(schedule.copy(startMinute = it)) } }) {
-                    Text("From ${formatMinute(schedule.startMinute)}")
+                    Text(stringResource(R.string.conditions_from_time, formatMinute(schedule.startMinute)))
                 }
                 OutlinedButton(onClick = { pickTime(schedule.endMinute) { onSchedule(schedule.copy(endMinute = it)) } }) {
-                    Text("To ${formatMinute(schedule.endMinute)}")
+                    Text(stringResource(R.string.conditions_to_time, formatMinute(schedule.endMinute)))
                 }
             }
-            Hint("A range that ends before it starts runs overnight. Same start and end means all day.")
+            Hint(stringResource(R.string.conditions_schedule_hint))
         }
 
         SwitchRow(
-            title = "Only during bursts",
-            hint = burst?.let { "The first ${it.count} within ${it.windowMinutes} min get through; the rest are caught." }
-                ?: "Applies to every matching notification.",
+            title = stringResource(R.string.conditions_burst_title),
+            hint = burst?.let { stringResource(R.string.conditions_burst_on, it.count, it.windowMinutes) }
+                ?: stringResource(R.string.conditions_burst_off),
             checked = burst != null,
             onChecked = { onBurst(if (it) Burst() else null) },
         )
         if (burst != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NumberField("Let through", burst.count, Modifier.width(140.dp)) { onBurst(burst.copy(count = it)) }
-                NumberField("Within (min)", burst.windowMinutes, Modifier.width(140.dp)) { onBurst(burst.copy(windowMinutes = it)) }
+                NumberField(stringResource(R.string.conditions_burst_count), burst.count, Modifier.width(140.dp)) { onBurst(burst.copy(count = it)) }
+                NumberField(stringResource(R.string.conditions_burst_window), burst.windowMinutes, Modifier.width(140.dp)) { onBurst(burst.copy(windowMinutes = it)) }
             }
         }
 
         if (isBundle) {
             SwitchRow(
-                title = "Deliver as a digest",
-                hint = if (deliveryTimes.isEmpty()) "The bundle shows up as soon as something is caught."
-                else "The bundle stays hidden and shows up at these times.",
+                title = stringResource(R.string.conditions_digest_title),
+                hint = if (deliveryTimes.isEmpty()) stringResource(R.string.conditions_digest_off)
+                else stringResource(R.string.conditions_digest_on),
                 checked = deliveryTimes.isNotEmpty(),
                 onChecked = { onDeliveryTimes(if (it) listOf(12 * 60, 18 * 60) else emptyList()) },
             )
@@ -117,7 +119,7 @@ fun RuleConditions(
                                 if (deliveryTimes.size > 1) {
                                     Icon(
                                         Icons.Default.Clear,
-                                        contentDescription = "Remove ${formatMinute(time)}",
+                                        contentDescription = stringResource(R.string.conditions_remove_time, formatMinute(time)),
                                         modifier = Modifier.clickable { onDeliveryTimes(deliveryTimes - time) },
                                     )
                                 }
@@ -126,7 +128,7 @@ fun RuleConditions(
                     }
                     AssistChip(
                         onClick = { pickTime(9 * 60) { onDeliveryTimes((deliveryTimes + it).distinct()) } },
-                        label = { Text("Add time") },
+                        label = { Text(stringResource(R.string.conditions_add_time)) },
                     )
                 }
             }

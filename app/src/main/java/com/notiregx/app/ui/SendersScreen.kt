@@ -1,5 +1,6 @@
 package com.notiregx.app.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,9 +36,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.MatchField
 import com.notiregx.app.model.PeoplePattern
 import com.notiregx.app.model.Rule
@@ -45,11 +49,11 @@ import com.notiregx.app.model.RuleType
 import com.notiregx.app.model.SenderCount
 import com.notiregx.app.model.SenderStats
 
-private enum class Period(val label: String, val days: Int?) {
-    TODAY("Today", 1),
-    WEEK("7 days", 7),
-    MONTH("30 days", 30),
-    ALL("All time", null),
+private enum class Period(@StringRes val label: Int, val days: Int?) {
+    TODAY(R.string.senders_period_today, 1),
+    WEEK(R.string.senders_period_week, 7),
+    MONTH(R.string.senders_period_month, 30),
+    ALL(R.string.senders_period_all, null),
 }
 
 /** Who sends you the most notifications, per app, over a chosen period. */
@@ -59,6 +63,7 @@ fun SendersView(senders: Collection<SenderCount>, onMakeRule: (Rule) -> Unit) {
     var period by rememberSaveable { mutableStateOf(Period.WEEK) }
     var app by rememberSaveable { mutableStateOf<String?>(null) }
     var picked by remember { mutableStateOf<SenderCount?>(null) }
+    val context = LocalContext.current
 
     val firstDay = period.days?.let { SenderStats.dayOf(System.currentTimeMillis()) - it + 1 } ?: Int.MIN_VALUE
     val inPeriod = remember(senders, firstDay) { SenderStats.ranked(senders, firstDay) }
@@ -78,14 +83,14 @@ fun SendersView(senders: Collection<SenderCount>, onMakeRule: (Rule) -> Unit) {
                         selected = period == p,
                         onClick = { period = p },
                         shape = SegmentedButtonDefaults.itemShape(i, Period.entries.size),
-                    ) { Text(p.label, maxLines = 1) }
+                    ) { Text(stringResource(p.label), maxLines = 1) }
                 }
             }
         }
         if (apps.isNotEmpty()) {
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { FilterChip(selected = app == null, onClick = { app = null }, label = { Text("All apps") }) }
+                    item { FilterChip(selected = app == null, onClick = { app = null }, label = { Text(stringResource(R.string.senders_all_apps)) }) }
                     items(apps, key = { it.first }) { (pkg, name, count) ->
                         FilterChip(
                             selected = app == pkg,
@@ -99,8 +104,7 @@ fun SendersView(senders: Collection<SenderCount>, onMakeRule: (Rule) -> Unit) {
         }
         item {
             Text(
-                "Counts every notification, whatever your rules did with it. For chat apps the sender is the " +
-                    "person or group; for others it's the notification's title. Tap one to make a rule.",
+                stringResource(R.string.senders_intro),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -108,7 +112,7 @@ fun SendersView(senders: Collection<SenderCount>, onMakeRule: (Rule) -> Unit) {
         if (rows.isEmpty()) {
             item {
                 Text(
-                    "Nothing counted for this period yet.",
+                    stringResource(R.string.senders_empty_period),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 24.dp),
@@ -138,14 +142,14 @@ fun SendersView(senders: Collection<SenderCount>, onMakeRule: (Rule) -> Unit) {
             onDismissRequest = { picked = null },
             title = { Text(s.sender) },
             text = {
-                Text("${"%,d".format(s.total)} notifications from ${s.appName} in total. What should happen to them?")
+                Text(context.resources.getQuantityString(R.plurals.senders_dialog_total, s.total.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), "%,d".format(s.total), s.appName))
             },
             confirmButton = {
                 Column(horizontalAlignment = Alignment.End) {
-                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.ALLOW)); picked = null }) { Text("Always let through") }
-                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.BUNDLE)); picked = null }) { Text("Bundle") }
-                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.HIDE)); picked = null }) { Text("Hide") }
-                    TextButton(onClick = { picked = null }) { Text("Cancel") }
+                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.ALLOW)); picked = null }) { Text(stringResource(R.string.senders_always_let_through)) }
+                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.BUNDLE)); picked = null }) { Text(stringResource(R.string.type_bundle)) }
+                    TextButton(onClick = { onMakeRule(senderRule(s, RuleType.HIDE)); picked = null }) { Text(stringResource(R.string.type_hide)) }
+                    TextButton(onClick = { picked = null }) { Text(stringResource(R.string.cancel)) }
                 }
             },
         )
@@ -180,26 +184,31 @@ fun PeoplePickerDialog(
             .sortedByDescending { it.second }
     }
     val shown = names.filter { query.isEmpty() || it.first.contains(query, ignoreCase = true) }
+    val context = LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Pick senders") },
+        title = { Text(stringResource(R.string.senders_pick_title)) },
         text = {
             Column {
                 Text(
-                    "Matches notifications whose title is exactly one of these.",
+                    stringResource(R.string.senders_pick_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search") },
+                    label = { Text(stringResource(R.string.senders_search)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 )
                 if (names.isEmpty()) {
-                    Text("No senders seen yet${if (packageName != null) " for this app" else ""}.")
+                    Text(
+                        stringResource(
+                            if (packageName != null) R.string.senders_none_for_app else R.string.senders_none,
+                        )
+                    )
                 }
                 LazyColumn(Modifier.heightIn(max = 380.dp)) {
                     items(shown, key = { it.first }) { (name, count, pkg) ->
@@ -207,7 +216,9 @@ fun PeoplePickerDialog(
                         ListItem(
                             leadingContent = { Checkbox(checked = checked, onCheckedChange = null) },
                             headlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                            supportingContent = { Text("%,d notifications".format(count)) },
+                            supportingContent = {
+                                Text(context.resources.getQuantityString(R.plurals.senders_notification_count, count.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), "%,d".format(count)))
+                            },
                             trailingContent = { if (packageName == null) AppIcon(pkg, size = 20.dp) },
                             modifier = Modifier.clickable { selected = if (checked) selected - name else selected + name },
                         )
@@ -217,9 +228,12 @@ fun PeoplePickerDialog(
         },
         confirmButton = {
             TextButton(onClick = { onDone(selected) }, enabled = selected.isNotEmpty()) {
-                Text(if (selected.isEmpty()) "Use" else "Use ${selected.size}")
+                Text(
+                    if (selected.isEmpty()) stringResource(R.string.senders_use)
+                    else stringResource(R.string.senders_use_count, selected.size)
+                )
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }

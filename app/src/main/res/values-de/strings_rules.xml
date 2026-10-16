@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rule editor -->
+    <string name="editor_title_new">Neue Regel</string>
+    <string name="editor_title_edit">Regel bearbeiten</string>
+    <string name="editor_back">Zurück</string>
+    <string name="editor_delete_rule">Regel löschen</string>
+    <string name="editor_save">Speichern</string>
+    <string name="editor_name">Name</string>
+    <string name="editor_regex">Regex</string>
+    <string name="editor_regex_hint">Leer passt auf alles. Beginne mit (?i), um Groß- und Kleinschreibung zu ignorieren.</string>
+    <string name="editor_edit_senders">Absender bearbeiten</string>
+    <string name="editor_pick_senders">Absender auswählen…</string>
+    <string name="editor_search_in">Suchen in</string>
+    <string name="editor_app">App</string>
+    <string name="editor_invert">Umkehren</string>
+    <string name="editor_invert_description">Trifft auf Benachrichtigungen zu, in denen die Regex NICHT vorkommt</string>
+    <string name="editor_final_match">Wenn diese Regel als letzte zutrifft</string>
+    <string name="editor_dnd_needed">Um trotz „Bitte nicht stören“ zu klingeln, braucht NotiRegX Zugriff auf „Bitte nicht stören“.</string>
+    <string name="editor_allow">Erlauben</string>
+    <string name="editor_debuzz">Vibrationsstopp</string>
+    <string name="editor_debuzz_needs_link">Zuerst muss ein Gerät verknüpft sein (siehe Einstellungen).</string>
+    <string name="editor_debuzz_any_app">Schaltet jede Benachrichtigungskategorie stumm, aus der diese Regel etwas abfängt; stattdessen vibriert NotiRegX für alles, was durchkommt.</string>
+    <string name="editor_debuzz_app">Schaltet %1$s stumm; stattdessen vibriert NotiRegX für alles, was durchkommt, sodass gefilterte Benachrichtigungen nie vibrieren.</string>
+    <string name="editor_link">Verknüpfen</string>
+    <string name="editor_when">Wann</string>
+    <string name="editor_description">Beschreibung (optional)</string>
+    <string name="editor_try_it">Ausprobieren</string>
+    <string name="editor_sample_text">Beispieltext einer Benachrichtigung</string>
+    <string name="editor_test_match">✓ Diese Regel trifft zu</string>
+    <string name="editor_test_no_match">✗ Kein Treffer</string>
+    <plurals name="editor_recent_matches">
+        <item quantity="one">Trifft auf %1$d der letzten Benachrichtigung zu</item>
+        <item quantity="other">Trifft auf %1$d der letzten %2$d Benachrichtigungen zu</item>
+    </plurals>
+    <string name="editor_people_name">Personen: %1$s</string>
+    <string name="editor_delete_title">Regel löschen?</string>
+    <string name="editor_delete_message">„%1$s“ und der gespeicherte Verlauf werden entfernt.</string>
+    <string name="editor_delete">Löschen</string>
+    <string name="editor_choose_app">App auswählen</string>
+    <string name="editor_search">Suchen</string>
+
+    <!-- Home: rules list -->
+    <string name="home_stopped_title">Filter wurde gestoppt</string>
+    <string name="home_stopped_body">Android hat den Benachrichtigungsfilter von NotiRegX getrennt, daher wird gerade nichts gefiltert. Falls „Neu starten“ nicht hilft, schalte den Benachrichtigungszugriff von NotiRegX aus und wieder ein.</string>
+    <string name="home_stopped_action">Neu starten</string>
+    <string name="home_access_title">Benachrichtigungszugriff ist aus</string>
+    <string name="home_access_body">NotiRegX kann nichts sehen oder filtern, bis du es in den Android-Einstellungen erlaubst.</string>
+    <string name="home_access_action">Zugriff erlauben</string>
+    <string name="home_post_title">NotiRegX darf keine Benachrichtigungen senden</string>
+    <string name="home_post_body">Erlaube es, damit Bündel, Zusammenfassungen und Vibrationsstopp-Hinweise angezeigt werden können.</string>
+    <string name="home_post_action">Erlauben</string>
+    <string name="home_paused_title">Filter ist pausiert</string>
+    <string name="home_paused_body">Alle Benachrichtigungen werden durchgelassen. In den Einstellungen kannst du ihn fortsetzen.</string>
+    <string name="home_suggested">Vorschläge für dich</string>
+    <string name="home_intro_empty">Noch keine Regeln. Tippe auf +, um eine zu erstellen, oder im Archiv bei einer Benachrichtigung auf „Regel erstellen“.</string>
+    <plurals name="home_intro_filtered">
+        <item quantity="one">Deine Regeln haben bisher %1$s Benachrichtigung gefiltert. Regeln laufen von oben nach unten; die letzte zutreffende Regel entscheidet. Zum Umsortieren ≡ ziehen.</item>
+        <item quantity="other">Deine Regeln haben bisher %1$s Benachrichtigungen gefiltert. Regeln laufen von oben nach unten; die letzte zutreffende Regel entscheidet. Zum Umsortieren ≡ ziehen.</item>
+    </plurals>
+    <string name="home_drag_to_reorder">Zum Umsortieren ziehen</string>
+    <string name="home_debuzzed">Vibrationsstopp aktiv</string>
+    <string name="home_regex_not">NICHT %1$s</string>
+    <string name="home_delivered_at">Zustellung um %1$s</string>
+    <string name="home_stale">Keine Treffer in den letzten 7 Tagen. Regex oder App prüfen?</string>
+    <plurals name="home_matches_week">
+        <item quantity="one">%1$d Treffer in den letzten 7 Tagen</item>
+        <item quantity="other">%1$d Treffer in den letzten 7 Tagen</item>
+    </plurals>
+    <string name="home_matches_today">%1$d heute</string>
+    <plurals name="home_caught_total">
+        <item quantity="one">%1$s insgesamt abgefangen</item>
+        <item quantity="other">%1$s insgesamt abgefangen</item>
+    </plurals>
+    <plurals name="home_saved">
+        <item quantity="one">%1$d gespeichert</item>
+        <item quantity="other">%1$d gespeichert</item>
+    </plurals>
+    <plurals name="home_unseen">
+        <item quantity="one">%1$d neu</item>
+        <item quantity="other">%1$d neu</item>
+    </plurals>
+
+    <!-- Archive -->
+    <string name="archive_tab_recent">Neueste</string>
+    <string name="archive_tab_senders">Absender</string>
+    <plurals name="archive_recent_intro">
+        <item quantity="one">Die letzte empfangene Benachrichtigung, egal mit welchem Ergebnis.</item>
+        <item quantity="other">Die letzten %1$d empfangenen Benachrichtigungen, egal mit welchem Ergebnis.</item>
+    </plurals>
+    <string name="archive_recent_empty">Noch nichts empfangen.</string>
+    <string name="archive_saved_of_caught">Letzte %1$d von %2$s abgefangenen (Limit in den Einstellungen erhöhen)</string>
+    <plurals name="archive_saved">
+        <item quantity="one">%1$d gespeichert</item>
+        <item quantity="other">%1$d gespeichert</item>
+    </plurals>
+    <string name="archive_clear_history">Verlauf löschen</string>
+    <string name="archive_rule_empty">Diese Regel hat noch nichts abgefangen.</string>
+    <string name="archive_clear_title">Verlauf löschen?</string>
+    <plurals name="archive_clear_message">
+        <item quantity="one">Löscht die %1$d von „%2$s“ gespeicherte Benachrichtigung.</item>
+        <item quantity="other">Löscht die %1$d von „%2$s“ gespeicherten Benachrichtigungen.</item>
+    </plurals>
+    <string name="archive_clear">Löschen</string>
+    <string name="archive_restore">Wiederherstellen</string>
+    <string name="archive_make_rule">Regel erstellen</string>
+    <string name="archive_open_link">Link öffnen</string>
+    <string name="archive_open">Öffnen</string>
+    <string name="archive_open_app">App öffnen</string>
+</resources>

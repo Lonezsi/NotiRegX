@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_hide">Elrejtés</string>
+    <string name="type_hide_short">Elrejt</string>
+    <string name="type_hide_explanation">Eltűnik a telefonról, és bekerül a szabály előzményei közé.</string>
+    <string name="type_bundle">Csomagba gyűjtés</string>
+    <string name="type_bundle_short">Csomag</string>
+    <string name="type_bundle_explanation">Eltűnik a telefonról, és a szabály csomagértesítésébe kerül.</string>
+    <string name="type_allow">Átengedés</string>
+    <string name="type_allow_short">Átenged</string>
+    <string name="type_allow_explanation">Normálisan megérkezik. Egy Elrejtés/Csomag szabály alá téve kivételt csinálhatsz vele.</string>
+    <string name="type_alert">Mindig jelezzen</string>
+    <string name="type_alert_short">Jelez</string>
+    <string name="type_alert_explanation">Megérkezik, és mindig jelez: a NotiRegX akkor is rezeg és csörög, ha a Ne zavarjanak be van kapcsolva, vagy az alkalmazás le van némítva. Sürgős szavakhoz vagy fontos emberekhez jó.</string>
+
+    <string name="field_any">Cím + szöveg</string>
+    <string name="field_title">Cím</string>
+    <string name="field_text">Szöveg</string>
+
+    <string name="kind_notification">Értesítés</string>
+    <string name="kind_notification_chip">Értesítések</string>
+    <string name="kind_estimate">Értesítés (becsült)</string>
+    <string name="kind_estimate_chip">Becsült</string>
+    <string name="kind_call">Hívás</string>
+    <string name="kind_call_chip">Hívások</string>
+    <string name="kind_alarm">Ébresztő</string>
+    <string name="kind_alarm_chip">Ébresztők</string>
+    <string name="kind_ghost">Szellemrezgés</string>
+    <string name="kind_ghost_chip">Szellemek</string>
+
+    <string name="suggestion_like">%1$s hasonló ehhez: „%2$s”</string>
+    <string name="suggestion_starts_with">%1$s így kezdődik: „%2$s”</string>
+    <string name="suggestion_ends_with">%1$s így végződik: „%2$s”</string>
+    <string name="suggestion_contains">%1$s tartalmazza: „%2$s”</string>
+    <string name="suggestion_is">%1$s pontosan: „%2$s”</string>
+    <string name="suggestion_mentions">Említi: „%1$s”</string>
+    <string name="suggestion_except_title">Minden, kivéve a(z) „%1$s” címűt</string>
+    <string name="suggestion_except_titles_like">Minden, kivéve az ilyen címűeket: „%1$s”</string>
+    <string name="suggestion_everything">Minden innen: %1$s</string>
+
+    <string name="schedule_every_day">Minden nap</string>
+    <string name="schedule_weekdays">Hétköznap</string>
+    <string name="schedule_weekends">Hétvégén</string>
+    <string name="schedule_all_day">%1$s, egész nap</string>
+    <string name="schedule_range">%1$s, %2$s–%3$s</string>
+    <string name="burst_summary">%1$d után, %2$d percen belül</string>
+
+    <string name="outcome_paused">Szűrés szüneteltetve</string>
+    <string name="outcome_no_match">Nincs egyezés</string>
+    <string name="outcome_hidden">Elrejtette: %1$s</string>
+    <string name="outcome_bundled">Csomagba tette: %1$s</string>
+    <string name="outcome_let_through">Átengedte: %1$s</string>
+
+    <string name="any_app">Bármely alkalmazás</string>
+    <string name="cancel">Mégse</string>
+
+    <string name="language_title">Nyelv</string>
+    <string name="language_system">Rendszer alapértelmezése</string>
+    <string name="language_change">Módosítás</string>
+</resources>

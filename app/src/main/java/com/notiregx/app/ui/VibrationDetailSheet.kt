@@ -31,10 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.notiregx.app.R
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.VibrationKind
 import com.notiregx.app.model.VibrationRow
@@ -92,7 +94,7 @@ fun VibrationDetailSheet(
                 Column(Modifier.weight(1f)) {
                     Text(e.appName, style = MaterialTheme.typography.titleLarge)
                     Text(
-                        row.kind.label,
+                        stringResource(row.kind.label),
                         style = MaterialTheme.typography.labelLarge,
                         color = if (row.isGhost) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                     )
@@ -101,50 +103,50 @@ fun VibrationDetailSheet(
             Text(
                 listOfNotNull(
                     DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(Date(e.time)),
-                    e.durationMs?.let { "$it ms" },
+                    e.durationMs?.let { stringResource(R.string.vibrations_duration_ms, it) },
                     e.usage?.lowercase()?.replace('_', ' '),
                 ).joinToString(" · "),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            // "Notification" is the stable marker SystemVibrationReader stores, not display text.
             e.detail.takeIf {
                 it.isNotEmpty() && it != "Notification" && row.kind != VibrationKind.ESTIMATE &&
                     !it.equals(e.usage?.replace('_', ' '), ignoreCase = true)
             }?.let {
-                Text("Android's reason: $it", style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                Text(stringResource(R.string.vibration_sheet_android_reason, it), style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
             }
 
             HorizontalDivider()
             when {
                 cause != null -> {
-                    SectionTitle("The notification")
+                    SectionTitle(stringResource(R.string.vibration_sheet_the_notification))
                     NotificationBox(cause, onOpen = { actions.openNotification(cause); onDismiss() })
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { actions.openNotification(cause); onDismiss() }) { Text("Open notification") }
-                        OutlinedButton(onClick = { onCreateRule(cause); onDismiss() }) { Text("Make rule") }
+                        Button(onClick = { actions.openNotification(cause); onDismiss() }) { Text(stringResource(R.string.vibration_sheet_open_notification)) }
+                        OutlinedButton(onClick = { onCreateRule(cause); onDismiss() }) { Text(stringResource(R.string.vibration_sheet_make_rule)) }
                     }
                 }
-                isNotificationBuzz -> Hint(
-                    "Android says a notification caused this, but NotiRegX didn't see it (it may be from before " +
-                        "NotiRegX was set up, or the app removed it straight away)."
-                )
-                row.isGhost -> Hint(
-                    "No notification was shown for this vibration: ${e.appName} buzzed the phone directly, " +
-                        "usually from something running in the background."
-                )
-                else -> Hint("This was a ${row.kind.label.lowercase()}, not a notification.")
+                isNotificationBuzz -> Hint(stringResource(R.string.vibration_sheet_notification_unseen))
+                row.isGhost -> Hint(stringResource(R.string.vibration_sheet_ghost_explanation, e.appName))
+                row.kind == VibrationKind.CALL -> Hint(stringResource(R.string.vibration_sheet_was_call))
+                row.kind == VibrationKind.ALARM -> Hint(stringResource(R.string.vibration_sheet_was_alarm))
+                else -> Hint(stringResource(R.string.vibration_sheet_was_other, stringResource(row.kind.label)))
             }
             if (nearby.isNotEmpty()) {
-                SectionTitle(if (cause == null) "Notifications from ${e.appName} around then" else "Other notifications around then")
+                SectionTitle(
+                    if (cause == null) stringResource(R.string.vibration_sheet_nearby_from_app, e.appName)
+                    else stringResource(R.string.vibration_sheet_nearby_other)
+                )
                 nearby.forEach { n -> NotificationBox(n, onOpen = { actions.openNotification(n); onDismiss() }) }
             }
 
             HorizontalDivider()
-            SectionTitle("Do something about it")
+            SectionTitle(stringResource(R.string.vibration_sheet_do_something))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (launch != null) OutlinedButton(onClick = { actions.openIntent(launch); onDismiss() }) { Text("Open app") }
+                if (launch != null) OutlinedButton(onClick = { actions.openIntent(launch); onDismiss() }) { Text(stringResource(R.string.vibration_sheet_open_app)) }
                 OutlinedButton(onClick = {
                     actions.openIntent(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${e.packageName}")))
-                }) { Text("App info") }
+                }) { Text(stringResource(R.string.vibration_sheet_app_info)) }
             }
 
             if (isNotificationBuzz || vibrationMuted) {
@@ -169,18 +171,19 @@ private fun MuteNotificationVibration(
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                if (muted) "$appName's notifications don't vibrate" else "Mute $appName's notification vibration",
+                if (muted) stringResource(R.string.vibration_sheet_notifications_muted_title, appName)
+                else stringResource(R.string.vibration_sheet_mute_notification_title, appName),
                 style = MaterialTheme.typography.titleSmall,
             )
-            Hint("Turns vibration off for $appName's notifications. Sound and pop-ups stay as they are.")
+            Hint(stringResource(R.string.vibration_sheet_mute_notification_hint, appName))
             error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
             when {
                 !companionLinked -> {
-                    Hint("Android only allows this for apps linked to a companion device.")
-                    TextButton(onClick = onLinkCompanion) { Text("Link a device") }
+                    Hint(stringResource(R.string.vibration_sheet_needs_companion))
+                    TextButton(onClick = onLinkCompanion) { Text(stringResource(R.string.vibration_sheet_link_device)) }
                 }
-                muted -> OutlinedButton(onClick = { onSetMuted(false) }) { Text("Let it vibrate again") }
-                else -> Button(onClick = { onSetMuted(true) }) { Text("Mute vibration") }
+                muted -> OutlinedButton(onClick = { onSetMuted(false) }) { Text(stringResource(R.string.vibration_sheet_unmute)) }
+                else -> Button(onClick = { onSetMuted(true) }) { Text(stringResource(R.string.vibration_sheet_mute)) }
             }
         }
     }
@@ -198,29 +201,25 @@ private fun MuteDirectVibration(packageName: String, appName: String) {
     val undo = "adb shell appops set $packageName VIBRATE allow"
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Mute $appName's vibrations", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.vibration_sheet_mute_direct_title, appName), style = MaterialTheme.typography.titleSmall)
             if (isSystemPackage(packageName)) {
                 Text(
-                    "$appName is part of the phone itself. Muting it can also silence keyboard, gesture and " +
-                        "other system vibrations you may want to keep.",
+                    stringResource(R.string.vibration_sheet_system_app_warning, appName),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
             }
-            Hint(
-                "$appName vibrated the phone directly, not through a notification. Android only lets you block that " +
-                    "from a computer with adb. Run this once (it stays until you undo it):"
-            )
+            Hint(stringResource(R.string.vibration_sheet_mute_direct_hint, appName))
             Text(mute, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
             Row {
                 TextButton(onClick = {
                     clipboard.setText(AnnotatedString(mute))
-                    Toast.makeText(context, "Command copied", Toast.LENGTH_SHORT).show()
-                }) { Text("Copy command") }
+                    Toast.makeText(context, context.getString(R.string.vibrations_command_copied), Toast.LENGTH_SHORT).show()
+                }) { Text(stringResource(R.string.vibrations_copy_command)) }
                 TextButton(onClick = {
                     clipboard.setText(AnnotatedString(undo))
-                    Toast.makeText(context, "Undo command copied", Toast.LENGTH_SHORT).show()
-                }) { Text("Copy undo") }
+                    Toast.makeText(context, context.getString(R.string.vibration_sheet_undo_copied), Toast.LENGTH_SHORT).show()
+                }) { Text(stringResource(R.string.vibration_sheet_copy_undo)) }
             }
         }
     }
