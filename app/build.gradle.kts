@@ -12,13 +12,17 @@ android {
         applicationId = "com.notiregx.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "1.0.0"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            // Signed with the local debug key so release APKs install over development builds
+            // (and vice versa) without losing data. Swap in a dedicated keystore before publishing
+            // to an app store.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
