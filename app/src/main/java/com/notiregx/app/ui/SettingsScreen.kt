@@ -35,6 +35,9 @@ fun SettingsScreen(
     onLinkCompanion: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
+    listenerConnected: Boolean,
+    onRestartListener: () -> Unit,
+    onShowTutorial: () -> Unit,
     onOpenIntent: (Intent) -> Unit,
 ) {
     val filtering by settings.filteringEnabled.collectAsState()
@@ -44,6 +47,7 @@ fun SettingsScreen(
     val hasAccess = remember(resumeTick) { settings.hasNotificationAccess() }
     val canPost = remember(resumeTick) { settings.canPostNotifications() }
     val unrestricted = remember(resumeTick) { settings.isIgnoringBatteryOptimizations() }
+    val dndAccess = remember(resumeTick) { settings.hasDndAccess() }
 
     Column(
         Modifier
@@ -52,6 +56,23 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Section("Filtering")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Filter service", style = MaterialTheme.typography.bodyLarge)
+                Hint(
+                    when {
+                        !hasAccess -> "Not running: notification access is off."
+                        listenerConnected -> "Running. NotiRegX checks this regularly and reconnects it if Android stops it."
+                        else -> "Not running. Android disconnected it; tap Restart."
+                    }
+                )
+            }
+            if (hasAccess && !listenerConnected) {
+                TextButton(onClick = onRestartListener) { Text("Restart") }
+            } else if (hasAccess) {
+                Text("Running", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Filtering enabled", style = MaterialTheme.typography.bodyLarge)
@@ -117,6 +138,12 @@ fun SettingsScreen(
             onFix = { onOpenIntent(settings.appNotificationSettingsIntent()) },
         )
         PermissionRow(
+            title = "Do Not Disturb access",
+            hint = "Optional. Lets \"Always alert\" rules ring through Do Not Disturb.",
+            granted = dndAccess,
+            onFix = { onOpenIntent(settings.dndAccessIntent()) },
+        )
+        PermissionRow(
             title = "Unrestricted battery use",
             hint = "Stops the system from putting NotiRegX to sleep.",
             granted = unrestricted,
@@ -132,6 +159,9 @@ fun SettingsScreen(
                 "Never sleeping apps."
         )
         TextButton(onClick = { onOpenIntent(settings.appDetailsIntent()) }) { Text("Open App info") }
+
+        HorizontalDivider()
+        TextButton(onClick = onShowTutorial) { Text("Show the tutorial again") }
     }
 }
 
@@ -146,7 +176,7 @@ private fun Hint(text: String) {
 }
 
 @Composable
-private fun PermissionRow(title: String, hint: String, granted: Boolean, onFix: () -> Unit) {
+internal fun PermissionRow(title: String, hint: String, granted: Boolean, onFix: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge)

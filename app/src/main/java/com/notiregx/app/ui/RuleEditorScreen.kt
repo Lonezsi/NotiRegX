@@ -69,6 +69,8 @@ fun RuleEditorScreen(
     companionLinked: Boolean,
     onLinkCompanion: () -> Unit,
     senders: Collection<SenderCount>,
+    dndAccess: Boolean,
+    onGrantDnd: () -> Unit,
     onSave: (Rule) -> Unit,
     onDelete: () -> Unit,
     onBack: () -> Unit,
@@ -190,10 +192,21 @@ fun RuleEditorScreen(
                         selected = type == t,
                         onClick = { type = t },
                         shape = SegmentedButtonDefaults.itemShape(i, RuleType.entries.size),
-                    ) { Text(t.label, maxLines = 1) }
+                    ) { Text(t.shortLabel, maxLines = 1) }
                 }
             }
             Text(type.explanation, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (type == RuleType.ALERT && !dndAccess) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "To ring through Do Not Disturb, NotiRegX needs Do Not Disturb access.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = onGrantDnd) { Text("Allow") }
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("De-buzz", style = MaterialTheme.typography.bodyLarge)

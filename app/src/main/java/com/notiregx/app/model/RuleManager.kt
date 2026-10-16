@@ -187,7 +187,7 @@ class RuleManager(
             val action = when (final.type) {
                 RuleType.HIDE -> Action.HIDE
                 RuleType.BUNDLE -> Action.BUNDLE
-                RuleType.ALLOW -> Action.PASS
+                RuleType.ALLOW, RuleType.ALERT -> Action.PASS
             }
             return Decision(action, final, matched)
         }
@@ -202,6 +202,6 @@ class RuleManager(
          * something from get silenced as they're found.
          */
         fun learnsChannels(rules: List<Rule>): Boolean =
-            rules.any { it.enabled && it.debuzz && it.type != RuleType.ALLOW && it.packageName.isNullOrEmpty() }
+            rules.any { it.enabled && it.debuzz && !it.type.letsThrough && it.packageName.isNullOrEmpty() }
     }
 }

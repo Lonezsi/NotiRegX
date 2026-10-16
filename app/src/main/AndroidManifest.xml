@@ -8,6 +8,8 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Lets NotiRegX appear under Do Not Disturb access, for "Always alert" rules. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- Re-arms digest delivery alarms after a reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -55,6 +57,10 @@
 
         <receiver
             android:name=".service.BundleDismissReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".service.WatchdogReceiver"
             android:exported="false" />
 
         <receiver

@@ -51,6 +51,38 @@ class Alerter(private val context: Context) {
         manager.notify(TAG, nextId++, builder.build())
     }
 
+    /**
+     * Alerts for an "Always alert" rule match that would otherwise stay quiet (Do Not Disturb, or a
+     * silenced app). With Do Not Disturb access the channel bypasses DND; channels can't be changed
+     * after creation, so that case gets its own channel id.
+     */
+    fun breakthrough(sbn: StatusBarNotification, n: Notification) {
+        val canBypass = manager.isNotificationPolicyAccessGranted
+        val id = if (canBypass) BREAKTHROUGH_DND else BREAKTHROUGH
+        if (manager.getNotificationChannel(id) == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(id, "Always alert", NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "Notifications matched by an \"Always alert\" rule"
+                    enableVibration(true)
+                    setBypassDnd(canBypass)
+                }
+            )
+        }
+        val builder = NotificationCompat.Builder(context, id)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(n.title.ifEmpty { n.appName })
+            .setContentText(n.text)
+            .setSubText(n.appName)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(n.text))
+            .setCategory(sbn.notification.category ?: NotificationCompat.CATEGORY_MESSAGE)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setContentIntent(sbn.notification.contentIntent)
+            .setAutoCancel(true)
+            .setTimeoutAfter(TIMEOUT_MS * 3)
+        appIcon(n.packageName)?.let(builder::setLargeIcon)
+        manager.notify(TAG, nextId++, builder.build())
+    }
+
     /** Puts a filtered notification back in the shade, with its click action if it's still known. */
     fun restore(n: Notification, contentIntent: PendingIntent?) {
         val builder = NotificationCompat.Builder(context, RESTORED)
@@ -81,6 +113,8 @@ class Alerter(private val context: Context) {
         const val POPUP = "alerts_popup"
         const val SOUND = "alerts_sound"
         const val RESTORED = "restored"
+        const val BREAKTHROUGH = "breakthrough"
+        const val BREAKTHROUGH_DND = "breakthrough_dnd"
         const val TAG = "alert"
         const val RESTORED_TAG = "restored"
         const val TIMEOUT_MS = 10_000L

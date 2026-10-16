@@ -12,6 +12,7 @@ import com.notiregx.app.model.Interaction
 import com.notiregx.app.model.Outcome
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.RuleManager
+import com.notiregx.app.model.RuleType
 import com.notiregx.app.model.VibrationEvent
 import com.notiregx.app.model.VibrationSource
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +48,8 @@ class NotiListenerService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
+        app.listenerConnected.value = true
+        app.watchdog.check()
         val muter = ChannelMuter(this, this).also { muter = it }
         val vibrationMuter = VibrationMuter(this, this).also { vibrationMuter = it }
         app.vibrationMuted.value = vibrationMuter.mutedPackages
@@ -70,6 +73,9 @@ class NotiListenerService : NotificationListenerService() {
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
+        app.listenerConnected.value = false
+        // Ask to come straight back; the watchdog follows up if this doesn't work.
+        app.watchdog.rebind()
         scope?.cancel()
         scope = null
         muter = null
@@ -104,7 +110,10 @@ class NotiListenerService : NotificationListenerService() {
         val decision = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value)
         lastSeen[sbn.key] = signature to decision.action
         if (decision.action != Action.PASS) remove(sbn) else inShade[sbn.key] = n
-        if (muting) handleDebuzz(sbn, ranking, n, decision, isUpdate = previous != null)
+        val alwaysAlert = decision.rule?.type == RuleType.ALERT
+        if (alwaysAlert && needsBreakthrough(sbn, ranking, isUpdate = previous != null)) app.alerter.breakthrough(sbn, n)
+        // An "Always alert" match already got its alert above; don't re-alert it a second time.
+        if (muting && !alwaysAlert) handleDebuzz(sbn, ranking, n, decision, isUpdate = previous != null)
     }
 
     /**
@@ -147,6 +156,17 @@ class NotiListenerService : NotificationListenerService() {
                 )
             )
         )
+    }
+
+    /**
+     * Whether an "Always alert" match would otherwise go unnoticed: Do Not Disturb blocks it, or
+     * its category is silent (possibly because NotiRegX de-buzzed it). If it alerts on its own,
+     * NotiRegX stays out of the way rather than buzzing twice.
+     */
+    private fun needsBreakthrough(sbn: StatusBarNotification, ranking: Ranking?, isUpdate: Boolean): Boolean {
+        if (isUpdate && sbn.notification.flags and android.app.Notification.FLAG_ONLY_ALERT_ONCE != 0) return false
+        if (ranking == null) return true
+        return !ranking.matchesInterruptionFilter() || ranking.importance < NotificationManager.IMPORTANCE_DEFAULT
     }
 
     /**

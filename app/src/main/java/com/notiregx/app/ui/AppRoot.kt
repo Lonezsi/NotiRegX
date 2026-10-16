@@ -40,6 +40,7 @@ import com.notiregx.app.model.DismissalAdvisor
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleAdvice
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private enum class Tab(val title: String) {
@@ -74,6 +75,14 @@ fun AppRoot(
     val vibrations by app.vibrationLog.events.collectAsState()
     val vibrationMuted by app.vibrationMuted.collectAsState()
     val senders by app.senderStats.senders.collectAsState()
+    val listenerConnected by app.listenerConnected.collectAsState()
+    // The system binds the listener a moment after the app starts; don't flash a warning before then.
+    var settled by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(4_000)
+        settled = true
+    }
+    val dndAccess = remember(resumeTick) { app.settings.hasDndAccess() }
     val interactions by app.interactions.events.collectAsState()
     val ignoredAdvice by app.settings.ignoredAdvice.collectAsState()
     // Only rule configuration matters for advice, not histories that change with every notification.
@@ -87,6 +96,7 @@ fun AppRoot(
     /** Selected archive tab: a rule id, or null for the Recent log. */
     var archiveRuleId by rememberSaveable { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf<Rule?>(null) }
+    var showTutorial by rememberSaveable { mutableStateOf(!app.settings.tutorialSeen) }
     /** Notification the user wants to make a rule from; shows the suggestions dialog. */
     var suggestFor by remember { mutableStateOf<Notification?>(null) }
 
@@ -95,9 +105,9 @@ fun AppRoot(
     val systemLogAvailable = remember(resumeTick) { app.systemVibrations.hasPermission() }
 
     val requestPost = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
-    LaunchedEffect(Unit) {
+    LaunchedEffect(showTutorial) {
         val permission = MainActivity.POST_NOTIFICATIONS
-        if (permission != null && !app.settings.canPostNotifications()) requestPost.launch(permission)
+        if (!showTutorial && permission != null && !app.settings.canPostNotifications()) requestPost.launch(permission)
     }
 
     LaunchedEffect(openTab.value) {
@@ -116,6 +126,21 @@ fun AppRoot(
         openRuleId.value = null
     }
 
+    if (showTutorial) {
+        TutorialScreen(
+            settings = app.settings,
+            resumeTick = resumeTick,
+            companionLinked = companionLinked,
+            onLinkCompanion = actions.linkCompanion,
+            onOpenIntent = actions.openIntent,
+            onDone = {
+                app.settings.markTutorialSeen()
+                showTutorial = false
+            },
+        )
+        return
+    }
+
     val draft = editing
     if (draft != null) {
         BackHandler { editing = null }
@@ -126,6 +151,8 @@ fun AppRoot(
             companionLinked = companionLinked,
             onLinkCompanion = actions.linkCompanion,
             senders = senders.values,
+            dndAccess = dndAccess,
+            onGrantDnd = { actions.openIntent(app.settings.dndAccessIntent()) },
             onSave = { manager.save(it); editing = null },
             onDelete = { manager.delete(draft.id); editing = null },
             onBack = { editing = null },
@@ -176,6 +203,8 @@ fun AppRoot(
                     filteringEnabled = filtering,
                     onGrantAccess = { actions.openIntent(app.settings.notificationAccessIntent()) },
                     onGrantPost = { actions.openIntent(app.settings.appNotificationSettingsIntent()) },
+                    listenerStopped = settled && hasAccess && !listenerConnected,
+                    onRestartListener = app.watchdog::rebind,
                     onEdit = { editing = it },
                     onMoveTo = manager::moveTo,
                     onToggle = manager::setEnabled,
@@ -220,6 +249,9 @@ fun AppRoot(
                     onLinkCompanion = actions.linkCompanion,
                     onExport = actions.exportRules,
                     onImport = actions.importRules,
+                    listenerConnected = listenerConnected,
+                    onRestartListener = app.watchdog::rebind,
+                    onShowTutorial = { showTutorial = true },
                     onOpenIntent = actions.openIntent,
                 )
             }

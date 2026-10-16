@@ -52,6 +52,8 @@ fun HomeScreen(
     filteringEnabled: Boolean,
     onGrantAccess: () -> Unit,
     onGrantPost: () -> Unit,
+    listenerStopped: Boolean,
+    onRestartListener: () -> Unit,
     onEdit: (Rule) -> Unit,
     onMoveTo: (String, Int) -> Unit,
     onToggle: (String, Boolean) -> Unit,
@@ -93,6 +95,17 @@ fun HomeScreen(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        if (listenerStopped) {
+            item(key = "notice-stopped") {
+                NoticeCard(
+                    title = "Filtering has stopped",
+                    body = "Android disconnected NotiRegX's notification filter, so nothing is being filtered. " +
+                        "If Restart doesn't help, turn NotiRegX's notification access off and on again.",
+                    action = "Restart",
+                    onAction = onRestartListener,
+                )
+            }
+        }
         if (!hasAccess) {
             item(key = "notice-access") {
                 NoticeCard(
@@ -127,7 +140,7 @@ fun HomeScreen(
             }
         }
         item(key = "intro") {
-            val filtered = rules.filter { it.type != RuleType.ALLOW }.sumOf { it.totalCaught }
+            val filtered = rules.filter { !it.type.letsThrough }.sumOf { it.totalCaught }
             Text(
                 if (rules.isEmpty()) "No rules yet. Tap + to create one, or Make rule on any notification in the Archive."
                 else "Your rules have filtered ${"%,d".format(filtered)} notifications so far. Rules run top to bottom; " +
@@ -223,13 +236,13 @@ private fun RuleCard(
                 Text(
                     if (stale) "No matches in the last 7 days. Check the regex or app?"
                     else "$week match${if (week == 1) "" else "es"} in the last 7 days · ${rule.hitsSince(now - DAY_MS)} today" +
-                        if (rule.type != RuleType.ALLOW) " · ${"%,d".format(rule.totalCaught)} caught in total" else "",
+                        if (!rule.type.letsThrough) " · ${"%,d".format(rule.totalCaught)} caught in total" else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (stale) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(Modifier.padding(start = 32.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (rule.type != RuleType.ALLOW) {
+                if (!rule.type.letsThrough) {
                     val unseen = rule.bundle.count
                     TextButton(onClick = onOpenArchive) {
                         Text("${rule.history.size} saved" + if (unseen > 0) " · $unseen unseen" else "")

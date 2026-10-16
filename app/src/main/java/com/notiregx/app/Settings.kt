@@ -31,6 +31,11 @@ class Settings(private val context: Context) {
         _ignoredAdvice.value = next
     }
 
+    /** Whether the first-launch tutorial has been shown (finished or skipped). */
+    val tutorialSeen: Boolean get() = prefs.getBoolean(KEY_TUTORIAL_SEEN, false)
+
+    fun markTutorialSeen() = prefs.edit().putBoolean(KEY_TUTORIAL_SEEN, true).apply()
+
     fun setMaxSaved(value: Int) {
         val clamped = value.coerceIn(MIN_MAX_SAVED, MAX_MAX_SAVED)
         prefs.edit().putInt(KEY_MAX_SAVED, clamped).apply()
@@ -49,6 +54,12 @@ class Settings(private val context: Context) {
 
     fun isIgnoringBatteryOptimizations(): Boolean =
         context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName)
+
+    /** Do Not Disturb access, which lets "Always alert" rules ring through DND. */
+    fun hasDndAccess(): Boolean =
+        context.getSystemService(android.app.NotificationManager::class.java).isNotificationPolicyAccessGranted
+
+    fun dndAccessIntent() = Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
 
     fun supportsCompanionDevices(): Boolean =
         context.packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
@@ -77,5 +88,6 @@ class Settings(private val context: Context) {
         private const val KEY_MAX_SAVED = "max_saved_per_rule"
         private const val KEY_FILTERING = "filtering_enabled"
         private const val KEY_IGNORED_ADVICE = "ignored_advice"
+        private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
     }
 }

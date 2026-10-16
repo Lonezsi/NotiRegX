@@ -17,6 +17,8 @@ import com.notiregx.app.service.BundleNotifier
 import com.notiregx.app.service.DigestReceiver
 import com.notiregx.app.service.NotificationReader
 import com.notiregx.app.service.SystemVibrationReader
+import com.notiregx.app.service.Watchdog
+import com.notiregx.app.model.WatchdogPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
@@ -48,6 +50,11 @@ class NotiRegXApp : Application() {
         private set
     lateinit var senderStats: SenderStats
         private set
+    lateinit var watchdog: Watchdog
+        private set
+
+    /** Whether Android currently has the notification listener connected, i.e. filtering works. */
+    val listenerConnected = MutableStateFlow(false)
     private lateinit var storage: Storage
     private lateinit var bundleNotifier: BundleNotifier
 
@@ -96,6 +103,8 @@ class NotiRegXApp : Application() {
         bundleNotifier = BundleNotifier(this)
         alerter = Alerter(this)
         companionLinked.value = settings.isCompanionLinked()
+        watchdog = Watchdog(this)
+        watchdog.schedule()
 
         scope.launch { ruleManager.rules.drop(1).collect { storage.saveRules(it) } }
         scope.launch { ruleManager.recent.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveRecent(it) } }
@@ -104,6 +113,14 @@ class NotiRegXApp : Application() {
         scope.launch { senderStats.senders.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveSenders(it.values) } }
         scope.launch { ruleManager.rules.collect { bundleNotifier.sync(it) } }
         scope.launch { settings.maxSaved.collect { ruleManager.trimHistories(it) } }
+        scope.launch {
+            // Check soon after startup (once the grace period is over), then regularly while running.
+            delay(WatchdogPolicy.STARTUP_GRACE_MS + 5_000)
+            while (isActive) {
+                watchdog.check()
+                delay(WATCHDOG_INTERVAL_MS)
+            }
+        }
         scope.launch {
             while (isActive) {
                 refreshSystemVibrations()
@@ -164,6 +181,7 @@ class NotiRegXApp : Application() {
         const val KEY_LAST_CHECK = "last_check"
         const val DIGEST_WINDOW_MS = 5 * 60_000L
         const val SAVE_DELAY_MS = 2_000L
+        const val WATCHDOG_INTERVAL_MS = 5 * 60_000L
 
         /** Android keeps only a few dozen recent vibrations, so check often enough not to miss any. */
         const val VIBRATION_POLL_MS = 2 * 60_000L

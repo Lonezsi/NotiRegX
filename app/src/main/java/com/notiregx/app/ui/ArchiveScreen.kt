@@ -55,7 +55,7 @@ fun ArchiveScreen(
     onRestore: (Notification) -> Unit,
     actions: AppActions,
 ) {
-    val archivable = rules.filter { it.type != RuleType.ALLOW || it.history.isNotEmpty() }
+    val archivable = rules.filter { !it.type.letsThrough || it.history.isNotEmpty() }
     Column {
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -154,7 +154,7 @@ private fun RuleHistory(
                 outcome = null,
                 actions = actions,
                 onCreateRule = { onCreateRule(n) },
-                onRestore = { onRestore(n) }.takeIf { rule.type != RuleType.ALLOW },
+                onRestore = { onRestore(n) }.takeIf { !rule.type.letsThrough },
             )
         }
     }
