@@ -100,10 +100,13 @@ object Friendship {
 /** How far back a time chart goes. Short ranges are daily; longer ones weekly. */
 enum class ChartRange(val buckets: Int?, val weekly: Boolean) {
     DAYS_30(30, false),
-    MONTHS_3(13, true),
+    MONTHS_3(90, false),
     YEAR(52, true),
-    /** From the first week anything was counted. */
-    ALL(null, true),
+    /**
+     * From the first day anything was counted: daily while that's within the daily history
+     * ([SenderStats.KEEP_DAYS]), weekly once it goes further back.
+     */
+    ALL(null, false),
 }
 
 /**
@@ -114,13 +117,27 @@ object TimeSeries {
     class Points(val startDays: List<Int>, val series: List<IntArray>, val weekly: Boolean)
 
     fun of(groups: List<Collection<SenderCount>>, today: Int, range: ChartRange): Points {
-        if (!range.weekly) {
-            val n = range.buckets ?: 30
-            val days = (0 until n).map { today - (n - 1 - it) }
-            return Points(days, groups.map { senders -> IntArray(n) { i -> senders.sumOf { it.days[days[i]] ?: 0 } } }, weekly = false)
+        if (range == ChartRange.ALL) {
+            val senders = groups.flatten()
+            val firstWeek = senders.flatMap { it.weeks.keys }.minOrNull()
+            val dailyFrom = today - SenderStats.KEEP_DAYS + 1
+            // Older than the daily history: only weekly totals exist that far back.
+            if (firstWeek != null && firstWeek < SenderStats.weekOf(dailyFrom)) return weekly(groups, today, null)
+            val firstDay = senders.flatMap { it.days.keys }.minOrNull() ?: today
+            return daily(groups, today, (today - firstDay + 1).coerceIn(7, SenderStats.KEEP_DAYS))
         }
+        if (!range.weekly) return daily(groups, today, range.buckets ?: 30)
+        return weekly(groups, today, range.buckets)
+    }
+
+    private fun daily(groups: List<Collection<SenderCount>>, today: Int, n: Int): Points {
+        val days = (0 until n).map { today - (n - 1 - it) }
+        return Points(days, groups.map { senders -> IntArray(n) { i -> senders.sumOf { it.days[days[i]] ?: 0 } } }, weekly = false)
+    }
+
+    private fun weekly(groups: List<Collection<SenderCount>>, today: Int, buckets: Int?): Points {
         val current = SenderStats.weekOf(today)
-        val n = range.buckets ?: run {
+        val n = buckets ?: run {
             val first = groups.flatten().flatMap { it.weeks.keys }.minOrNull() ?: current
             (current - first + 1).coerceIn(2, SenderStats.KEEP_WEEKS)
         }

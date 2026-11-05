@@ -103,6 +103,22 @@ class InsightsTest {
     }
 
     @Test
+    fun allTimeIsDailyWhileTheHistoryIsYoung() {
+        val today = 1000
+        val days = mapOf(today - 25 to 3, today - 3 to 1, today to 2)
+        val s = SenderCount(msg, "Messenger", "A", 6, days, 0, SenderCount.weeksFrom(days))
+        val all = TimeSeries.of(listOf(listOf(s)), today, ChartRange.ALL)
+        assertFalse(all.weekly)
+        assertEquals(26, all.startDays.size) // from the first day with data
+        assertEquals(today - 25, all.startDays.first())
+        assertEquals(3, all.series[0].first())
+
+        val months = TimeSeries.of(listOf(listOf(s)), today, ChartRange.MONTHS_3)
+        assertFalse(months.weekly)
+        assertEquals(90, months.startDays.size)
+    }
+
+    @Test
     fun personAndChatScopeRules() {
         val fromZeno = Rule(name = "z", personId = "z")
         assertTrue(fromZeno.matches(n("hi", personId = "z")))
