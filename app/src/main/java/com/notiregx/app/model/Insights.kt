@@ -97,6 +97,42 @@ object Friendship {
     }
 }
 
+/** How far back a time chart goes. Short ranges are daily; longer ones weekly. */
+enum class ChartRange(val buckets: Int?, val weekly: Boolean) {
+    DAYS_30(30, false),
+    MONTHS_3(13, true),
+    YEAR(52, true),
+    /** From the first week anything was counted. */
+    ALL(null, true),
+}
+
+/**
+ * Counts over time for charts: one value per day or week, oldest first, with the epoch day each
+ * point starts on (for date labels). Several series (people) line up on the same points.
+ */
+object TimeSeries {
+    class Points(val startDays: List<Int>, val series: List<IntArray>, val weekly: Boolean)
+
+    fun of(groups: List<Collection<SenderCount>>, today: Int, range: ChartRange): Points {
+        if (!range.weekly) {
+            val n = range.buckets ?: 30
+            val days = (0 until n).map { today - (n - 1 - it) }
+            return Points(days, groups.map { senders -> IntArray(n) { i -> senders.sumOf { it.days[days[i]] ?: 0 } } }, weekly = false)
+        }
+        val current = SenderStats.weekOf(today)
+        val n = range.buckets ?: run {
+            val first = groups.flatten().flatMap { it.weeks.keys }.minOrNull() ?: current
+            (current - first + 1).coerceIn(2, SenderStats.KEEP_WEEKS)
+        }
+        val weeks = (0 until n).map { current - (n - 1 - it) }
+        return Points(
+            startDays = weeks.map { it * 7 - 3 },
+            series = groups.map { senders -> IntArray(n) { i -> senders.sumOf { it.weeks[weeks[i]] ?: 0 } } },
+            weekly = true,
+        )
+    }
+}
+
 /** "You haven't heard from Zénó in 14 days." */
 object Reminders {
     private const val DAY_MS = 24 * 60 * 60 * 1000L

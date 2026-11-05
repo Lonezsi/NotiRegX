@@ -142,6 +142,9 @@ fun PeopleScreen(
                 }
             }
         }
+        if (people.isNotEmpty()) {
+            item(key = "people-chart") { PeopleChart(people, senders) }
+        }
         item {
             Text(stringResource(R.string.people_friend_mode), style = MaterialTheme.typography.labelLarge)
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(top = 4.dp)) {
@@ -260,6 +263,67 @@ fun PeopleScreen(
         }
     }
 }
+
+/**
+ * Everyone's messages over time as overlapping smooth lines, one per person in their avatar
+ * colour, like a stock chart: drag along it to compare a day across people.
+ */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun PeopleChart(people: List<Person>, senders: Collection<SenderCount>) {
+    var range by rememberSaveable { mutableStateOf(com.notiregx.app.model.ChartRange.DAYS_30) }
+    val today = SenderStats.dayOf(System.currentTimeMillis())
+    // The busiest people in the range (best friends first), at most eight lines.
+    val shown = remember(people, senders, range, today) {
+        val groups = people.map { p ->
+            val keys = p.aliases.mapTo(HashSet()) { it.key }
+            p to senders.filter { Alias.keyOf(it.packageName, it.sender) in keys }
+        }
+        val points = com.notiregx.app.model.TimeSeries.of(groups.map { it.second }, today, range)
+        groups.indices
+            .map { Triple(groups[it].first, points.series[it], points) }
+            .filter { it.second.sum() > 0 }
+            .sortedWith(compareByDescending<Triple<Person, IntArray, com.notiregx.app.model.TimeSeries.Points>> { it.first.favorite }.thenByDescending { it.second.sum() })
+            .take(8)
+    }
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.people_chart_title), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            ChartRangeChips(range) { range = it }
+            val points = shown.firstOrNull()?.third
+            if (points == null) {
+                Text(stringResource(R.string.activity_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                SmoothLineChart(
+                    series = shown.mapIndexed { i, (p, values, _) -> ChartSeries(p.name, CHART_COLORS[i % CHART_COLORS.size], values) },
+                    pointLabel = timeSeriesPointLabel(points),
+                    axisLabels = timeSeriesAxisLabels(points),
+                    height = 200.dp,
+                )
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    shown.forEachIndexed { i, (p, values, _) ->
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+                            Box(Modifier.size(10.dp).background(CHART_COLORS[i % CHART_COLORS.size], CircleShape))
+                            Spacer(Modifier.size(4.dp))
+                            Text("${p.name} · ${values.sum()}", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+                Text(
+                    stringResource(R.string.chart_touch_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/** Clearly different line colours, so overlapping people are easy to tell apart. */
+private val CHART_COLORS = listOf(
+    Color(0xFF4C8DF6), Color(0xFFFF9F1C), Color(0xFF2EC4B6), Color(0xFFFF4F9A),
+    Color(0xFFA56BFF), Color(0xFF8BC34A), Color(0xFFF7D046), Color(0xFFFF5A5A),
+)
 
 private enum class PeoplePeriod(val label: Int, val days: Int?) {
     TODAY(R.string.senders_period_today, 1),

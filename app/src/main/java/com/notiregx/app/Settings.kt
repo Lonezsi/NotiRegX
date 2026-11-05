@@ -62,7 +62,7 @@ class Settings(private val context: Context) {
         _rescueAlerts.value = on
     }
 
-    private val _recapEnabled = MutableStateFlow(prefs.getBoolean(KEY_RECAP, true))
+    private val _recapEnabled = MutableStateFlow(prefs.getBoolean(KEY_RECAP, false))
     val recapEnabled: StateFlow<Boolean> = _recapEnabled.asStateFlow()
 
     private val _recapMinute = MutableStateFlow(prefs.getInt(KEY_RECAP_MINUTE, 21 * 60))

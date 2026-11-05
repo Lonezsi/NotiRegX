@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,8 @@ import androidx.compose.foundation.layout.FlowRow
 import com.notiregx.app.R
 import com.notiregx.app.model.Activity
 import com.notiregx.app.model.Alias
+import com.notiregx.app.model.ChartRange
+import com.notiregx.app.model.TimeSeries
 import com.notiregx.app.model.Friendship
 import com.notiregx.app.model.Reminders
 import com.notiregx.app.model.RuleType
@@ -103,8 +106,9 @@ fun PersonScreen(
     val times = remember(mine) { mine.map { it.notification.postedAt } }
     val hours = remember(times) { Activity.byHour(times) }
     val weekdays = remember(times) { Activity.byWeekday(times) }
-    val daily = remember(mySenders, today) { Activity.daily(mySenders, today) }
-    val weekly = remember(mySenders, today) { Friendship.weekly(mySenders, today) }
+    var range by rememberSaveable { mutableStateOf(ChartRange.MONTHS_3) }
+    val points = remember(mySenders, today, range) { TimeSeries.of(listOf(mySenders), today, range) }
+    val accent = MaterialTheme.colorScheme.primary
     val trend = remember(mySenders, today) { Friendship.trend(mySenders, today) }
     // Groups they talk in, busiest first, with the app they're in.
     val groups = remember(mine) {
@@ -250,10 +254,16 @@ fun PersonScreen(
                 }
                 Hint(stringResource(R.string.friendship_trend, trend.recent, trend.usual.toInt()))
                 if (trend.fading) Hint(stringResource(R.string.friendship_fading_hint))
-                Text(stringResource(R.string.friendship_weeks), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
-                // Only from the first week with anything in it, so a new person's graph isn't mostly empty.
-                val first = weekly.indexOfFirst { it > 0 }.coerceAtLeast(0).coerceAtMost(weekly.size - 8)
-                MiniBarChart(weekly.copyOfRange(first, weekly.size), emptyList(), height = 64.dp)
+                Spacer(Modifier.size(8.dp))
+                ChartRangeChips(range) { range = it }
+                SmoothLineChart(
+                    series = listOf(ChartSeries(person.name, accent, points.series.first())),
+                    pointLabel = timeSeriesPointLabel(points),
+                    axisLabels = timeSeriesAxisLabels(points),
+                    height = 160.dp,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                Hint(stringResource(R.string.chart_touch_hint))
             }
             item {
                 Text(
@@ -268,13 +278,20 @@ fun PersonScreen(
                     val busiest = hours.indices.maxBy { hours[it] }
                     Hint(stringResource(R.string.activity_busiest, "%02d:00".format(busiest)))
                     Text(stringResource(R.string.activity_hours), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
-                    MiniBarChart(hours, (0 until 24).map { if (it % 6 == 0) "$it" else "" })
+                    SmoothLineChart(
+                        series = listOf(ChartSeries(person.name, accent, hours)),
+                        pointLabel = { "%02d:00–%02d:00".format(it, (it + 1) % 24) },
+                        axisLabels = listOf("0:00", "6:00", "12:00", "18:00", "23:00"),
+                        height = 110.dp,
+                    )
                     Text(stringResource(R.string.activity_weekdays), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
-                    MiniBarChart(weekdays, Schedule.DAY_ORDER.map { context.dayName(it) }, height = 56.dp)
-                }
-                if (daily.any { it > 0 }) {
-                    Text(stringResource(R.string.activity_days), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
-                    MiniBarChart(daily, emptyList(), height = 48.dp)
+                    val dayNames = Schedule.DAY_ORDER.map { context.dayName(it) }
+                    SmoothLineChart(
+                        series = listOf(ChartSeries(person.name, accent, weekdays)),
+                        pointLabel = { dayNames[it] },
+                        axisLabels = dayNames,
+                        height = 100.dp,
+                    )
                 }
             }
             item {

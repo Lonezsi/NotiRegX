@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chart_range_30_days">30 Tage</string>
+    <string name="chart_range_3_months">3 Monate</string>
+    <string name="chart_range_year">1 Jahr</string>
+    <string name="chart_range_all">Gesamt</string>
+    <string name="chart_week_of">Woche ab %1$s</string>
+    <string name="people_chart_title">Nachrichten im Zeitverlauf</string>
+    <string name="chart_touch_hint">Tippe und ziehe über das Diagramm, um die Zahlen jedes Tages zu sehen.</string>
+</resources>

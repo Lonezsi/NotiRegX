@@ -83,6 +83,26 @@ class InsightsTest {
     }
 
     @Test
+    fun timeSeriesCoverDaysWeeksAndAllTime() {
+        val today = 1000
+        val a = SenderCount(msg, "Messenger", "A", 0, mapOf(today to 2, today - 1 to 1), 0, mapOf(SenderStats.weekOf(today) to 3, SenderStats.weekOf(today) - 20 to 4))
+        val b = SenderCount(msg, "Messenger", "B", 0, mapOf(today to 5), 0, mapOf(SenderStats.weekOf(today) to 5))
+
+        val days = TimeSeries.of(listOf(listOf(a), listOf(b)), today, ChartRange.DAYS_30)
+        assertEquals(30, days.startDays.size)
+        assertEquals(today, days.startDays.last())
+        assertEquals(listOf(1, 2), days.series[0].takeLast(2))
+        assertEquals(5, days.series[1].last())
+
+        val all = TimeSeries.of(listOf(listOf(a), listOf(b)), today, ChartRange.ALL)
+        assertEquals(21, all.startDays.size) // back to the first week with data
+        assertEquals(4, all.series[0].first())
+        assertTrue(all.weekly)
+        // Weeks start on Mondays: epoch day 4 (1970-01-05) was a Monday.
+        assertEquals(0, (all.startDays.first() - 4).mod(7))
+    }
+
+    @Test
     fun personAndChatScopeRules() {
         val fromZeno = Rule(name = "z", personId = "z")
         assertTrue(fromZeno.matches(n("hi", personId = "z")))
