@@ -51,6 +51,16 @@ class PeopleTest {
     }
 
     @Test
+    fun backfillFillsTheTimelineFromWhatIsAlreadyKnownOnce() {
+        val book = PeopleBook()
+        val anna = book.create("Anna", listOf(Alias(messenger, "Messenger", "Anna")))
+        val old = listOf(n(messenger, "Anna", "old one"), n(messenger, "Bob", "not her"), n(messenger, "Anna", "old two"))
+        book.backfill(anna.id, old)
+        book.backfill(anna.id, old + old) // twice, and duplicated: still once each
+        assertEquals(listOf("old two", "old one"), book.log.value.map { it.notification.text })
+    }
+
+    @Test
     fun mergeCombinesUsernamesTimelinesAndStars() {
         val book = PeopleBook()
         val a = book.create("Zénó", listOf(Alias(messenger, "Messenger", "Zénó")))

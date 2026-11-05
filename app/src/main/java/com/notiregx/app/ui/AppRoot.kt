@@ -107,6 +107,8 @@ fun AppRoot(
     val friendMode by app.settings.friendMode.collectAsState()
     val ignoredMerges by app.settings.ignoredMerges.collectAsState()
     val scope = rememberCoroutineScope()
+    /** Everything NotiRegX still has, to fill a person's timeline when they're created or get usernames. */
+    fun known() = recent.map { it.notification } + rules.flatMap { it.history }
 
     var tab by rememberSaveable { mutableStateOf(Tab.RULES) }
     /** Selected archive tab: a rule id, or null for the Recent log. */
@@ -197,6 +199,8 @@ fun AppRoot(
     val person = people.firstOrNull { it.id == openPersonId }
     if (person != null) {
         BackHandler { openPersonId = null }
+        // Pick up anything already known about them (cheap; skips what's there).
+        LaunchedEffect(person.id) { app.people.backfill(person.id, known()) }
         PersonScreen(
             person = person,
             entries = peopleLog,
@@ -206,8 +210,14 @@ fun AppRoot(
             onBack = { openPersonId = null },
             onRename = { name -> app.people.update(person.id) { it.copy(name = name) } },
             onSetFavorite = { on -> app.people.update(person.id) { it.copy(favorite = on) } },
-            onSetSaveAll = { on -> app.people.update(person.id) { it.copy(saveAll = on) } },
-            onAddAliases = { app.people.addAliases(person.id, it) },
+            onAddAliases = {
+                app.people.addAliases(person.id, it)
+                app.people.backfill(person.id, known())
+            },
+            onSetSaveAll = { on ->
+                app.people.update(person.id) { it.copy(saveAll = on) }
+                if (on) app.people.backfill(person.id, known())
+            },
             onRemoveAlias = { app.people.removeAlias(person.id, it) },
             onLinkContact = { linkContact(person.id) },
             onClearLog = { app.people.clearLog(person.id) },
@@ -308,6 +318,7 @@ fun AppRoot(
                     onCombine = { group ->
                         val name = PeopleBook.displayName(group.maxBy { it.total }.sender)
                         val created = app.people.create(name, group.map { Alias(it.packageName, it.appName, it.sender) })
+                        app.people.backfill(created.id, known())
                         openPersonId = created.id
                     },
                     onIgnoreMerge = app.settings::ignoreMerge,
@@ -357,7 +368,9 @@ fun AppRoot(
         NamePersonDialog(
             initialName = PeopleBook.displayName(aliases.first().sender),
             onCreate = { name ->
-                openPersonId = app.people.create(name, aliases).id
+                val created = app.people.create(name, aliases)
+                app.people.backfill(created.id, known())
+                openPersonId = created.id
                 namingAliases = null
             },
             onDismiss = { namingAliases = null },

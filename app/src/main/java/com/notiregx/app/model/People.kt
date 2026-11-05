@@ -100,6 +100,28 @@ class PeopleBook(initialPeople: List<Person> = emptyList(), initialLog: List<Per
         _log.update { log -> log.map { if (it.personId in ids) it.copy(personId = intoId) else it } }
     }
 
+    /**
+     * Adds already-known notifications (Recent log, rule histories) from [personId]'s usernames to
+     * their timeline, so it isn't empty when someone is just created. Skips ones already there.
+     */
+    fun backfill(personId: String, known: List<Notification>) {
+        val person = _people.value.firstOrNull { it.id == personId } ?: return
+        if (!person.saveAll) return
+        val keys = person.aliases.mapTo(HashSet()) { it.key }
+        _log.update { log ->
+            val have = log.filter { it.personId == personId }.mapTo(HashSet()) { it.notification.dedupeKey() }
+            val found = known
+                .filter { Alias.keyOf(it.packageName, it.title) in keys }
+                .distinctBy { it.dedupeKey() }
+                .filter { it.dedupeKey() !in have }
+                .map { PersonEntry(personId, it) }
+            if (found.isEmpty()) log
+            else (log + found).sortedByDescending { it.notification.postedAt }.take(MAX_TOTAL)
+        }
+    }
+
+    private fun Notification.dedupeKey() = Triple(packageName, postedAt, content)
+
     fun delete(id: String) {
         _people.update { list -> list.filter { it.id != id } }
         _log.update { log -> log.filter { it.personId != id } }
