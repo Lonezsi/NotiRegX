@@ -7,6 +7,8 @@ import android.service.notification.StatusBarNotification
 import com.notiregx.app.MuteStatus
 import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Action
+import com.notiregx.app.model.ChatMessage
+import com.notiregx.app.model.ConversationTracker
 import com.notiregx.app.model.Decision
 import com.notiregx.app.model.Interaction
 import com.notiregx.app.model.Outcome
@@ -39,6 +41,9 @@ class NotiListenerService : NotificationListenerService() {
 
     /** Notifications we let through, by key, so we can tell whether the user opened or swiped them. */
     private val inShade = lru<Notification>(1000)
+
+    /** Per-message decisions for chat apps' conversation notifications. */
+    private val conversations = ConversationTracker()
 
     private var scope: CoroutineScope? = null
     private var muter: ChannelMuter? = null
@@ -97,6 +102,13 @@ class NotiListenerService : NotificationListenerService() {
             return
         }
 
+        // Chat apps add every message to one conversation notification: decide message by message.
+        val messages = app.reader.readMessages(sbn)
+        if (messages.any { !it.fromMe }) {
+            handleConversation(sbn, ranking, messages)
+            return
+        }
+
         val n = app.reader.read(sbn, app.ruleManager.newNotificationId()) ?: return
         val signature = n.content.hashCode()
         val previous = lastSeen[sbn.key]
@@ -117,10 +129,47 @@ class NotiListenerService : NotificationListenerService() {
     }
 
     /**
+     * A conversation notification: each new message from someone else goes through the rules on its
+     * own (so a "Reacted ❤️" line is caught without taking the friend's real messages with it), and
+     * the notification is only removed when every message in it is filtered.
+     */
+    private fun handleConversation(sbn: StatusBarNotification, ranking: Ranking?, messages: List<ChatMessage>) {
+        val key = sbn.key
+        val fresh = conversations.unseen(key, messages)
+        var lastPassing: Pair<Notification, Decision>? = null
+        var lastCaught: Pair<Notification, Decision>? = null
+        var alert: Notification? = null
+        for (m in fresh) {
+            val n = m.notification.copy(id = app.ruleManager.newNotificationId())
+            sbn.notification.contentIntent?.let { app.contentIntents.put(n.id, it) }
+            app.senderStats.record(n)
+            val d = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value)
+            conversations.record(key, m.id, d.action)
+            if (d.action == Action.PASS) lastPassing = n to d else lastCaught = n to d
+            if (d.rule?.type == RuleType.ALERT) alert = n
+        }
+
+        if (conversations.allFiltered(key)) {
+            inShade.remove(key)
+            remove(sbn)
+        } else {
+            (lastPassing?.first ?: messages.lastOrNull { !it.fromMe }?.notification)?.let { inShade[key] = it }
+        }
+        if (fresh.isEmpty()) return
+
+        val isUpdate = fresh.size < messages.count { !it.fromMe }
+        alert?.let { if (needsBreakthrough(sbn, ranking, isUpdate)) app.alerter.breakthrough(sbn, it) }
+        val (n, d) = lastPassing ?: lastCaught ?: return
+        if (muting && alert == null) handleDebuzz(sbn, ranking, n, d, isUpdate)
+    }
+
+    /**
      * Learns from what the user does with notifications we let through: opened or swiped away.
      * Removals by the app itself or by NotiRegX say nothing about what the user wanted.
      */
     override fun onNotificationRemoved(sbn: StatusBarNotification, rankingMap: RankingMap?, reason: Int) {
+        // A conversation the user or the app cleared starts over; one we removed ourselves may come back with more.
+        if (reason != REASON_LISTENER_CANCEL) conversations.forget(sbn.key)
         val n = inShade.remove(sbn.key) ?: return
         val outcome = when (reason) {
             REASON_CLICK -> Outcome.OPENED
