@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_tab">People</string>
+    <string name="people_intro">Combine someone\'s usernames from every app into one person to see everything they send in one place.</string>
+    <string name="people_best_friends">Best friends</string>
+    <string name="people_friend_mode">Best friends\' messages</string>
+    <string name="people_friend_mode_off">Follow rules</string>
+    <string name="people_friend_mode_allow">Always let through</string>
+    <string name="people_friend_mode_alert">Always alert</string>
+    <string name="people_friend_mode_hint_off">Your rules decide, like for everyone else.</string>
+    <string name="people_friend_mode_hint_allow">Never hidden or bundled, whatever your rules say.</string>
+    <string name="people_friend_mode_hint_alert">Never hidden, and always ring, even in Do Not Disturb.</string>
+    <string name="people_suggested">Same person?</string>
+    <!-- %1$s = name, %2$s = list of apps -->
+    <string name="people_suggestion_text">%1$s on %2$s</string>
+    <string name="people_combine">Combine</string>
+    <string name="people_not_same">Not the same</string>
+    <string name="people_all">People</string>
+    <string name="people_empty">No people yet. Tap + to combine someone\'s usernames, or use a suggestion above.</string>
+    <string name="people_add">Add person</string>
+    <plurals name="people_week_count">
+        <item quantity="one">%1$d notification this week</item>
+        <item quantity="other">%1$d notifications this week</item>
+    </plurals>
+    <string name="people_star">Best friend</string>
+    <string name="people_unstar">Remove from best friends</string>
+
+    <string name="person_title">Person</string>
+    <string name="person_name">Name</string>
+    <string name="person_contact">Phone contact</string>
+    <string name="person_no_contact">Not linked</string>
+    <string name="person_link_contact">Link contact</string>
+    <string name="person_change_contact">Change</string>
+    <string name="person_usernames">Usernames</string>
+    <string name="person_add_usernames">Add usernames</string>
+    <string name="person_remove_username">Remove %1$s</string>
+    <string name="person_save_all">Save every notification</string>
+    <string name="person_save_all_hint">Keeps everything they send here, across apps, whatever your rules do.</string>
+    <string name="person_best_friend_hint">Shown first, and handled by the best friends setting on the People tab.</string>
+    <string name="person_stats">Today %1$d · this week %2$d · all time %3$d</string>
+    <string name="person_timeline">Everything they sent</string>
+    <string name="person_timeline_empty">Nothing saved yet. New notifications from them will appear here.</string>
+    <string name="person_timeline_off">Saving is off for this person.</string>
+    <string name="person_clear">Clear saved</string>
+    <string name="person_delete">Delete person</string>
+    <string name="person_delete_text">%1$s and their saved notifications will be removed. Notifications themselves aren\'t affected.</string>
+    <string name="person_delete_confirm">Delete</string>
+    <string name="person_open">Open</string>
+    <string name="person_make_rule">Make rule</string>
+    <string name="person_contact_failed">Couldn\'t read that contact.</string>
+
+    <string name="alias_picker_title">Pick usernames</string>
+    <string name="alias_picker_hint">Every name NotiRegX has seen send you notifications, per app.</string>
+    <string name="alias_picker_search">Search</string>
+    <string name="alias_picker_none">No senders seen yet.</string>
+    <!-- %1$s = person who already has this username -->
+    <string name="alias_picker_taken">Now: %1$s</string>
+    <string name="alias_picker_next">Next</string>
+    <string name="alias_picker_add">Add %1$d</string>
+    <string name="create_person_title">New person</string>
+    <string name="create_person_create">Create</string>
+</resources>

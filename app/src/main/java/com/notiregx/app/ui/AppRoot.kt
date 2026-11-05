@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,17 +40,21 @@ import androidx.compose.ui.res.stringResource
 import com.notiregx.app.R
 import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Notification
+import com.notiregx.app.model.Alias
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.PeopleBook
 import com.notiregx.app.model.DismissalAdvisor
 import com.notiregx.app.model.Rule
 import com.notiregx.app.model.RuleAdvice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private enum class Tab(@StringRes val title: Int) {
     RULES(R.string.root_tab_rules),
     ARCHIVE(R.string.root_tab_archive),
+    PEOPLE(R.string.people_tab),
     VIBRATIONS(R.string.root_tab_vibrations),
     SETTINGS(R.string.root_tab_settings);
 
@@ -56,6 +62,7 @@ private enum class Tab(@StringRes val title: Int) {
     fun Icon() = when (this) {
         RULES -> Icon(Icons.Default.Home, contentDescription = null)
         ARCHIVE -> Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
+        PEOPLE -> Icon(Icons.Default.Person, contentDescription = null)
         VIBRATIONS -> Icon(painterResource(R.drawable.ic_vibration), contentDescription = null)
         SETTINGS -> Icon(Icons.Default.Settings, contentDescription = null)
     }
@@ -95,6 +102,11 @@ fun AppRoot(
         value = withContext(Dispatchers.Default) { DismissalAdvisor.advise(interactions, ruleConfig, ignoredAdvice) }
     }
     val vibrationMuteError by app.vibrationMuteError.collectAsState()
+    val people by app.people.people.collectAsState()
+    val peopleLog by app.people.log.collectAsState()
+    val friendMode by app.settings.friendMode.collectAsState()
+    val ignoredMerges by app.settings.ignoredMerges.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var tab by rememberSaveable { mutableStateOf(Tab.RULES) }
     /** Selected archive tab: a rule id, or null for the Recent log. */
@@ -103,6 +115,24 @@ fun AppRoot(
     var showTutorial by rememberSaveable { mutableStateOf(!app.settings.tutorialSeen) }
     /** Notification the user wants to make a rule from; shows the suggestions dialog. */
     var suggestFor by remember { mutableStateOf<Notification?>(null) }
+    var openPersonId by rememberSaveable { mutableStateOf<String?>(null) }
+    /** Adding a person: first pick usernames, then name them. */
+    var pickingNewPerson by remember { mutableStateOf(false) }
+    var namingAliases by remember { mutableStateOf<List<Alias>?>(null) }
+
+    /** Links a phone contact: takes its name, and its photo if it has one. */
+    fun linkContact(personId: String) = actions.pickContact { picked ->
+        if (picked == null) {
+            android.widget.Toast.makeText(context, R.string.person_contact_failed, android.widget.Toast.LENGTH_SHORT).show()
+            return@pickContact
+        }
+        scope.launch {
+            val saved = picked.photo?.let { bytes ->
+                withContext(Dispatchers.IO) { runCatching { app.photoFile(personId).writeBytes(bytes) }.isSuccess }
+            } ?: false
+            app.people.update(personId) { it.copy(name = picked.name, contactName = picked.name, hasPhoto = saved || it.hasPhoto) }
+        }
+    }
 
     val hasAccess = remember(resumeTick) { app.settings.hasNotificationAccess() }
     val canPost = remember(resumeTick) { app.settings.canPostNotifications() }
@@ -164,6 +194,38 @@ fun AppRoot(
         return
     }
 
+    val person = people.firstOrNull { it.id == openPersonId }
+    if (person != null) {
+        BackHandler { openPersonId = null }
+        PersonScreen(
+            person = person,
+            entries = peopleLog,
+            senders = senders.values,
+            people = people,
+            photo = app.photoFile(person.id),
+            onBack = { openPersonId = null },
+            onRename = { name -> app.people.update(person.id) { it.copy(name = name) } },
+            onSetFavorite = { on -> app.people.update(person.id) { it.copy(favorite = on) } },
+            onSetSaveAll = { on -> app.people.update(person.id) { it.copy(saveAll = on) } },
+            onAddAliases = { app.people.addAliases(person.id, it) },
+            onRemoveAlias = { app.people.removeAlias(person.id, it) },
+            onLinkContact = { linkContact(person.id) },
+            onClearLog = { app.people.clearLog(person.id) },
+            onDelete = {
+                app.people.delete(person.id)
+                app.photoFile(person.id).delete()
+                openPersonId = null
+            },
+            onOpen = actions.openNotification,
+            onMakeRule = { suggestFor = it },
+        )
+        // Make-rule from a person's timeline opens on top of their screen.
+        suggestFor?.let { t ->
+            SuggestionScreen(target = t, known = recent.map { it.notification } + rules.flatMap { it.history }, onPick = { editing = it; suggestFor = null }, onBack = { suggestFor = null })
+        }
+        return
+    }
+
     val target = suggestFor
     if (target != null) {
         BackHandler { suggestFor = null }
@@ -194,6 +256,11 @@ fun AppRoot(
             if (tab == Tab.RULES) {
                 FloatingActionButton(onClick = { editing = Rule(name = "") }) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.root_add_rule))
+                }
+            }
+            if (tab == Tab.PEOPLE) {
+                FloatingActionButton(onClick = { pickingNewPerson = true }) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.people_add))
                 }
             }
         },
@@ -230,6 +297,21 @@ fun AppRoot(
                     onRestore = actions.restore,
                     actions = actions,
                 )
+                Tab.PEOPLE -> PeopleScreen(
+                    people = people,
+                    senders = senders.values,
+                    friendMode = friendMode,
+                    ignoredMerges = ignoredMerges,
+                    photoFile = app::photoFile,
+                    onSetFriendMode = app.settings::setFriendMode,
+                    onOpenPerson = { openPersonId = it },
+                    onCombine = { group ->
+                        val name = PeopleBook.displayName(group.maxBy { it.total }.sender)
+                        val created = app.people.create(name, group.map { Alias(it.packageName, it.appName, it.sender) })
+                        openPersonId = created.id
+                    },
+                    onIgnoreMerge = app.settings::ignoreMerge,
+                )
                 Tab.VIBRATIONS -> VibrationsScreen(
                     events = vibrations,
                     systemLogAvailable = systemLogAvailable,
@@ -260,5 +342,25 @@ fun AppRoot(
                 )
             }
         }
+    }
+
+    if (pickingNewPerson) {
+        AliasPickerDialog(
+            senders = senders.values,
+            people = people,
+            confirmLabel = { stringResource(R.string.alias_picker_next) },
+            onDone = { namingAliases = it; pickingNewPerson = false },
+            onDismiss = { pickingNewPerson = false },
+        )
+    }
+    namingAliases?.let { aliases ->
+        NamePersonDialog(
+            initialName = PeopleBook.displayName(aliases.first().sender),
+            onCreate = { name ->
+                openPersonId = app.people.create(name, aliases).id
+                namingAliases = null
+            },
+            onDismiss = { namingAliases = null },
+        )
     }
 }

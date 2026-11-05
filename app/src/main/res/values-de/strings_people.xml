@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_tab">Personen</string>
+    <string name="people_intro">Fasse die Benutzernamen einer Person aus allen Apps zusammen, um alles, was sie dir schickt, an einem Ort zu sehen.</string>
+    <string name="people_best_friends">Beste Freunde</string>
+    <string name="people_friend_mode">Nachrichten bester Freunde</string>
+    <string name="people_friend_mode_off">Nach Regeln</string>
+    <string name="people_friend_mode_allow">Immer durchlassen</string>
+    <string name="people_friend_mode_alert">Immer melden</string>
+    <string name="people_friend_mode_hint_off">Deine Regeln entscheiden, wie bei allen anderen.</string>
+    <string name="people_friend_mode_hint_allow">Nie ausgeblendet oder gebündelt, egal was deine Regeln sagen.</string>
+    <string name="people_friend_mode_hint_alert">Nie ausgeblendet und klingeln immer, auch bei „Bitte nicht stören“.</string>
+    <string name="people_suggested">Dieselbe Person?</string>
+    <string name="people_suggestion_text">%1$s auf %2$s</string>
+    <string name="people_combine">Zusammenfassen</string>
+    <string name="people_not_same">Nicht dieselbe</string>
+    <string name="people_all">Personen</string>
+    <string name="people_empty">Noch keine Personen. Tippe auf +, um Benutzernamen einer Person zusammenzufassen, oder nimm einen Vorschlag oben.</string>
+    <string name="people_add">Person hinzufügen</string>
+    <plurals name="people_week_count">
+        <item quantity="one">%1$d Benachrichtigung diese Woche</item>
+        <item quantity="other">%1$d Benachrichtigungen diese Woche</item>
+    </plurals>
+    <string name="people_star">Bester Freund</string>
+    <string name="people_unstar">Aus besten Freunden entfernen</string>
+
+    <string name="person_title">Person</string>
+    <string name="person_name">Name</string>
+    <string name="person_contact">Kontakt</string>
+    <string name="person_no_contact">Nicht verknüpft</string>
+    <string name="person_link_contact">Kontakt verknüpfen</string>
+    <string name="person_change_contact">Ändern</string>
+    <string name="person_usernames">Benutzernamen</string>
+    <string name="person_add_usernames">Benutzernamen hinzufügen</string>
+    <string name="person_remove_username">%1$s entfernen</string>
+    <string name="person_save_all">Jede Benachrichtigung speichern</string>
+    <string name="person_save_all_hint">Behält hier alles, was diese Person schickt, aus allen Apps, egal was deine Regeln tun.</string>
+    <string name="person_best_friend_hint">Wird zuerst angezeigt und nach der Einstellung für beste Freunde im Tab „Personen“ behandelt.</string>
+    <string name="person_stats">Heute %1$d · diese Woche %2$d · insgesamt %3$d</string>
+    <string name="person_timeline">Alles, was gesendet wurde</string>
+    <string name="person_timeline_empty">Noch nichts gespeichert. Neue Benachrichtigungen von dieser Person erscheinen hier.</string>
+    <string name="person_timeline_off">Speichern ist für diese Person aus.</string>
+    <string name="person_clear">Gespeichertes löschen</string>
+    <string name="person_delete">Person löschen</string>
+    <string name="person_delete_text">%1$s und die gespeicherten Benachrichtigungen werden entfernt. Die Benachrichtigungen selbst sind nicht betroffen.</string>
+    <string name="person_delete_confirm">Löschen</string>
+    <string name="person_open">Öffnen</string>
+    <string name="person_make_rule">Regel erstellen</string>
+    <string name="person_contact_failed">Der Kontakt konnte nicht gelesen werden.</string>
+
+    <string name="alias_picker_title">Benutzernamen auswählen</string>
+    <string name="alias_picker_hint">Jeder Name, von dem NotiRegX Benachrichtigungen gesehen hat, pro App.</string>
+    <string name="alias_picker_search">Suchen</string>
+    <string name="alias_picker_none">Noch keine Absender gesehen.</string>
+    <string name="alias_picker_taken">Jetzt: %1$s</string>
+    <string name="alias_picker_next">Weiter</string>
+    <string name="alias_picker_add">%1$d hinzufügen</string>
+    <string name="create_person_title">Neue Person</string>
+    <string name="create_person_create">Erstellen</string>
+</resources>

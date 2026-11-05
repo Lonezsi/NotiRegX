@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_tab">Emberek</string>
+    <string name="people_intro">Fűzd össze valaki felhasználóneveit az összes alkalmazásból egy emberré, és mindent, amit küld, egy helyen látsz.</string>
+    <string name="people_best_friends">Legjobb barátok</string>
+    <string name="people_friend_mode">Legjobb barátok üzenetei</string>
+    <string name="people_friend_mode_off">Szabályok szerint</string>
+    <string name="people_friend_mode_allow">Mindig átenged</string>
+    <string name="people_friend_mode_alert">Mindig jelez</string>
+    <string name="people_friend_mode_hint_off">A szabályaid döntenek, mint bárki másnál.</string>
+    <string name="people_friend_mode_hint_allow">Soha nem rejtődnek el vagy kerülnek csomagba, bármit mondanak a szabályaid.</string>
+    <string name="people_friend_mode_hint_alert">Soha nem rejtődnek el, és mindig csörögnek, a Ne zavarjanak alatt is.</string>
+    <string name="people_suggested">Ugyanaz az ember?</string>
+    <string name="people_suggestion_text">%1$s itt: %2$s</string>
+    <string name="people_combine">Összefűzés</string>
+    <string name="people_not_same">Nem ugyanaz</string>
+    <string name="people_all">Emberek</string>
+    <string name="people_empty">Még nincsenek emberek. Koppints a + gombra, hogy összefűzd valaki felhasználóneveit, vagy használj egy fenti javaslatot.</string>
+    <string name="people_add">Ember hozzáadása</string>
+    <plurals name="people_week_count">
+        <item quantity="one">%1$d értesítés ezen a héten</item>
+        <item quantity="other">%1$d értesítés ezen a héten</item>
+    </plurals>
+    <string name="people_star">Legjobb barát</string>
+    <string name="people_unstar">Eltávolítás a legjobb barátok közül</string>
+
+    <string name="person_title">Ember</string>
+    <string name="person_name">Név</string>
+    <string name="person_contact">Telefonos névjegy</string>
+    <string name="person_no_contact">Nincs összekapcsolva</string>
+    <string name="person_link_contact">Névjegy kapcsolása</string>
+    <string name="person_change_contact">Módosítás</string>
+    <string name="person_usernames">Felhasználónevek</string>
+    <string name="person_add_usernames">Felhasználónevek hozzáadása</string>
+    <string name="person_remove_username">%1$s eltávolítása</string>
+    <string name="person_save_all">Minden értesítés mentése</string>
+    <string name="person_save_all_hint">Mindent megőriz itt, amit küld, minden alkalmazásból, bármit is csinálnak a szabályaid.</string>
+    <string name="person_best_friend_hint">Elöl jelenik meg, és az Emberek lapon lévő legjobb barátok beállítás szerint kezelődik.</string>
+    <string name="person_stats">Ma %1$d · ezen a héten %2$d · összesen %3$d</string>
+    <string name="person_timeline">Minden, amit küldött</string>
+    <string name="person_timeline_empty">Még nincs mentve semmi. A tőle érkező új értesítések itt jelennek meg.</string>
+    <string name="person_timeline_off">A mentés ki van kapcsolva ennél az embernél.</string>
+    <string name="person_clear">Mentettek törlése</string>
+    <string name="person_delete">Ember törlése</string>
+    <string name="person_delete_text">%1$s és a mentett értesítései törlődnek. Magukat az értesítéseket ez nem érinti.</string>
+    <string name="person_delete_confirm">Törlés</string>
+    <string name="person_open">Megnyitás</string>
+    <string name="person_make_rule">Szabály készítése</string>
+    <string name="person_contact_failed">Nem sikerült beolvasni a névjegyet.</string>
+
+    <string name="alias_picker_title">Felhasználónevek kiválasztása</string>
+    <string name="alias_picker_hint">Minden név, amelytől a NotiRegX értesítést látott, alkalmazásonként.</string>
+    <string name="alias_picker_search">Keresés</string>
+    <string name="alias_picker_none">Még nincsenek küldők.</string>
+    <string name="alias_picker_taken">Jelenleg: %1$s</string>
+    <string name="alias_picker_next">Tovább</string>
+    <string name="alias_picker_add">%1$d hozzáadása</string>
+    <string name="create_person_title">Új ember</string>
+    <string name="create_person_create">Létrehozás</string>
+</resources>

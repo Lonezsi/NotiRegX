@@ -119,7 +119,8 @@ class NotiListenerService : NotificationListenerService() {
 
         sbn.notification.contentIntent?.let { app.contentIntents.put(n.id, it) }
         app.senderStats.record(n)
-        val decision = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value)
+        app.people.record(n)
+        val decision = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value, app.friendRules())
         lastSeen[sbn.key] = signature to decision.action
         if (decision.action != Action.PASS) remove(sbn) else inShade[sbn.key] = n
         val alwaysAlert = decision.rule?.type == RuleType.ALERT
@@ -143,7 +144,8 @@ class NotiListenerService : NotificationListenerService() {
             val n = m.notification.copy(id = app.ruleManager.newNotificationId())
             sbn.notification.contentIntent?.let { app.contentIntents.put(n.id, it) }
             app.senderStats.record(n)
-            val d = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value)
+            app.people.record(n)
+            val d = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value, app.friendRules())
             conversations.record(key, m.id, d.action)
             if (d.action == Action.PASS) lastPassing = n to d else lastCaught = n to d
             if (d.rule?.type == RuleType.ALERT) alert = n

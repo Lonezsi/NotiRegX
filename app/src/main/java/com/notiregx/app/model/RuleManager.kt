@@ -57,8 +57,12 @@ class RuleManager(
     fun newNotificationId(): Long = nextId.getAndIncrement()
 
     /** Decides the outcome for [n], records it in the catching rule's history and updates stats. */
-    fun process(n: Notification, maxSaved: Int, filteringEnabled: Boolean = true): Decision {
-        val rules = _rules.value
+    /**
+     * [extraRules] are evaluated after the user's rules (so they win), e.g. best friends'
+     * always-let-through rules; they aren't stored and keep no history.
+     */
+    fun process(n: Notification, maxSaved: Int, filteringEnabled: Boolean = true, extraRules: List<Rule> = emptyList()): Decision {
+        val rules = _rules.value + extraRules
         val decision = if (filteringEnabled) decide(rules, n, recordArrivals(rules, n)) else Decision.NONE
         val rule = decision.rule
         if (rule != null) {

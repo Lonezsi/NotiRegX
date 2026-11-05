@@ -11,6 +11,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.IntentSender
 import android.net.Uri
+import android.provider.ContactsContract
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -51,6 +52,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Who's waiting for the contact picker's answer. */
+    private var onContactPicked: ((PickedContact?) -> Unit)? = null
+
+    private val contactPicker = registerForActivityResult(ActivityResultContracts.PickContact()) { uri ->
+        val callback = onContactPicked
+        onContactPicked = null
+        callback?.invoke(uri?.let(::readContact))
+    }
+
     private val importFile = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
         try {
@@ -74,6 +84,15 @@ class MainActivity : ComponentActivity() {
             exportRules = { exportFile.launch("notiregx-rules.json") },
             importRules = { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
             restore = { app.restore(it); toast(getString(R.string.main_restored)) },
+            pickContact = { callback ->
+                onContactPicked = callback
+                try {
+                    contactPicker.launch(null)
+                } catch (e: ActivityNotFoundException) {
+                    onContactPicked = null
+                    callback(null)
+                }
+            },
             canOpenDirectly = { app.contentIntents.get(it.id) != null },
         )
         setContent {
@@ -157,6 +176,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Reads the picked contact's name and photo, through the read access the picker grants. */
+    private fun readContact(uri: Uri): PickedContact? =
+        try {
+            val name = contentResolver.query(uri, arrayOf(ContactsContract.Contacts.DISPLAY_NAME), null, null, null)
+                ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+            val photo = try {
+                ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, uri, false)?.use { it.readBytes() }
+            } catch (e: Exception) {
+                null
+            }
+            name?.let { PickedContact(it, photo) }
+        } catch (e: Exception) {
+            null
+        }
+
     private fun toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
     companion object {
@@ -168,6 +202,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** A contact picked from the phone's contacts: only this one contact is readable, no permission needed. */
+class PickedContact(val name: String, val photo: ByteArray?)
+
 class AppActions(
     val openNotification: (Notification) -> Unit,
     val openUrl: (String) -> Unit,
@@ -176,5 +213,7 @@ class AppActions(
     val exportRules: () -> Unit,
     val importRules: () -> Unit,
     val restore: (Notification) -> Unit,
+    /** Opens the system contact picker; the callback gets the picked contact, or null. */
+    val pickContact: ((PickedContact?) -> Unit) -> Unit,
     val canOpenDirectly: (Notification) -> Boolean,
 )

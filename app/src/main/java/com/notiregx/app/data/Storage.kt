@@ -3,7 +3,10 @@ package com.notiregx.app.data
 import android.util.AtomicFile
 import android.util.Log
 import com.notiregx.app.model.Action
+import com.notiregx.app.model.Alias
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.Person
+import com.notiregx.app.model.PersonEntry
 import com.notiregx.app.model.Interaction
 import com.notiregx.app.model.Outcome
 import com.notiregx.app.model.SenderCount
@@ -29,6 +32,8 @@ class Storage(dir: File) {
     private val vibrationsFile = File(dir, "vibrations.json")
     private val interactionsFile = File(dir, "interactions.json")
     private val sendersFile = File(dir, "senders.json")
+    private val peopleFile = File(dir, "people.json")
+    private val peopleLogFile = File(dir, "people_log.json")
     private val writer = Executors.newSingleThreadExecutor()
 
     fun loadRules(): List<Rule> = read(rulesFile, "rules", ::ruleFromJson)
@@ -81,6 +86,43 @@ class Storage(dir: File) {
             .put("total", s.total)
             .put("days", JSONObject().apply { s.days.forEach { (d, c) -> put(d.toString(), c) } })
             .put("lastSeen", s.lastSeen)
+    })
+
+    fun loadPeople(): List<Person> = read(peopleFile, "people") { o ->
+        Person(
+            id = o.getString("id"),
+            name = o.getString("name"),
+            aliases = o.optJSONArray("aliases")?.objects()?.map {
+                Alias(it.getString("packageName"), it.optString("appName"), it.getString("sender"))
+            }.orEmpty(),
+            favorite = o.optBoolean("favorite"),
+            saveAll = o.optBoolean("saveAll", true),
+            contactName = o.stringOrNull("contactName"),
+            hasPhoto = o.optBoolean("hasPhoto"),
+            createdAt = o.optLong("createdAt", System.currentTimeMillis()),
+        )
+    }
+
+    fun savePeople(people: List<Person>) = write(peopleFile, "people", people.map { p ->
+        JSONObject()
+            .put("id", p.id)
+            .put("name", p.name)
+            .put("aliases", JSONArray(p.aliases.map {
+                JSONObject().put("packageName", it.packageName).put("appName", it.appName).put("sender", it.sender)
+            }))
+            .put("favorite", p.favorite)
+            .put("saveAll", p.saveAll)
+            .put("contactName", p.contactName ?: JSONObject.NULL)
+            .put("hasPhoto", p.hasPhoto)
+            .put("createdAt", p.createdAt)
+    })
+
+    fun loadPeopleLog(): List<PersonEntry> = read(peopleLogFile, "entries") { o ->
+        PersonEntry(o.getString("personId"), notificationFromJson(o.getJSONObject("notification")))
+    }
+
+    fun savePeopleLog(entries: List<PersonEntry>) = write(peopleLogFile, "entries", entries.map {
+        JSONObject().put("personId", it.personId).put("notification", notificationToJson(it.notification))
     })
 
     private fun <T> read(file: File, key: String, parse: (JSONObject) -> T): List<T> {

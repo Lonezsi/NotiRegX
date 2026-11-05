@@ -8,6 +8,8 @@ import android.util.LruCache
 import com.notiregx.app.data.Storage
 import com.notiregx.app.model.Delivery
 import com.notiregx.app.model.InteractionLog
+import com.notiregx.app.model.PeopleBook
+import com.notiregx.app.model.Rule
 import com.notiregx.app.model.SenderStats
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.RuleManager
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class NotiRegXApp : Application() {
     lateinit var settings: Settings
@@ -49,6 +52,8 @@ class NotiRegXApp : Application() {
     lateinit var interactions: InteractionLog
         private set
     lateinit var senderStats: SenderStats
+        private set
+    lateinit var people: PeopleBook
         private set
     lateinit var watchdog: Watchdog
         private set
@@ -95,6 +100,7 @@ class NotiRegXApp : Application() {
         vibrationLog = VibrationLog(storage.loadVibrations())
         interactions = InteractionLog(storage.loadInteractions())
         senderStats = SenderStats(storage.loadSenders())
+        people = PeopleBook(storage.loadPeople(), storage.loadPeopleLog())
         if (senderStats.senders.value.isEmpty()) {
             senderStats.backfill(ruleManager.recent.value.map { it.notification } + ruleManager.rules.value.flatMap { it.history })
         }
@@ -111,6 +117,8 @@ class NotiRegXApp : Application() {
         scope.launch { vibrationLog.events.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveVibrations(it) } }
         scope.launch { interactions.events.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveInteractions(it) } }
         scope.launch { senderStats.senders.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveSenders(it.values) } }
+        scope.launch { people.people.drop(1).collect { storage.savePeople(it) } }
+        scope.launch { people.log.drop(1).debounce(SAVE_DELAY_MS).collect { storage.savePeopleLog(it) } }
         scope.launch { ruleManager.rules.collect { bundleNotifier.sync(it) } }
         scope.launch { settings.maxSaved.collect { ruleManager.trimHistories(it) } }
         scope.launch {
@@ -169,6 +177,14 @@ class NotiRegXApp : Application() {
         // Inexact, so no special alarm permission is needed; digests may arrive a few minutes late.
         if (next == null) alarms.cancel(pending) else alarms.setWindow(AlarmManager.RTC_WAKEUP, next, DIGEST_WINDOW_MS, pending)
     }
+
+    /** Folder for people's contact photos. */
+    val photoDir: File get() = File(filesDir, "people").apply { mkdirs() }
+
+    fun photoFile(personId: String) = File(photoDir, "$personId.jpg")
+
+    /** Rules for best friends, added after the user's own so they win. */
+    fun friendRules(): List<Rule> = PeopleBook.friendRules(people.people.value, settings.friendMode.value)
 
     fun exportRules(): String = storage.exportRules(ruleManager.rules.value)
 

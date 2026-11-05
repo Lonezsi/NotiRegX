@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people_tab">Personas</string>
+    <string name="people_intro">Une los nombres de usuario de alguien en todas las apps en una sola persona para ver todo lo que te envía en un mismo sitio.</string>
+    <string name="people_best_friends">Mejores amigos</string>
+    <string name="people_friend_mode">Mensajes de mejores amigos</string>
+    <string name="people_friend_mode_off">Según reglas</string>
+    <string name="people_friend_mode_allow">Dejar pasar siempre</string>
+    <string name="people_friend_mode_alert">Avisar siempre</string>
+    <string name="people_friend_mode_hint_off">Deciden tus reglas, como con todos los demás.</string>
+    <string name="people_friend_mode_hint_allow">Nunca se ocultan ni se agrupan, digan lo que digan tus reglas.</string>
+    <string name="people_friend_mode_hint_alert">Nunca se ocultan y siempre suenan, incluso con No molestar.</string>
+    <string name="people_suggested">¿La misma persona?</string>
+    <string name="people_suggestion_text">%1$s en %2$s</string>
+    <string name="people_combine">Unir</string>
+    <string name="people_not_same">No es la misma</string>
+    <string name="people_all">Personas</string>
+    <string name="people_empty">Aún no hay personas. Toca + para unir los nombres de usuario de alguien, o usa una sugerencia de arriba.</string>
+    <string name="people_add">Añadir persona</string>
+    <plurals name="people_week_count">
+        <item quantity="one">%1$d notificación esta semana</item>
+        <item quantity="other">%1$d notificaciones esta semana</item>
+    </plurals>
+    <string name="people_star">Mejor amigo</string>
+    <string name="people_unstar">Quitar de mejores amigos</string>
+
+    <string name="person_title">Persona</string>
+    <string name="person_name">Nombre</string>
+    <string name="person_contact">Contacto del teléfono</string>
+    <string name="person_no_contact">Sin vincular</string>
+    <string name="person_link_contact">Vincular contacto</string>
+    <string name="person_change_contact">Cambiar</string>
+    <string name="person_usernames">Nombres de usuario</string>
+    <string name="person_add_usernames">Añadir nombres de usuario</string>
+    <string name="person_remove_username">Quitar %1$s</string>
+    <string name="person_save_all">Guardar todas las notificaciones</string>
+    <string name="person_save_all_hint">Guarda aquí todo lo que envía, de todas las apps, hagan lo que hagan tus reglas.</string>
+    <string name="person_best_friend_hint">Aparece primero y sigue el ajuste de mejores amigos de la pestaña Personas.</string>
+    <string name="person_stats">Hoy %1$d · esta semana %2$d · en total %3$d</string>
+    <string name="person_timeline">Todo lo que ha enviado</string>
+    <string name="person_timeline_empty">Aún no hay nada guardado. Sus nuevas notificaciones aparecerán aquí.</string>
+    <string name="person_timeline_off">El guardado está desactivado para esta persona.</string>
+    <string name="person_clear">Borrar guardadas</string>
+    <string name="person_delete">Eliminar persona</string>
+    <string name="person_delete_text">Se eliminarán %1$s y sus notificaciones guardadas. Las notificaciones en sí no se ven afectadas.</string>
+    <string name="person_delete_confirm">Eliminar</string>
+    <string name="person_open">Abrir</string>
+    <string name="person_make_rule">Crear regla</string>
+    <string name="person_contact_failed">No se pudo leer ese contacto.</string>
+
+    <string name="alias_picker_title">Elegir nombres de usuario</string>
+    <string name="alias_picker_hint">Todos los nombres de los que NotiRegX ha visto notificaciones, por app.</string>
+    <string name="alias_picker_search">Buscar</string>
+    <string name="alias_picker_none">Aún no se ha visto ningún remitente.</string>
+    <string name="alias_picker_taken">Ahora: %1$s</string>
+    <string name="alias_picker_next">Siguiente</string>
+    <string name="alias_picker_add">Añadir %1$d</string>
+    <string name="create_person_title">Nueva persona</string>
+    <string name="create_person_create">Crear</string>
+</resources>

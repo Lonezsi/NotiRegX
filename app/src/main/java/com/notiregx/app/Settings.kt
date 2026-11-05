@@ -7,6 +7,7 @@ import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.PowerManager
 import androidx.core.app.NotificationManagerCompat
+import com.notiregx.app.model.FriendMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,27 @@ class Settings(private val context: Context) {
         val next = _ignoredAdvice.value + key
         prefs.edit().putStringSet(KEY_IGNORED_ADVICE, next).apply()
         _ignoredAdvice.value = next
+    }
+
+    private val _friendMode = MutableStateFlow(
+        FriendMode.entries.firstOrNull { it.name == prefs.getString(KEY_FRIEND_MODE, null) } ?: FriendMode.OFF
+    )
+    /** What happens to best friends' messages, whatever the rules say. */
+    val friendMode: StateFlow<FriendMode> = _friendMode.asStateFlow()
+
+    fun setFriendMode(mode: FriendMode) {
+        prefs.edit().putString(KEY_FRIEND_MODE, mode.name).apply()
+        _friendMode.value = mode
+    }
+
+    private val _ignoredMerges = MutableStateFlow(prefs.getStringSet(KEY_IGNORED_MERGES, emptySet()).orEmpty())
+    /** Names the user said aren't the same person across apps. */
+    val ignoredMerges: StateFlow<Set<String>> = _ignoredMerges.asStateFlow()
+
+    fun ignoreMerge(name: String) {
+        val next = _ignoredMerges.value + name
+        prefs.edit().putStringSet(KEY_IGNORED_MERGES, next).apply()
+        _ignoredMerges.value = next
     }
 
     /** Whether the first-launch tutorial has been shown (finished or skipped). */
@@ -89,5 +111,7 @@ class Settings(private val context: Context) {
         private const val KEY_FILTERING = "filtering_enabled"
         private const val KEY_IGNORED_ADVICE = "ignored_advice"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
+        private const val KEY_FRIEND_MODE = "friend_mode"
+        private const val KEY_IGNORED_MERGES = "ignored_merges"
     }
 }
