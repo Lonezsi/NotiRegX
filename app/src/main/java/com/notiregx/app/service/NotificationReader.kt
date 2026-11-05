@@ -47,12 +47,17 @@ class NotificationReader(private val context: Context) {
         val fallbackTitle = style.conversationTitle?.toString()
             ?: sbn.notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE)?.toString().orEmpty()
         val appName = appName(sbn.packageName)
+        // Some apps re-stamp every message when they re-post, so ids use sender, text and how many
+        // times that same line came before, not the time.
+        val occurrences = HashMap<String, Int>()
         return style.messages.map { m ->
             val sender = m.person?.name?.toString()
             val text = m.text?.toString().orEmpty()
             val time = if (m.timestamp > 0) m.timestamp else sbn.postTime
+            val line = "$sender|${text.hashCode()}"
+            val nth = occurrences.merge(line, 1, Int::plus)
             ChatMessage(
-                id = "$time|$sender|${text.hashCode()}",
+                id = "$line|$nth",
                 notification = Notification(
                     id = 0,
                     packageName = sbn.packageName,
