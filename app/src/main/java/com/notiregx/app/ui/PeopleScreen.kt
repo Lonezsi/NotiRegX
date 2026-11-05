@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import com.notiregx.app.R
 import com.notiregx.app.model.Alias
 import com.notiregx.app.model.FriendMode
+import com.notiregx.app.model.Friendship
 import com.notiregx.app.model.PeopleBook
 import com.notiregx.app.model.Person
 import com.notiregx.app.model.SenderCount
@@ -81,15 +83,37 @@ fun PeopleScreen(
     onOpenPerson: (String) -> Unit,
     onCombine: (List<SenderCount>) -> Unit,
     onIgnoreMerge: (String) -> Unit,
+    onMakePerson: (SenderCount) -> Unit,
 ) {
     val suggestions = remember(senders, people, ignoredMerges) {
         PeopleBook.mergeSuggestions(senders, people, ignoredMerges).take(5)
     }
-    val week = SenderStats.dayOf(System.currentTimeMillis()) - 6
+    var period by rememberSaveable { mutableStateOf(PeoplePeriod.WEEK) }
+    val firstDay = period.days?.let { SenderStats.dayOf(System.currentTimeMillis()) - it + 1 } ?: Int.MIN_VALUE
     val friends = people.filter { it.favorite }
-    val sorted = remember(people, senders) {
-        people.sortedWith(compareByDescending<Person> { it.favorite }.thenByDescending { personCount(it, senders, week) })
+    // Per person: their apps and counts in the period; people first (stars, then busiest).
+    val rows = remember(people, senders, firstDay) {
+        people.map { it to personSegments(it, senders, firstDay) }
+            .sortedWith(compareByDescending<Pair<Person, List<Pair<String, Long>>>> { it.first.favorite }.thenByDescending { r -> r.second.sumOf { it.second } })
     }
+    // Senders who aren't part of anyone: same bars, below everyone.
+    val unsorted = remember(people, senders, firstDay) {
+        val taken = people.flatMap { it.aliases }.mapTo(HashSet()) { it.key }
+        senders.filter { Alias.keyOf(it.packageName, it.sender) !in taken && !PeopleBook.isSystemApp(it.packageName) }
+            .map { it to it.countSince(firstDay) }
+            .filter { it.second > 0 }
+            .sortedByDescending { it.second }
+            .take(60)
+    }
+    // Best friends who've gone much quieter than usual.
+    val fading = remember(people, senders) {
+        val today = SenderStats.dayOf(System.currentTimeMillis())
+        people.filter { it.favorite }.filter { p ->
+            val keys = p.aliases.mapTo(HashSet()) { it.key }
+            Friendship.trend(senders.filter { Alias.keyOf(it.packageName, it.sender) in keys }, today).fading
+        }.mapTo(HashSet()) { it.id }
+    }
+    val max = maxOf(rows.maxOfOrNull { r -> r.second.sumOf { it.second } } ?: 0L, unsorted.maxOfOrNull { it.second } ?: 0L)
 
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
@@ -159,7 +183,18 @@ fun PeopleScreen(
                 }
             }
         }
-        item { Section(stringResource(R.string.people_all)) }
+        item {
+            Section(stringResource(R.string.people_all))
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(top = 6.dp)) {
+                PeoplePeriod.entries.forEachIndexed { i, p ->
+                    SegmentedButton(
+                        selected = period == p,
+                        onClick = { period = p },
+                        shape = SegmentedButtonDefaults.itemShape(i, PeoplePeriod.entries.size),
+                    ) { Text(stringResource(p.label), maxLines = 1) }
+                }
+            }
+        }
         if (people.isEmpty()) {
             item {
                 Text(
@@ -169,28 +204,78 @@ fun PeopleScreen(
                 )
             }
         }
-        items(sorted, key = { it.id }) { p ->
-            val count = personCount(p, senders, week)
+        items(rows, key = { it.first.id }) { (p, segments) ->
+            val count = segments.sumOf { it.second }
             Card(onClick = { onOpenPerson(p.id) }, modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Avatar(p, photoFile(p.id), 44.dp)
                     Spacer(Modifier.size(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(p.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(
-                            LocalContext.current.resources.getQuantityString(R.plurals.people_week_count, count.toInt(), count.toInt()),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Row(Modifier.padding(top = 4.dp)) {
-                            p.packages.forEach { AppIcon(it, size = 16.dp, modifier = Modifier.padding(end = 4.dp)) }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(p.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            if (p.favorite) Icon(Icons.Default.Star, stringResource(R.string.people_star), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                            if (p.favorite && fading.contains(p.id)) {
+                                Text(
+                                    stringResource(R.string.friendship_fading),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(start = 6.dp),
+                                )
+                            }
+                            Text("%,d".format(count), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+                        }
+                        AppStackedBar(segments, max)
+                        Row {
+                            segments.forEach { (pkg, n) ->
+                                AppIcon(pkg, size = 14.dp)
+                                Text("$n", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(start = 2.dp, end = 8.dp))
+                            }
                         }
                     }
-                    if (p.favorite) Icon(Icons.Default.Star, stringResource(R.string.people_star), tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
+        if (unsorted.isNotEmpty()) {
+            item {
+                Section(stringResource(R.string.people_unsorted))
+                Text(
+                    stringResource(R.string.people_unsorted_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            items(unsorted, key = { "unsorted-" + it.first.key }) { (sender, count) ->
+                Card(onClick = { onMakePerson(sender) }, modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AppIcon(sender.packageName, size = 22.dp)
+                            Spacer(Modifier.size(10.dp))
+                            Text(sender.sender, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Text("%,d".format(count), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        }
+                        AppStackedBar(listOf(sender.packageName to count), max)
+                    }
                 }
             }
         }
     }
+}
+
+private enum class PeoplePeriod(val label: Int, val days: Int?) {
+    TODAY(R.string.senders_period_today, 1),
+    WEEK(R.string.senders_period_week, 7),
+    MONTH(R.string.senders_period_month, 30),
+    ALL(R.string.senders_period_all, null),
+}
+
+/** How much [p] sent in each of their apps since [firstDay], busiest app first. */
+fun personSegments(p: Person, senders: Collection<SenderCount>, firstDay: Int): List<Pair<String, Long>> {
+    val keys = p.aliases.mapTo(HashSet()) { it.key }
+    return senders.filter { Alias.keyOf(it.packageName, it.sender) in keys }
+        .groupBy { it.packageName }
+        .map { (pkg, list) -> pkg to list.sumOf { it.countSince(firstDay) } }
+        .filter { it.second > 0 }
+        .sortedByDescending { it.second }
 }
 
 private val FriendMode.label: Int

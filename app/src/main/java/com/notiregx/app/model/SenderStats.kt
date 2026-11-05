@@ -19,6 +19,8 @@ data class SenderCount(
     /** Count per local day (days since the epoch), for the last [SenderStats.KEEP_DAYS] days. */
     val days: Map<Int, Int>,
     val lastSeen: Long,
+    /** Count per week (see [SenderStats.weekOf]) for the last [SenderStats.KEEP_WEEKS] weeks, for long-term graphs. */
+    val weeks: Map<Int, Int> = weeksFrom(days),
 ) {
     val key: String get() = keyOf(packageName, sender)
 
@@ -26,6 +28,10 @@ data class SenderCount(
 
     companion object {
         fun keyOf(packageName: String, sender: String) = packageName + "\u0000" + sender
+
+        /** Weekly totals from daily counts, for data saved before weeks were kept. */
+        fun weeksFrom(days: Map<Int, Int>): Map<Int, Int> =
+            days.entries.groupBy { SenderStats.weekOf(it.key) }.mapValues { (_, e) -> e.sumOf { it.value } }
     }
 }
 
@@ -42,7 +48,9 @@ class SenderStats(initial: List<SenderCount> = emptyList()) {
             val key = SenderCount.keyOf(n.packageName, sender)
             val old = all[key]
             val days = (old?.days.orEmpty() + (day to (old?.days?.get(day) ?: 0) + 1)).filterKeys { it > day - KEEP_DAYS }
-            val updated = SenderCount(n.packageName, n.appName, sender, (old?.total ?: 0) + 1, days, maxOf(old?.lastSeen ?: 0, n.postedAt))
+            val week = weekOf(day)
+            val weeks = (old?.weeks.orEmpty() + (week to (old?.weeks?.get(week) ?: 0) + 1)).filterKeys { it > week - KEEP_WEEKS }
+            val updated = SenderCount(n.packageName, n.appName, sender, (old?.total ?: 0) + 1, days, maxOf(old?.lastSeen ?: 0, n.postedAt), weeks)
             val next = all + (key to updated)
             if (next.size <= MAX_SENDERS) next
             else next.values.sortedByDescending { it.lastSeen }.take(MAX_SENDERS).associateBy { it.key }
@@ -57,6 +65,10 @@ class SenderStats(initial: List<SenderCount> = emptyList()) {
 
     companion object {
         const val KEEP_DAYS = 90
+        const val KEEP_WEEKS = 104
+
+        /** Week number (weeks since the epoch, starting on Mondays) of a [dayOf] day. */
+        fun weekOf(day: Int): Int = Math.floorDiv(day + 3, 7)
         private const val MAX_SENDERS = 3000
 
         fun dayOf(time: Long, zone: TimeZone = TimeZone.getDefault()): Int =

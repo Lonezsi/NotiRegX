@@ -32,6 +32,9 @@ class MainActivity : ComponentActivity() {
     /** Rule whose archive should be shown, set when a bundle notification is tapped. */
     private val openRuleId = mutableStateOf<String?>(null)
 
+    /** Person to show, set when a "haven't heard from" reminder is tapped. */
+    private val openPerson = mutableStateOf<String?>(null)
+
     /** Tab to switch to, set when the quick-settings tile opens the app. */
     private val openTab = mutableStateOf<String?>(null)
 
@@ -49,6 +52,21 @@ class MainActivity : ComponentActivity() {
             toast(getString(R.string.main_rules_exported))
         } catch (e: Exception) {
             toast(getString(R.string.main_export_failed, e.message))
+        }
+    }
+
+    /** Text waiting to be written once the user picks where to save it. */
+    private var pendingExport: String? = null
+
+    private val exportText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        val text = pendingExport
+        pendingExport = null
+        if (uri == null || text == null) return@registerForActivityResult
+        try {
+            contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) }
+            toast(getString(R.string.person_exported))
+        } catch (e: Exception) {
+            toast(getString(R.string.person_export_failed))
         }
     }
 
@@ -84,6 +102,10 @@ class MainActivity : ComponentActivity() {
             exportRules = { exportFile.launch("notiregx-rules.json") },
             importRules = { importFile.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
             restore = { app.restore(it); toast(getString(R.string.main_restored)) },
+            exportText = { fileName, text ->
+                pendingExport = text
+                exportText.launch(fileName)
+            },
             pickContact = { callback ->
                 onContactPicked = callback
                 try {
@@ -97,7 +119,7 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             NotiRegXTheme {
-                AppRoot(app, openRuleId, openTab, resumeTick.intValue, actions)
+                AppRoot(app, openRuleId, openTab, openPerson, resumeTick.intValue, actions)
             }
         }
     }
@@ -140,6 +162,7 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent?) {
         intent?.getStringExtra(EXTRA_RULE_ID)?.let { openRuleId.value = it }
         intent?.getStringExtra(EXTRA_TAB)?.let { openTab.value = it }
+        intent?.getStringExtra(EXTRA_PERSON_ID)?.let { openPerson.value = it }
     }
 
     /** Fires the original notification's click action, or falls back to launching its app. */
@@ -196,6 +219,7 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_RULE_ID = "com.notiregx.app.RULE_ID"
         const val EXTRA_TAB = "com.notiregx.app.TAB"
+        const val EXTRA_PERSON_ID = "com.notiregx.app.PERSON_ID"
         const val TAB_VIBRATIONS = "vibrations"
         val POST_NOTIFICATIONS: String? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
@@ -213,6 +237,8 @@ class AppActions(
     val exportRules: () -> Unit,
     val importRules: () -> Unit,
     val restore: (Notification) -> Unit,
+    /** Saves text to a file the user picks (name suggested). */
+    val exportText: (fileName: String, text: String) -> Unit,
     /** Opens the system contact picker; the callback gets the picked contact, or null. */
     val pickContact: ((PickedContact?) -> Unit) -> Unit,
     val canOpenDirectly: (Notification) -> Boolean,

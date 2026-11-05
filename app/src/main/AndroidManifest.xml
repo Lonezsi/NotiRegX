@@ -60,6 +60,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".service.RecapReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".service.WatchdogReceiver"
             android:exported="false" />
 

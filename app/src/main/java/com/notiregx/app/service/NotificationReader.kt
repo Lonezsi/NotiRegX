@@ -2,7 +2,9 @@ package com.notiregx.app.service
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.service.notification.StatusBarNotification
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.app.NotificationCompat
 import com.notiregx.app.model.ChatMessage
 import com.notiregx.app.model.Notification
@@ -47,6 +49,7 @@ class NotificationReader(private val context: Context) {
         val fallbackTitle = style.conversationTitle?.toString()
             ?: sbn.notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE)?.toString().orEmpty()
         val appName = appName(sbn.packageName)
+        val group = style.conversationTitle?.toString()?.takeIf { style.isGroupConversation }
         // Some apps re-stamp every message when they re-post, so ids use sender, text and how many
         // times that same line came before, not the time.
         val occurrences = HashMap<String, Int>()
@@ -66,11 +69,26 @@ class NotificationReader(private val context: Context) {
                     text = text,
                     postedAt = time,
                     url = URL.find(text)?.value,
+                    group = group,
                 ),
                 // MessagingStyle marks the user's own messages with no sender.
                 fromMe = m.person == null,
             )
         }
+    }
+
+    /**
+     * The picture the chat app attached for [sender]: their avatar in the conversation, or for a
+     * one-to-one chat the notification's large icon. Null if there's none.
+     */
+    fun senderAvatar(sbn: StatusBarNotification, sender: String): Bitmap? = try {
+        val style = NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(sbn.notification)
+        val icon = style?.messages?.lastOrNull { it.person?.name?.toString() == sender }?.person?.icon
+        val drawable = icon?.loadDrawable(context)
+            ?: sbn.notification.getLargeIcon()?.takeIf { style?.isGroupConversation != true }?.loadDrawable(context)
+        drawable?.toBitmap(AVATAR_PX, AVATAR_PX)
+    } catch (e: RuntimeException) {
+        null
     }
 
     fun appName(pkg: String): String = appNames.getOrPut(pkg) {
@@ -83,6 +101,7 @@ class NotificationReader(private val context: Context) {
     }
 
     companion object {
+        private const val AVATAR_PX = 192
         private val URL = Regex("""https?://[^\s<>"]+""")
 
         fun isGroupSummary(sbn: StatusBarNotification) =

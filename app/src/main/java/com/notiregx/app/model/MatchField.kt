@@ -7,11 +7,15 @@ import com.notiregx.app.R
 enum class MatchField(@StringRes val label: Int) {
     ANY(R.string.field_any),
     TITLE(R.string.field_title),
-    TEXT(R.string.field_text);
+    TEXT(R.string.field_text),
+
+    /** A chat group's name (empty for direct chats and other notifications). */
+    GROUP(R.string.field_group);
 
     fun of(n: Notification): String = when (this) {
         ANY -> n.content
         TITLE -> n.title
         TEXT -> n.text
+        GROUP -> n.group.orEmpty()
     }
 }

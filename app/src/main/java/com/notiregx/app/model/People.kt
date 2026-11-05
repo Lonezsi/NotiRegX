@@ -27,13 +27,15 @@ data class Person(
     val contactName: String? = null,
     /** Whether a contact photo was saved for them (see the app's people photo folder). */
     val hasPhoto: Boolean = false,
+    /** Remind the user when they haven't heard from this person in this many days; null: never. */
+    val remindAfterDays: Int? = null,
     val createdAt: Long = System.currentTimeMillis(),
 ) {
     val packages: List<String> get() = aliases.map { it.packageName }.distinct()
 }
 
-/** A notification kept in a person's timeline. */
-data class PersonEntry(val personId: String, val notification: Notification)
+/** A notification kept in a person's timeline. [deleted]: the sender unsent it afterwards. */
+data class PersonEntry(val personId: String, val notification: Notification, val deleted: Boolean = false)
 
 /** What happens to best friends' messages, whatever the rules say. */
 enum class FriendMode { OFF, ALLOW, ALERT }
@@ -127,6 +129,21 @@ class PeopleBook(initialPeople: List<Person> = emptyList(), initialLog: List<Per
         _log.update { log -> log.filter { it.personId != id } }
     }
 
+    /** Marks a saved message as unsent by its sender (it stays saved). Returns the person, if it was theirs. */
+    fun markDeleted(n: Notification): Person? {
+        var personId: String? = null
+        _log.update { log ->
+            val i = log.indexOfFirst {
+                !it.deleted && it.notification.packageName == n.packageName && it.notification.title == n.title && it.notification.text == n.text
+            }
+            if (i < 0) log else {
+                personId = log[i].personId
+                log.toMutableList().apply { this[i] = this[i].copy(deleted = true) }
+            }
+        }
+        return personId?.let { id -> _people.value.firstOrNull { it.id == id } }
+    }
+
     fun clearLog(id: String) = _log.update { log -> log.filter { it.personId != id } }
 
     private fun Person.withoutAliases(taken: List<Alias>): Person {
@@ -137,6 +154,11 @@ class PeopleBook(initialPeople: List<Person> = emptyList(), initialLog: List<Per
     companion object {
         const val MAX_PER_PERSON = 2000
         const val MAX_TOTAL = 20000
+
+        /** The phone's own apps (battery, system UI, Samsung services): their notification titles aren't people. */
+        fun isSystemApp(packageName: String): Boolean =
+            packageName == "android" || packageName.startsWith("com.android.") ||
+                packageName.startsWith("com.samsung.") || packageName.startsWith("com.sec.")
 
         fun personFor(people: List<Person>, packageName: String, sender: String): Person? {
             val key = Alias.keyOf(packageName, sender)
@@ -181,7 +203,7 @@ class PeopleBook(initialPeople: List<Person> = emptyList(), initialLog: List<Per
         fun mergeSuggestions(senders: Collection<SenderCount>, people: List<Person>, ignored: Set<String> = emptySet()): List<List<SenderCount>> {
             val taken = people.flatMap { it.aliases }.mapTo(HashSet()) { it.key }
             return senders
-                .filter { Alias.keyOf(it.packageName, it.sender) !in taken }
+                .filter { Alias.keyOf(it.packageName, it.sender) !in taken && !isSystemApp(it.packageName) }
                 .groupBy { displayName(it.sender).lowercase() }
                 .filterKeys { it.length >= 2 && it !in ignored }
                 .values

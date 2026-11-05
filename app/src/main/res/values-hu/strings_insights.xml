@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Visszavont üzenetek mentése, emlékeztetők, napi összegzés, keresés, aktivitási grafikonok és emberekhez kapcsolódó extrák. -->
+<resources>
+    <string name="rescue_channel">Visszavont üzenetek</string>
+    <string name="rescue_channel_description">Üzenetek, amelyeket valaki elküldött, majd visszavont</string>
+    <!-- %1$s = person -->
+    <string name="rescue_title">%1$s visszavont egy üzenetet</string>
+
+    <string name="reminder_channel">Tartsd a kapcsolatot</string>
+    <string name="reminder_channel_description">Emlékeztetők, ha valaki már egy ideje nem jelentkezett</string>
+    <!-- %1$s = person, %2$d = days -->
+    <plurals name="reminder_title">
+        <item quantity="one">%1$s már %2$d napja nem jelentkezett</item>
+        <item quantity="other">%1$s már %2$d napja nem jelentkezett</item>
+    </plurals>
+    <string name="reminder_text">Esetleg írj neki?</string>
+
+    <string name="recap_channel">Napi összegzés</string>
+    <string name="recap_channel_description">Esti összefoglaló az értesítéseidről</string>
+    <string name="recap_title">A napod értesítésekben</string>
+    <!-- %1$d = hidden, %2$d = bundled -->
+    <string name="recap_filtered">Szűrve: %1$d elrejtve, %2$d csomagban</string>
+    <!-- %1$s = app, %2$d = count -->
+    <string name="recap_top_app">Legzajosabb: %1$s (%2$d)</string>
+    <!-- %1$s = list like "Zénó 12, Anna 5" -->
+    <string name="recap_top_people">Legtöbbet írtak: %1$s</string>
+    <plurals name="recap_ghosts">
+        <item quantity="one">%1$d szellemrezgés</item>
+        <item quantity="other">%1$d szellemrezgés</item>
+    </plurals>
+    <string name="recap_quiet">Csendes nap: semmi sem lett szűrve.</string>
+
+    <string name="settings_section_extras">Extrák</string>
+    <string name="settings_recap">Napi összegzés</string>
+    <!-- %1$s = time -->
+    <string name="settings_recap_hint">Esti összefoglaló értesítés ekkor: %1$s.</string>
+    <string name="settings_recap_time">Időpont módosítása</string>
+    <string name="settings_rescue">Visszavont üzenetek jelzése</string>
+    <string name="settings_rescue_hint">Ha valamelyik embered visszavon egy üzenetet, a NotiRegX megőrzi, és szól neked.</string>
+
+    <string name="search_title">Keresés</string>
+    <string name="search_hint">Keresés mindenben, amit a NotiRegX mentett</string>
+    <string name="search_all_people">Bárki</string>
+    <string name="search_all_apps">Minden alkalmazás</string>
+    <plurals name="search_results">
+        <item quantity="one">%1$d találat</item>
+        <item quantity="other">%1$d találat</item>
+    </plurals>
+    <string name="search_nothing">Nincs találat.</string>
+    <string name="search_deleted">Visszavonva</string>
+
+    <string name="activity_title">Mikor ír neked</string>
+    <string name="activity_hours">Óránként</string>
+    <string name="activity_weekdays">A hét napjai szerint</string>
+    <string name="activity_days">Utolsó 30 nap</string>
+    <string name="activity_empty">Még nincs elég mentett adat a mintákhoz.</string>
+    <!-- %1$s = like "21:00" -->
+    <string name="activity_busiest">Általában %1$s körül</string>
+
+    <string name="person_groups">Csoportok, ahol ír</string>
+    <!-- %1$s = group, %2$d = count -->
+    <string name="person_group_entry">%1$s · %2$d</string>
+    <string name="person_mute_group">Csoport elrejtése</string>
+    <string name="person_rules">Szabályok ennél az embernél</string>
+    <string name="person_rule_hide">Üzenetei elrejtése</string>
+    <string name="person_rule_alert">Mindig jelezzen, ha ír</string>
+    <string name="person_reminder">Emlékeztess, ha nem jelentkezik</string>
+    <string name="person_reminder_off">Ki</string>
+    <plurals name="person_reminder_days">
+        <item quantity="one">%1$d nap után</item>
+        <item quantity="other">%1$d nap után</item>
+    </plurals>
+    <!-- %1$s = like "3 days ago" -->
+    <string name="person_last_heard">Utoljára jelentkezett: %1$s</string>
+    <string name="person_export">Előzmények exportálása</string>
+    <string name="person_exported">Előzmények exportálva</string>
+    <string name="person_export_failed">Sikertelen exportálás</string>
+    <string name="person_deleted_badge">Visszavonva</string>
+    <string name="people_unsorted">Még nincs besorolva</string>
+    <string name="people_unsorted_hint">Küldők, akik még nem tartoznak egy emberhez sem. Koppints valamelyikre, hogy emberré tedd.</string>
+
+    <string name="editor_person">Ember</string>
+    <string name="editor_person_any">Bárki</string>
+    <string name="editor_chat_scope">Csevegések</string>
+    <string name="editor_chat_any">Mind</string>
+    <string name="editor_chat_direct">Privát</string>
+    <string name="editor_chat_group">Csoportok</string>
+    <string name="editor_person_pick_title">Ember kiválasztása</string>
+    <string name="friendship_title">A barátságotok az idő során</string>
+    <string name="friendship_weeks">Üzenetek hetente, az elmúlt egy évben</string>
+    <!-- %1$d = last 14 days, %2$d = usual per 14 days -->
+    <string name="friendship_trend">Utolsó 2 hét: %1$d · általában kb. %2$d</string>
+    <string name="friendship_fading">Elhalványul</string>
+    <string name="friendship_fading_hint">Mostanában sokkal csendesebb a szokásosnál. Esetleg írj neki?</string>
+    <!-- %1$s = person -->
+    <string name="fading_title">Elcsendesedett a kapcsolat vele: %1$s</string>
+    <!-- %1$d = last 14 days, %2$d = usual -->
+    <string name="fading_text">%1$d üzenet az elmúlt 2 hétben, általában kb. %2$d. Esetleg írj neki?</string>
+</resources>

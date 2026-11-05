@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zurückgezogene Nachrichten retten, Erinnerungen, Tagesrückblick, Suche, Aktivitätsdiagramme und Personen-Extras. -->
+<resources>
+    <string name="rescue_channel">Zurückgezogene Nachrichten</string>
+    <string name="rescue_channel_description">Nachrichten, die jemand gesendet und dann zurückgezogen hat</string>
+    <!-- %1$s = person -->
+    <string name="rescue_title">%1$s hat eine Nachricht zurückgezogen</string>
+
+    <string name="reminder_channel">In Kontakt bleiben</string>
+    <string name="reminder_channel_description">Erinnerungen, wenn du länger nichts von jemandem gehört hast</string>
+    <!-- %1$s = person, %2$d = days -->
+    <plurals name="reminder_title">
+        <item quantity="one">Seit %2$d Tag nichts von %1$s gehört</item>
+        <item quantity="other">Seit %2$d Tagen nichts von %1$s gehört</item>
+    </plurals>
+    <string name="reminder_text">Vielleicht mal schreiben?</string>
+
+    <string name="recap_channel">Tagesrückblick</string>
+    <string name="recap_channel_description">Eine abendliche Zusammenfassung deiner Benachrichtigungen</string>
+    <string name="recap_title">Dein Tag in Benachrichtigungen</string>
+    <!-- %1$d = hidden, %2$d = bundled -->
+    <string name="recap_filtered">Gefiltert: %1$d ausgeblendet, %2$d gebündelt</string>
+    <!-- %1$s = app, %2$d = count -->
+    <string name="recap_top_app">Am lautesten: %1$s (%2$d)</string>
+    <!-- %1$s = list like "Zénó 12, Anna 5" -->
+    <string name="recap_top_people">Am meisten von: %1$s</string>
+    <plurals name="recap_ghosts">
+        <item quantity="one">%1$d Geistervibration</item>
+        <item quantity="other">%1$d Geistervibrationen</item>
+    </plurals>
+    <string name="recap_quiet">Ein ruhiger Tag: nichts gefiltert.</string>
+
+    <string name="settings_section_extras">Extras</string>
+    <string name="settings_recap">Tagesrückblick</string>
+    <!-- %1$s = time -->
+    <string name="settings_recap_hint">Eine abendliche Zusammenfassung um %1$s.</string>
+    <string name="settings_recap_time">Uhrzeit ändern</string>
+    <string name="settings_rescue">Zurückgezogene Nachrichten melden</string>
+    <string name="settings_rescue_hint">Wenn eine deiner Personen eine Nachricht zurückzieht, behält NotiRegX sie und sagt dir Bescheid.</string>
+
+    <string name="search_title">Suchen</string>
+    <string name="search_hint">Alles durchsuchen, was NotiRegX gespeichert hat</string>
+    <string name="search_all_people">Alle</string>
+    <string name="search_all_apps">Alle Apps</string>
+    <plurals name="search_results">
+        <item quantity="one">%1$d Ergebnis</item>
+        <item quantity="other">%1$d Ergebnisse</item>
+    </plurals>
+    <string name="search_nothing">Nichts gefunden.</string>
+    <string name="search_deleted">Zurückgezogen</string>
+
+    <string name="activity_title">Wann Nachrichten kommen</string>
+    <string name="activity_hours">Nach Uhrzeit</string>
+    <string name="activity_weekdays">Nach Wochentag</string>
+    <string name="activity_days">Letzte 30 Tage</string>
+    <string name="activity_empty">Noch nicht genug gespeichert, um Muster zu zeigen.</string>
+    <!-- %1$s = like "21:00" -->
+    <string name="activity_busiest">Meist gegen %1$s</string>
+
+    <string name="person_groups">Gruppen, in denen geschrieben wird</string>
+    <!-- %1$s = group, %2$d = count -->
+    <string name="person_group_entry">%1$s · %2$d</string>
+    <string name="person_mute_group">Diese Gruppe ausblenden</string>
+    <string name="person_rules">Regeln für diese Person</string>
+    <string name="person_rule_hide">Nachrichten ausblenden</string>
+    <string name="person_rule_alert">Immer melden</string>
+    <string name="person_reminder">Erinnern, wenn nichts kommt</string>
+    <string name="person_reminder_off">Aus</string>
+    <plurals name="person_reminder_days">
+        <item quantity="one">Nach %1$d Tag</item>
+        <item quantity="other">Nach %1$d Tagen</item>
+    </plurals>
+    <!-- %1$s = like "3 days ago" -->
+    <string name="person_last_heard">Zuletzt gemeldet: %1$s</string>
+    <string name="person_export">Verlauf exportieren</string>
+    <string name="person_exported">Verlauf exportiert</string>
+    <string name="person_export_failed">Export fehlgeschlagen</string>
+    <string name="person_deleted_badge">Zurückgezogen</string>
+    <string name="people_unsorted">Noch nicht zugeordnet</string>
+    <string name="people_unsorted_hint">Absender, die noch zu keiner Person gehören. Tippe auf einen, um eine Person daraus zu machen.</string>
+
+    <string name="editor_person">Person</string>
+    <string name="editor_person_any">Alle</string>
+    <string name="editor_chat_scope">Chats</string>
+    <string name="editor_chat_any">Alle</string>
+    <string name="editor_chat_direct">Direkt</string>
+    <string name="editor_chat_group">Gruppen</string>
+    <string name="editor_person_pick_title">Person auswählen</string>
+    <string name="friendship_title">Eure Freundschaft im Verlauf</string>
+    <string name="friendship_weeks">Nachrichten pro Woche, letztes Jahr</string>
+    <!-- %1$d = last 14 days, %2$d = usual per 14 days -->
+    <string name="friendship_trend">Letzte 2 Wochen: %1$d · sonst etwa %2$d</string>
+    <string name="friendship_fading">Wird leiser</string>
+    <string name="friendship_fading_hint">In letzter Zeit viel ruhiger als sonst. Vielleicht mal melden?</string>
+    <!-- %1$s = person -->
+    <string name="fading_title">Mit %1$s ist es ruhig geworden</string>
+    <!-- %1$d = last 14 days, %2$d = usual -->
+    <string name="fading_text">%1$d Nachrichten in den letzten 2 Wochen, sonst etwa %2$d. Vielleicht mal melden?</string>
+</resources>

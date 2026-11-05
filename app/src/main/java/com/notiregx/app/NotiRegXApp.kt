@@ -17,6 +17,11 @@ import com.notiregx.app.model.VibrationLog
 import com.notiregx.app.service.Alerter
 import com.notiregx.app.service.BundleNotifier
 import com.notiregx.app.service.DigestReceiver
+import com.notiregx.app.service.RecapReceiver
+import com.notiregx.app.model.Recap
+import com.notiregx.app.model.Alias
+import com.notiregx.app.model.Friendship
+import com.notiregx.app.model.Reminders
 import com.notiregx.app.service.NotificationReader
 import com.notiregx.app.service.SystemVibrationReader
 import com.notiregx.app.service.Watchdog
@@ -111,6 +116,7 @@ class NotiRegXApp : Application() {
         companionLinked.value = settings.isCompanionLinked()
         watchdog = Watchdog(this)
         watchdog.schedule()
+        scheduleRecap()
 
         scope.launch { ruleManager.rules.drop(1).collect { storage.saveRules(it) } }
         scope.launch { ruleManager.recent.drop(1).debounce(SAVE_DELAY_MS).collect { storage.saveRecent(it) } }
@@ -176,6 +182,72 @@ class NotiRegXApp : Application() {
         val next = Delivery.nextAfter(times, System.currentTimeMillis())
         // Inexact, so no special alarm permission is needed; digests may arrive a few minutes late.
         if (next == null) alarms.cancel(pending) else alarms.setWindow(AlarmManager.RTC_WAKEUP, next, DIGEST_WINDOW_MS, pending)
+    }
+
+    /** Posts "haven't heard from" reminders that are due (checked with the watchdog, every ~15 min). */
+    fun checkReminders() {
+        val prefs = getSharedPreferences("reminders", MODE_PRIVATE)
+        val last = prefs.all.mapNotNull { (k, v) -> (v as? Long)?.let { k to it } }.toMap()
+        val now = System.currentTimeMillis()
+        Reminders.due(people.people.value, senderStats.senders.value.values, last, now).forEach { (person, days) ->
+            alerter.reminder(person.id, person.name, days)
+            prefs.edit().putLong(person.id, now).apply()
+        }
+        // Best friends who've gone quiet: warn once per quiet spell.
+        val fading = getSharedPreferences("fading", MODE_PRIVATE)
+        val today = SenderStats.dayOf(now)
+        val senders = senderStats.senders.value.values
+        people.people.value.filter { it.favorite }.forEach { p ->
+            val keys = p.aliases.mapTo(HashSet()) { it.key }
+            val trend = Friendship.trend(senders.filter { Alias.keyOf(it.packageName, it.sender) in keys }, today)
+            val warned = fading.getBoolean(p.id, false)
+            if (trend.fading && !warned) {
+                alerter.fading(p.id, p.name, trend.recent, trend.usual.toInt())
+                fading.edit().putBoolean(p.id, true).apply()
+            } else if (!trend.fading && warned) {
+                fading.edit().remove(p.id).apply()
+            }
+        }
+    }
+
+    /** Builds and posts the daily recap, then arms the next one. */
+    fun sendRecap() {
+        if (settings.recapEnabled.value) {
+            val today = SenderStats.dayOf(System.currentTimeMillis())
+            val dayStart = java.util.Calendar.getInstance().apply {
+                set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0)
+                set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val recap = Recap.build(
+                ruleManager.recent.value, senderStats.senders.value.values, people.people.value,
+                VibrationLog.timeline(vibrationLog.events.value), dayStart, today,
+            )
+            val lines = buildList {
+                if (recap.hidden + recap.bundled == 0) add(getString(R.string.recap_quiet))
+                else add(getString(R.string.recap_filtered, recap.hidden, recap.bundled))
+                recap.topFilteredApp?.let { (app, n) -> add(getString(R.string.recap_top_app, app, n)) }
+                if (recap.topPeople.isNotEmpty()) {
+                    add(getString(R.string.recap_top_people, recap.topPeople.joinToString(", ") { (name, n) -> "$name $n" }))
+                }
+                if (recap.ghosts > 0) add(resources.getQuantityString(R.plurals.recap_ghosts, recap.ghosts, recap.ghosts))
+            }
+            alerter.recap(lines)
+        }
+        scheduleRecap()
+    }
+
+    fun scheduleRecap() {
+        val alarms = getSystemService(AlarmManager::class.java)
+        val pending = PendingIntent.getBroadcast(
+            this, 2, Intent(this, RecapReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        if (!settings.recapEnabled.value) {
+            alarms.cancel(pending)
+            return
+        }
+        val next = Delivery.nextAfter(listOf(settings.recapMinute.value), System.currentTimeMillis()) ?: return
+        alarms.setWindow(AlarmManager.RTC_WAKEUP, next, DIGEST_WINDOW_MS, pending)
     }
 
     /** Folder for people's contact photos. */

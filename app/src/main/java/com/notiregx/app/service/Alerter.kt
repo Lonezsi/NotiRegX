@@ -4,12 +4,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.content.pm.PackageManager
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.notiregx.app.R
 import com.notiregx.app.model.Notification
+import com.notiregx.app.ui.MainActivity
 
 /**
  * Alerts on behalf of silenced channels for notifications the rules let through. The original
@@ -83,6 +86,88 @@ class Alerter(private val context: Context) {
         manager.notify(TAG, nextId++, builder.build())
     }
 
+    /** "Zénó unsent a message: …", with the message NotiRegX kept. */
+    fun rescued(n: Notification, personName: String) {
+        ensureChannel(RESCUED, R.string.rescue_channel, R.string.rescue_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
+        val builder = NotificationCompat.Builder(context, RESCUED)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.rescue_title, personName))
+            .setContentText(n.text)
+            .setSubText(n.appName)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(n.text))
+            .setAutoCancel(true)
+        appIcon(n.packageName)?.let(builder::setLargeIcon)
+        manager.notify(RESCUED, nextId++, builder.build())
+    }
+
+    /** "You haven't heard from Zénó in 14 days"; tapping opens their page. */
+    fun reminder(personId: String, personName: String, days: Int) {
+        ensureChannel(REMINDER, R.string.reminder_channel, R.string.reminder_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
+        val open = PendingIntent.getActivity(
+            context, personId.hashCode(),
+            Intent(context, MainActivity::class.java).setData(Uri.parse("notiregx://person/$personId"))
+                .putExtra(MainActivity.EXTRA_PERSON_ID, personId)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val notification = NotificationCompat.Builder(context, REMINDER)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.resources.getQuantityString(R.plurals.reminder_title, days, personName, days))
+            .setContentText(context.getString(R.string.reminder_text))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        manager.notify(REMINDER, personId.hashCode(), notification)
+    }
+
+    /** A best friend has gone quiet compared to normal; tapping opens their page. */
+    fun fading(personId: String, personName: String, recent: Int, usual: Int) {
+        ensureChannel(REMINDER, R.string.reminder_channel, R.string.reminder_channel_description, NotificationManager.IMPORTANCE_DEFAULT)
+        val open = PendingIntent.getActivity(
+            context, personId.hashCode() + 1,
+            Intent(context, MainActivity::class.java).setData(Uri.parse("notiregx://fading/$personId"))
+                .putExtra(MainActivity.EXTRA_PERSON_ID, personId)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val notification = NotificationCompat.Builder(context, REMINDER)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.fading_title, personName))
+            .setContentText(context.getString(R.string.fading_text, recent, usual))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.fading_text, recent, usual)))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        manager.notify(REMINDER, personId.hashCode() + 1, notification)
+    }
+
+    /** The evening summary. */
+    fun recap(lines: List<String>) {
+        ensureChannel(RECAP, R.string.recap_channel, R.string.recap_channel_description, NotificationManager.IMPORTANCE_LOW)
+        val style = NotificationCompat.InboxStyle()
+        lines.forEach(style::addLine)
+        val open = PendingIntent.getActivity(
+            context, 7, Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val notification = NotificationCompat.Builder(context, RECAP)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(context.getString(R.string.recap_title))
+            .setContentText(lines.firstOrNull())
+            .setStyle(style)
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        manager.notify(RECAP, 1, notification)
+    }
+
+    private fun ensureChannel(id: String, name: Int, description: Int, importance: Int) {
+        if (manager.getNotificationChannel(id) != null) return
+        manager.createNotificationChannel(
+            NotificationChannel(id, context.getString(name), importance).apply { this.description = context.getString(description) }
+        )
+    }
+
     /** Puts a filtered notification back in the shade, with its click action if it's still known. */
     fun restore(n: Notification, contentIntent: PendingIntent?) {
         val builder = NotificationCompat.Builder(context, RESTORED)
@@ -113,6 +198,9 @@ class Alerter(private val context: Context) {
         const val POPUP = "alerts_popup"
         const val SOUND = "alerts_sound"
         const val RESTORED = "restored"
+        const val RESCUED = "rescued"
+        const val REMINDER = "reminder"
+        const val RECAP = "recap"
         const val BREAKTHROUGH = "breakthrough"
         const val BREAKTHROUGH_DND = "breakthrough_dnd"
         const val TAG = "alert"

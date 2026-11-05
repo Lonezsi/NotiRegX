@@ -57,4 +57,5 @@
     <string name="language_title">Sprache</string>
     <string name="language_system">Systemstandard</string>
     <string name="language_change">Ändern</string>
+    <string name="field_group">Gruppe</string>
 </resources>

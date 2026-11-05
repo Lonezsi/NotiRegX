@@ -13,6 +13,8 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -42,6 +44,11 @@ import com.notiregx.app.NotiRegXApp
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Alias
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.MatchField
+import com.notiregx.app.model.Person
+import com.notiregx.app.model.PersonEntry
+import com.notiregx.app.model.RuleType
+import com.notiregx.app.model.SearchHit
 import com.notiregx.app.model.PeopleBook
 import com.notiregx.app.model.DismissalAdvisor
 import com.notiregx.app.model.Rule
@@ -73,6 +80,7 @@ fun AppRoot(
     app: NotiRegXApp,
     openRuleId: MutableState<String?>,
     openTab: MutableState<String?>,
+    openPerson: MutableState<String?>,
     resumeTick: Int,
     actions: AppActions,
 ) {
@@ -118,6 +126,7 @@ fun AppRoot(
     /** Notification the user wants to make a rule from; shows the suggestions dialog. */
     var suggestFor by remember { mutableStateOf<Notification?>(null) }
     var openPersonId by rememberSaveable { mutableStateOf<String?>(null) }
+    var searching by rememberSaveable { mutableStateOf(false) }
     /** Adding a person: first pick usernames, then name them. */
     var pickingNewPerson by remember { mutableStateOf(false) }
     var namingAliases by remember { mutableStateOf<List<Alias>?>(null) }
@@ -154,6 +163,14 @@ fun AppRoot(
         openTab.value = null
     }
 
+    LaunchedEffect(openPerson.value) {
+        val id = openPerson.value ?: return@LaunchedEffect
+        tab = Tab.PEOPLE
+        editing = null
+        openPersonId = id
+        openPerson.value = null
+    }
+
     LaunchedEffect(openRuleId.value) {
         val id = openRuleId.value ?: return@LaunchedEffect
         archiveRuleId = id
@@ -188,6 +205,7 @@ fun AppRoot(
             onLinkCompanion = actions.linkCompanion,
             senders = senders.values,
             dndAccess = dndAccess,
+            people = people,
             onGrantDnd = { actions.openIntent(app.settings.dndAccessIntent()) },
             onSave = { manager.save(it); editing = null },
             onDelete = { manager.delete(draft.id); editing = null },
@@ -228,10 +246,41 @@ fun AppRoot(
             },
             onOpen = actions.openNotification,
             onMakeRule = { suggestFor = it },
+            onPersonRule = { type -> editing = Rule(name = person.name, personId = person.id, type = type) },
+            onHideGroup = { pkg, appName, group ->
+                editing = Rule(
+                    name = group, regex = "^" + Rule.escape(group) + "$", field = MatchField.GROUP,
+                    packageName = pkg, appName = appName, type = RuleType.HIDE,
+                )
+            },
+            onSetReminder = { days -> app.people.update(person.id) { it.copy(remindAfterDays = days) } },
+            onExport = { actions.exportText(person.name + ".txt", personHistoryText(person, peopleLog)) },
         )
         // Make-rule from a person's timeline opens on top of their screen.
         suggestFor?.let { t ->
             SuggestionScreen(target = t, known = recent.map { it.notification } + rules.flatMap { it.history }, onPick = { editing = it; suggestFor = null }, onBack = { suggestFor = null })
+        }
+        return
+    }
+
+    if (searching) {
+        BackHandler { searching = false }
+        val sources = remember(recent, rules, peopleLog, people) {
+            fun owner(n: Notification) = n.personId ?: app.people.personFor(n.packageName, n.title)?.id
+            peopleLog.map { SearchHit(it.notification, it.personId, it.deleted) } +
+                recent.map { SearchHit(it.notification, owner(it.notification)) } +
+                rules.flatMap { r -> r.history.map { SearchHit(it, owner(it)) } }
+        }
+        SearchScreen(
+            sources = sources,
+            people = people,
+            photoFile = app::photoFile,
+            onBack = { searching = false },
+            onOpen = actions.openNotification,
+            onMakeRule = { suggestFor = it },
+        )
+        suggestFor?.let { t ->
+            SuggestionScreen(target = t, known = known(), onPick = { editing = it; suggestFor = null }, onBack = { suggestFor = null })
         }
         return
     }
@@ -249,7 +298,18 @@ fun AppRoot(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (tab == Tab.RULES) "NotiRegX" else stringResource(tab.title)) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(if (tab == Tab.RULES) "NotiRegX" else stringResource(tab.title)) },
+                actions = {
+                    if (tab == Tab.ARCHIVE || tab == Tab.PEOPLE) {
+                        IconButton(onClick = { searching = true }) {
+                            Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_title))
+                        }
+                    }
+                },
+            )
+        },
         bottomBar = {
             NavigationBar {
                 Tab.entries.forEach {
@@ -322,6 +382,7 @@ fun AppRoot(
                         openPersonId = created.id
                     },
                     onIgnoreMerge = app.settings::ignoreMerge,
+                    onMakePerson = { s -> namingAliases = listOf(Alias(s.packageName, s.appName, s.sender)) },
                 )
                 Tab.VIBRATIONS -> VibrationsScreen(
                     events = vibrations,
@@ -376,4 +437,15 @@ fun AppRoot(
             onDismiss = { namingAliases = null },
         )
     }
+}
+
+/** A person's saved timeline as plain text, oldest first: "2026-11-05 09:20 · Messenger · Kutyák · text". */
+private fun personHistoryText(person: Person, log: List<PersonEntry>): String {
+    val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ROOT)
+    val lines = log.filter { it.personId == person.id }.sortedBy { it.notification.postedAt }.map { e ->
+        val n = e.notification
+        listOfNotNull(format.format(java.util.Date(n.postedAt)), n.appName, n.group, n.text.replace('\n', ' '), "(unsent)".takeIf { e.deleted })
+            .joinToString(" · ")
+    }
+    return (listOf(person.name, person.aliases.joinToString(", ") { "${it.appName}: ${it.sender}" }, "") + lines).joinToString("\n")
 }

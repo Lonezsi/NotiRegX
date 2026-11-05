@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,13 +39,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.RadioButton
+import android.text.format.DateUtils
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import com.notiregx.app.R
+import com.notiregx.app.model.Activity
 import com.notiregx.app.model.Alias
+import com.notiregx.app.model.Friendship
+import com.notiregx.app.model.Reminders
+import com.notiregx.app.model.RuleType
+import com.notiregx.app.model.Schedule
 import com.notiregx.app.model.Notification
 import com.notiregx.app.model.Person
 import com.notiregx.app.model.PersonEntry
@@ -74,12 +84,34 @@ fun PersonScreen(
     onDelete: () -> Unit,
     onOpen: (Notification) -> Unit,
     onMakeRule: (Notification) -> Unit,
+    onPersonRule: (RuleType) -> Unit,
+    onHideGroup: (packageName: String, appName: String, group: String) -> Unit,
+    onSetReminder: (Int?) -> Unit,
+    onExport: () -> Unit,
 ) {
     var name by remember(person.id) { mutableStateOf(person.name) }
     var adding by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val today = SenderStats.dayOf(System.currentTimeMillis())
     val mine = remember(entries, person.id) { entries.filter { it.personId == person.id } }
+    val context = LocalContext.current
+    val mySenders = remember(senders, person) {
+        val keys = person.aliases.mapTo(HashSet()) { it.key }
+        senders.filter { Alias.keyOf(it.packageName, it.sender) in keys }
+    }
+    val lastHeard = remember(mySenders) { Reminders.lastHeard(person, mySenders) }
+    val times = remember(mine) { mine.map { it.notification.postedAt } }
+    val hours = remember(times) { Activity.byHour(times) }
+    val weekdays = remember(times) { Activity.byWeekday(times) }
+    val daily = remember(mySenders, today) { Activity.daily(mySenders, today) }
+    val weekly = remember(mySenders, today) { Friendship.weekly(mySenders, today) }
+    val trend = remember(mySenders, today) { Friendship.trend(mySenders, today) }
+    // Groups they talk in, busiest first, with the app they're in.
+    val groups = remember(mine) {
+        mine.mapNotNull { e -> e.notification.group?.let { Triple(e.notification.packageName, e.notification.appName, it) } }
+            .groupingBy { it }.eachCount().entries.sortedByDescending { it.value }.take(8)
+    }
+    var pickingReminder by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -91,6 +123,7 @@ fun PersonScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onExport) { Icon(Icons.Default.Share, contentDescription = stringResource(R.string.person_export)) }
                     StarButton(person.favorite) { onSetFavorite(!person.favorite) }
                     IconButton(onClick = { confirmDelete = true }) {
                         Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.person_delete))
@@ -127,6 +160,26 @@ fun PersonScreen(
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                if (lastHeard > 0) {
+                    Hint(
+                        stringResource(
+                            R.string.person_last_heard,
+                            DateUtils.getRelativeTimeSpanString(lastHeard, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString(),
+                        )
+                    )
+                }
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.person_reminder), style = MaterialTheme.typography.bodyLarge)
+                        Hint(
+                            person.remindAfterDays?.let { context.resources.getQuantityString(R.plurals.person_reminder_days, it, it) }
+                                ?: stringResource(R.string.person_reminder_off)
+                        )
+                    }
+                    TextButton(onClick = { pickingReminder = true }) { Text(stringResource(R.string.language_change)) }
+                }
             }
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -163,6 +216,68 @@ fun PersonScreen(
                 SwitchRow(stringResource(R.string.person_save_all), stringResource(R.string.person_save_all_hint), person.saveAll, onSetSaveAll)
             }
             item {
+                Text(stringResource(R.string.person_rules), style = MaterialTheme.typography.bodyLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { onPersonRule(RuleType.HIDE) }) { Text(stringResource(R.string.person_rule_hide)) }
+                    OutlinedButton(onClick = { onPersonRule(RuleType.ALERT) }) { Text(stringResource(R.string.person_rule_alert)) }
+                }
+            }
+            if (groups.isNotEmpty()) {
+                item {
+                    Text(stringResource(R.string.person_groups), style = MaterialTheme.typography.bodyLarge)
+                    groups.forEach { (g, count) ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AppIcon(g.first, size = 18.dp)
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.person_group_entry, g.third, count), modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            TextButton(onClick = { onHideGroup(g.first, g.second, g.third) }) { Text(stringResource(R.string.person_mute_group)) }
+                        }
+                    }
+                }
+            }
+            item {
+                HorizontalDivider()
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)) {
+                    Text(
+                        stringResource(R.string.friendship_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (trend.fading) {
+                        Text(stringResource(R.string.friendship_fading), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                Hint(stringResource(R.string.friendship_trend, trend.recent, trend.usual.toInt()))
+                if (trend.fading) Hint(stringResource(R.string.friendship_fading_hint))
+                Text(stringResource(R.string.friendship_weeks), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
+                // Only from the first week with anything in it, so a new person's graph isn't mostly empty.
+                val first = weekly.indexOfFirst { it > 0 }.coerceAtLeast(0).coerceAtMost(weekly.size - 8)
+                MiniBarChart(weekly.copyOfRange(first, weekly.size), emptyList(), height = 64.dp)
+            }
+            item {
+                Text(
+                    stringResource(R.string.activity_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                )
+                if (times.size < 5) {
+                    Hint(stringResource(R.string.activity_empty))
+                } else {
+                    val busiest = hours.indices.maxBy { hours[it] }
+                    Hint(stringResource(R.string.activity_busiest, "%02d:00".format(busiest)))
+                    Text(stringResource(R.string.activity_hours), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
+                    MiniBarChart(hours, (0 until 24).map { if (it % 6 == 0) "$it" else "" })
+                    Text(stringResource(R.string.activity_weekdays), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
+                    MiniBarChart(weekdays, Schedule.DAY_ORDER.map { context.dayName(it) }, height = 56.dp)
+                }
+                if (daily.any { it > 0 }) {
+                    Text(stringResource(R.string.activity_days), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
+                    MiniBarChart(daily, emptyList(), height = 48.dp)
+                }
+            }
+            item {
                 HorizontalDivider()
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
                     Text(
@@ -191,6 +306,14 @@ fun PersonScreen(
                                 modifier = Modifier.padding(end = 8.dp),
                             )
                         }
+                        n.group?.let { Hint(it) }
+                        if (entry.deleted) {
+                            Text(
+                                stringResource(R.string.person_deleted_badge),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                         if (n.text.isNotEmpty()) Text(n.text, style = MaterialTheme.typography.bodyMedium, maxLines = 8)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { onMakeRule(n) }) { Text(stringResource(R.string.person_make_rule)) }
@@ -210,6 +333,28 @@ fun PersonScreen(
             confirmLabel = { stringResource(R.string.alias_picker_add, it) },
             onDone = { onAddAliases(it); adding = false },
             onDismiss = { adding = false },
+        )
+    }
+    if (pickingReminder) {
+        AlertDialog(
+            onDismissRequest = { pickingReminder = false },
+            title = { Text(stringResource(R.string.person_reminder)) },
+            text = {
+                Column {
+                    (listOf<Int?>(null) + listOf(3, 7, 14, 30, 60)).forEach { days ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { onSetReminder(days); pickingReminder = false }.padding(vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = person.remindAfterDays == days, onClick = null)
+                            Spacer(Modifier.size(8.dp))
+                            Text(days?.let { context.resources.getQuantityString(R.plurals.person_reminder_days, it, it) } ?: stringResource(R.string.person_reminder_off))
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { pickingReminder = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
     if (confirmDelete) {

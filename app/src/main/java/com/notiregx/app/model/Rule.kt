@@ -2,6 +2,9 @@ package com.notiregx.app.model
 
 import java.util.UUID
 
+/** Which chats a rule applies to. Notifications that aren't chat messages count as direct. */
+enum class ChatScope { ANY, DIRECT, GROUP }
+
 data class Rule(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
@@ -21,6 +24,10 @@ data class Rule(
      * so filtered notifications never buzz. Needs a linked companion device.
      */
     val debuzz: Boolean = false,
+    /** Only notifications from this person (any of their usernames, in any app); null means anyone. */
+    val personId: String? = null,
+    /** Limit to direct chats or group chats. */
+    val chatScope: ChatScope = ChatScope.ANY,
     /** Only active at these times; null means always. */
     val schedule: Schedule? = null,
     /** Only applies once an app sends notifications in a burst; null means always. */
@@ -43,6 +50,9 @@ data class Rule(
         if (!enabled) return false
         if (!packageName.isNullOrEmpty() && packageName != n.packageName) return false
         if (schedule != null && !schedule.isActive(n.postedAt)) return false
+        if (personId != null && n.personId != personId) return false
+        if (chatScope == ChatScope.DIRECT && n.group != null) return false
+        if (chatScope == ChatScope.GROUP && n.group == null) return false
         // An invalid pattern never matches, even when inverted.
         val re = compiled ?: return false
         return re.containsMatchIn(field.of(n)) != invert

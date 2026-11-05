@@ -53,6 +53,28 @@ class Settings(private val context: Context) {
         _ignoredMerges.value = next
     }
 
+    private val _rescueAlerts = MutableStateFlow(prefs.getBoolean(KEY_RESCUE, true))
+    /** Tell the user when one of their people unsends a message. */
+    val rescueAlerts: StateFlow<Boolean> = _rescueAlerts.asStateFlow()
+
+    fun setRescueAlerts(on: Boolean) {
+        prefs.edit().putBoolean(KEY_RESCUE, on).apply()
+        _rescueAlerts.value = on
+    }
+
+    private val _recapEnabled = MutableStateFlow(prefs.getBoolean(KEY_RECAP, true))
+    val recapEnabled: StateFlow<Boolean> = _recapEnabled.asStateFlow()
+
+    private val _recapMinute = MutableStateFlow(prefs.getInt(KEY_RECAP_MINUTE, 21 * 60))
+    /** When the daily recap arrives, in minutes after midnight. */
+    val recapMinute: StateFlow<Int> = _recapMinute.asStateFlow()
+
+    fun setRecap(enabled: Boolean, minute: Int = _recapMinute.value) {
+        prefs.edit().putBoolean(KEY_RECAP, enabled).putInt(KEY_RECAP_MINUTE, minute).apply()
+        _recapEnabled.value = enabled
+        _recapMinute.value = minute
+    }
+
     /** Whether the first-launch tutorial has been shown (finished or skipped). */
     val tutorialSeen: Boolean get() = prefs.getBoolean(KEY_TUTORIAL_SEEN, false)
 
@@ -111,6 +133,9 @@ class Settings(private val context: Context) {
         private const val KEY_FILTERING = "filtering_enabled"
         private const val KEY_IGNORED_ADVICE = "ignored_advice"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
+        private const val KEY_RESCUE = "rescue_alerts"
+        private const val KEY_RECAP = "recap_enabled"
+        private const val KEY_RECAP_MINUTE = "recap_minute"
         private const val KEY_FRIEND_MODE = "friend_mode"
         private const val KEY_IGNORED_MERGES = "ignored_merges"
     }

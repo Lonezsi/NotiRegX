@@ -116,6 +116,10 @@ fun SettingsScreen(
         Hint(stringResource(R.string.settings_debuzz_uninstall_hint))
 
         HorizontalDivider()
+        Section(stringResource(R.string.settings_section_extras))
+        ExtrasSettings(settings)
+
+        HorizontalDivider()
         Section(stringResource(R.string.settings_section_backup))
         Hint(stringResource(R.string.settings_backup_hint))
         Row {
@@ -182,5 +186,37 @@ internal fun PermissionRow(title: String, hint: String, granted: Boolean, onFix:
         } else {
             TextButton(onClick = onFix) { Text(stringResource(R.string.settings_allow)) }
         }
+    }
+}
+
+/** Daily recap (on/off and time) and unsent-message alerts. */
+@Composable
+private fun ExtrasSettings(settings: Settings) {
+    val context = LocalContext.current
+    val recapOn by settings.recapEnabled.collectAsState()
+    val recapMinute by settings.recapMinute.collectAsState()
+    val rescue by settings.rescueAlerts.collectAsState()
+    val app = context.applicationContext as com.notiregx.app.NotiRegXApp
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_recap), style = MaterialTheme.typography.bodyLarge)
+            Hint(stringResource(R.string.settings_recap_hint, com.notiregx.app.model.formatMinute(recapMinute)))
+            TextButton(onClick = {
+                android.app.TimePickerDialog(
+                    context,
+                    { _, h, m -> settings.setRecap(true, h * 60 + m); app.scheduleRecap() },
+                    recapMinute / 60, recapMinute % 60,
+                    android.text.format.DateFormat.is24HourFormat(context),
+                ).show()
+            }) { Text(stringResource(R.string.settings_recap_time)) }
+        }
+        Switch(checked = recapOn, onCheckedChange = { settings.setRecap(it); app.scheduleRecap() })
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_rescue), style = MaterialTheme.typography.bodyLarge)
+            Hint(stringResource(R.string.settings_rescue_hint))
+        }
+        Switch(checked = rescue, onCheckedChange = settings::setRescueAlerts)
     }
 }

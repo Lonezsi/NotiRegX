@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unsent-message rescue, reminders, the daily recap, search, activity charts and people extras. -->
+<resources>
+    <string name="rescue_channel">Unsent messages</string>
+    <string name="rescue_channel_description">Messages people sent and then unsent</string>
+    <!-- %1$s = person -->
+    <string name="rescue_title">%1$s unsent a message</string>
+
+    <string name="reminder_channel">Keep in touch</string>
+    <string name="reminder_channel_description">Reminders when you haven\'t heard from someone in a while</string>
+    <!-- %1$s = person, %2$d = days -->
+    <plurals name="reminder_title">
+        <item quantity="one">You haven\'t heard from %1$s in %2$d day</item>
+        <item quantity="other">You haven\'t heard from %1$s in %2$d days</item>
+    </plurals>
+    <string name="reminder_text">Maybe drop them a message?</string>
+
+    <string name="recap_channel">Daily recap</string>
+    <string name="recap_channel_description">An evening summary of your notifications</string>
+    <string name="recap_title">Your day in notifications</string>
+    <!-- %1$d = hidden, %2$d = bundled -->
+    <string name="recap_filtered">Filtered: %1$d hidden, %2$d bundled</string>
+    <!-- %1$s = app, %2$d = count -->
+    <string name="recap_top_app">Noisiest: %1$s (%2$d)</string>
+    <!-- %1$s = list like "Zénó 12, Anna 5" -->
+    <string name="recap_top_people">Most from: %1$s</string>
+    <plurals name="recap_ghosts">
+        <item quantity="one">%1$d ghost vibration</item>
+        <item quantity="other">%1$d ghost vibrations</item>
+    </plurals>
+    <string name="recap_quiet">A quiet day: nothing filtered.</string>
+
+    <string name="settings_section_extras">Extras</string>
+    <string name="settings_recap">Daily recap</string>
+    <!-- %1$s = time -->
+    <string name="settings_recap_hint">An evening summary notification at %1$s.</string>
+    <string name="settings_recap_time">Change time</string>
+    <string name="settings_rescue">Unsent message alerts</string>
+    <string name="settings_rescue_hint">When one of your people unsends a message, NotiRegX keeps it and tells you.</string>
+
+    <string name="search_title">Search</string>
+    <string name="search_hint">Search everything NotiRegX saved</string>
+    <string name="search_all_people">Anyone</string>
+    <string name="search_all_apps">All apps</string>
+    <plurals name="search_results">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
+    <string name="search_nothing">Nothing found.</string>
+    <string name="search_deleted">Unsent</string>
+
+    <string name="activity_title">When they message you</string>
+    <string name="activity_hours">By hour</string>
+    <string name="activity_weekdays">By weekday</string>
+    <string name="activity_days">Last 30 days</string>
+    <string name="activity_empty">Not enough saved yet to show patterns.</string>
+    <!-- %1$s = like "21:00" -->
+    <string name="activity_busiest">Usually around %1$s</string>
+
+    <string name="person_groups">Groups they talk in</string>
+    <!-- %1$s = group, %2$d = count -->
+    <string name="person_group_entry">%1$s · %2$d</string>
+    <string name="person_mute_group">Hide this group</string>
+    <string name="person_rules">Rules for this person</string>
+    <string name="person_rule_hide">Hide their messages</string>
+    <string name="person_rule_alert">Always alert for them</string>
+    <string name="person_reminder">Remind me if I don\'t hear from them</string>
+    <string name="person_reminder_off">Off</string>
+    <plurals name="person_reminder_days">
+        <item quantity="one">After %1$d day</item>
+        <item quantity="other">After %1$d days</item>
+    </plurals>
+    <!-- %1$s = like "3 days ago" -->
+    <string name="person_last_heard">Last heard from: %1$s</string>
+    <string name="person_export">Export history</string>
+    <string name="person_exported">History exported</string>
+    <string name="person_export_failed">Export failed</string>
+    <string name="person_deleted_badge">Unsent</string>
+    <string name="people_unsorted">Not sorted yet</string>
+    <string name="people_unsorted_hint">Senders who aren\'t part of a person yet. Tap one to make them a person.</string>
+
+    <string name="editor_person">Person</string>
+    <string name="editor_person_any">Anyone</string>
+    <string name="editor_chat_scope">Chats</string>
+    <string name="editor_chat_any">All</string>
+    <string name="editor_chat_direct">Direct</string>
+    <string name="editor_chat_group">Groups</string>
+    <string name="editor_person_pick_title">Choose person</string>
+    <string name="friendship_title">Your friendship over time</string>
+    <string name="friendship_weeks">Messages per week, last year</string>
+    <!-- %1$d = last 14 days, %2$d = usual per 14 days -->
+    <string name="friendship_trend">Last 2 weeks: %1$d · usually about %2$d</string>
+    <string name="friendship_fading">Fading</string>
+    <string name="friendship_fading_hint">Much quieter than usual lately. Maybe reach out?</string>
+    <!-- %1$s = person -->
+    <string name="fading_title">Things have gone quiet with %1$s</string>
+    <!-- %1$d = last 14 days, %2$d = usual -->
+    <string name="fading_text">%1$d messages in the last 2 weeks, usually about %2$d. Maybe reach out?</string>
+</resources>

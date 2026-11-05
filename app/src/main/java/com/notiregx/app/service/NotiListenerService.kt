@@ -109,7 +109,8 @@ class NotiListenerService : NotificationListenerService() {
             return
         }
 
-        val n = app.reader.read(sbn, app.ruleManager.newNotificationId()) ?: return
+        val n = app.reader.read(sbn, app.ruleManager.newNotificationId())
+            ?.let { it.copy(personId = app.people.personFor(it.packageName, it.title)?.id) } ?: return
         val signature = n.content.hashCode()
         val previous = lastSeen[sbn.key]
         if (previous != null && previous.first == signature) {
@@ -136,17 +137,25 @@ class NotiListenerService : NotificationListenerService() {
      */
     private fun handleConversation(sbn: StatusBarNotification, ranking: Ranking?, messages: List<ChatMessage>) {
         val key = sbn.key
-        val fresh = conversations.unseen(key, messages)
+        val update = conversations.update(key, messages)
+        val fresh = update.fresh
+        // Messages that vanished from the middle of the conversation were unsent: keep and flag them.
+        update.deleted.forEach { gone ->
+            val person = app.people.markDeleted(gone)
+            if (person != null && app.settings.rescueAlerts.value) app.alerter.rescued(gone, person.name)
+        }
         var lastPassing: Pair<Notification, Decision>? = null
         var lastCaught: Pair<Notification, Decision>? = null
         var alert: Notification? = null
         for (m in fresh) {
-            val n = m.notification.copy(id = app.ruleManager.newNotificationId())
+            val person = app.people.personFor(m.notification.packageName, m.notification.title)
+            val n = m.notification.copy(id = app.ruleManager.newNotificationId(), personId = person?.id)
+            if (person != null && !person.hasPhoto) saveAvatar(sbn, person.id, n.title)
             sbn.notification.contentIntent?.let { app.contentIntents.put(n.id, it) }
             app.senderStats.record(n)
             app.people.record(n)
             val d = app.ruleManager.process(n, app.settings.maxSaved.value, app.settings.filteringEnabled.value, app.friendRules())
-            conversations.record(key, m.id, d.action)
+            conversations.record(key, m.id, d.action, n)
             if (d.action == Action.PASS) lastPassing = n to d else lastCaught = n to d
             if (d.rule?.type == RuleType.ALERT) alert = n
         }
@@ -163,6 +172,17 @@ class NotiListenerService : NotificationListenerService() {
         alert?.let { if (needsBreakthrough(sbn, ranking, isUpdate)) app.alerter.breakthrough(sbn, it) }
         val (n, d) = lastPassing ?: lastCaught ?: return
         if (muting && alert == null) handleDebuzz(sbn, ranking, n, d, isUpdate)
+    }
+
+    /** Uses the chat app's picture for a person who has no contact photo yet. */
+    private fun saveAvatar(sbn: StatusBarNotification, personId: String, sender: String) {
+        val bitmap = app.reader.senderAvatar(sbn, sender) ?: return
+        val saved = try {
+            app.photoFile(personId).outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, it) }
+        } catch (e: java.io.IOException) {
+            false
+        }
+        if (saved) app.people.update(personId) { it.copy(hasPhoto = true) }
     }
 
     /**

@@ -57,4 +57,5 @@
     <string name="language_title">Nyelv</string>
     <string name="language_system">Rendszer alapértelmezése</string>
     <string name="language_change">Módosítás</string>
+    <string name="field_group">Csoport</string>
 </resources>

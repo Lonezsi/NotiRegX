@@ -57,4 +57,5 @@
     <string name="language_title">Idioma</string>
     <string name="language_system">Predeterminado del sistema</string>
     <string name="language_change">Cambiar</string>
+    <string name="field_group">Grupo</string>
 </resources>

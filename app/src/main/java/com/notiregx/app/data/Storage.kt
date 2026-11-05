@@ -5,6 +5,7 @@ import android.util.Log
 import com.notiregx.app.model.Action
 import com.notiregx.app.model.Alias
 import com.notiregx.app.model.Bundle
+import com.notiregx.app.model.ChatScope
 import com.notiregx.app.model.Person
 import com.notiregx.app.model.PersonEntry
 import com.notiregx.app.model.Interaction
@@ -75,7 +76,11 @@ class Storage(dir: File) {
             total = o.optLong("total"),
             days = days?.keys()?.asSequence()?.associate { it.toInt() to days.getInt(it) }.orEmpty(),
             lastSeen = o.optLong("lastSeen"),
-        )
+        ).let { s ->
+            // Older saves had no weekly totals: start them from the daily ones.
+            val weeks = o.optJSONObject("weeks")?.let { w -> w.keys().asSequence().associate { it.toInt() to w.getInt(it) } }
+            if (weeks != null) s.copy(weeks = weeks) else s
+        }
     }
 
     fun saveSenders(senders: Collection<SenderCount>) = write(sendersFile, "senders", senders.map { s ->
@@ -86,6 +91,7 @@ class Storage(dir: File) {
             .put("total", s.total)
             .put("days", JSONObject().apply { s.days.forEach { (d, c) -> put(d.toString(), c) } })
             .put("lastSeen", s.lastSeen)
+            .put("weeks", JSONObject().apply { s.weeks.forEach { (w, c) -> put(w.toString(), c) } })
     })
 
     fun loadPeople(): List<Person> = read(peopleFile, "people") { o ->
@@ -99,6 +105,7 @@ class Storage(dir: File) {
             saveAll = o.optBoolean("saveAll", true),
             contactName = o.stringOrNull("contactName"),
             hasPhoto = o.optBoolean("hasPhoto"),
+            remindAfterDays = if (o.isNull("remindAfterDays") || !o.has("remindAfterDays")) null else o.getInt("remindAfterDays"),
             createdAt = o.optLong("createdAt", System.currentTimeMillis()),
         )
     }
@@ -114,15 +121,16 @@ class Storage(dir: File) {
             .put("saveAll", p.saveAll)
             .put("contactName", p.contactName ?: JSONObject.NULL)
             .put("hasPhoto", p.hasPhoto)
+            .put("remindAfterDays", p.remindAfterDays ?: JSONObject.NULL)
             .put("createdAt", p.createdAt)
     })
 
     fun loadPeopleLog(): List<PersonEntry> = read(peopleLogFile, "entries") { o ->
-        PersonEntry(o.getString("personId"), notificationFromJson(o.getJSONObject("notification")))
+        PersonEntry(o.getString("personId"), notificationFromJson(o.getJSONObject("notification")), o.optBoolean("deleted"))
     }
 
     fun savePeopleLog(entries: List<PersonEntry>) = write(peopleLogFile, "entries", entries.map {
-        JSONObject().put("personId", it.personId).put("notification", notificationToJson(it.notification))
+        JSONObject().put("personId", it.personId).put("notification", notificationToJson(it.notification)).put("deleted", it.deleted)
     })
 
     private fun <T> read(file: File, key: String, parse: (JSONObject) -> T): List<T> {
@@ -163,6 +171,8 @@ class Storage(dir: File) {
         .put("description", r.description)
         .put("enabled", r.enabled)
         .put("debuzz", r.debuzz)
+        .put("personId", r.personId ?: JSONObject.NULL)
+        .put("chatScope", r.chatScope.name)
         .put("schedule", r.schedule?.let(::scheduleToJson) ?: JSONObject.NULL)
         .put("burst", r.burst?.let { JSONObject().put("count", it.count).put("windowMinutes", it.windowMinutes) } ?: JSONObject.NULL)
         .put("deliveryTimes", JSONArray(r.deliveryTimes))
@@ -200,6 +210,8 @@ class Storage(dir: File) {
         description = o.optString("description"),
         enabled = o.optBoolean("enabled", true),
         debuzz = o.optBoolean("debuzz"),
+        personId = o.stringOrNull("personId"),
+        chatScope = enumOr(o.optString("chatScope"), ChatScope.ANY),
         schedule = o.optJSONObject("schedule")?.let(::scheduleFromJson),
         burst = o.optJSONObject("burst")?.let { Burst(it.getInt("count"), it.getInt("windowMinutes")) },
         deliveryTimes = o.optJSONArray("deliveryTimes")?.ints().orEmpty(),
@@ -219,6 +231,8 @@ class Storage(dir: File) {
         .put("text", n.text)
         .put("postedAt", n.postedAt)
         .put("url", n.url ?: JSONObject.NULL)
+        .put("group", n.group ?: JSONObject.NULL)
+        .put("personId", n.personId ?: JSONObject.NULL)
 
     private fun notificationFromJson(o: JSONObject) = Notification(
         id = o.getLong("id"),
@@ -228,6 +242,8 @@ class Storage(dir: File) {
         text = o.optString("text"),
         postedAt = o.optLong("postedAt"),
         url = o.stringOrNull("url"),
+        group = o.stringOrNull("group"),
+        personId = o.stringOrNull("personId"),
     )
 
     private fun loggedToJson(l: LoggedNotification) = JSONObject()

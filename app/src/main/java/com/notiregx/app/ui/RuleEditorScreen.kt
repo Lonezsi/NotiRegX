@@ -54,7 +54,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.notiregx.app.R
 import com.notiregx.app.model.LoggedNotification
+import com.notiregx.app.model.ChatScope
 import com.notiregx.app.model.MatchField
+import com.notiregx.app.model.Person
 import com.notiregx.app.model.PeoplePattern
 import com.notiregx.app.model.SenderCount
 import com.notiregx.app.model.Notification
@@ -72,6 +74,7 @@ fun RuleEditorScreen(
     onLinkCompanion: () -> Unit,
     senders: Collection<SenderCount>,
     dndAccess: Boolean,
+    people: List<Person>,
     onGrantDnd: () -> Unit,
     onSave: (Rule) -> Unit,
     onDelete: () -> Unit,
@@ -82,6 +85,9 @@ fun RuleEditorScreen(
     var field by remember { mutableStateOf(initial.field) }
     var pickingPeople by remember { mutableStateOf(false) }
     var debuzz by remember { mutableStateOf(initial.debuzz) }
+    var personId by remember { mutableStateOf(initial.personId) }
+    var chatScope by remember { mutableStateOf(initial.chatScope) }
+    var pickingPerson by remember { mutableStateOf(false) }
     var schedule by remember { mutableStateOf(initial.schedule) }
     var burst by remember { mutableStateOf(initial.burst) }
     var deliveryTimes by remember { mutableStateOf(initial.deliveryTimes) }
@@ -99,6 +105,8 @@ fun RuleEditorScreen(
         regex = regex,
         field = field,
         debuzz = debuzz,
+        personId = personId,
+        chatScope = chatScope,
         schedule = schedule,
         burst = burst,
         deliveryTimes = if (type == RuleType.BUNDLE) deliveryTimes else emptyList(),
@@ -179,6 +187,40 @@ fun RuleEditorScreen(
                     }
                     if (app != null) {
                         IconButton(onClick = { app = null }) { Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.any_app)) }
+                    }
+                }
+            }
+            // Who it's from: a person (any of their usernames, in any app) and direct or group chats.
+            val person = people.firstOrNull { it.id == personId }
+            OutlinedCard(onClick = { pickingPerson = true }, modifier = Modifier.fillMaxWidth()) {
+                Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.editor_person), style = MaterialTheme.typography.labelMedium)
+                        Text(person?.name ?: stringResource(R.string.editor_person_any), style = MaterialTheme.typography.bodyLarge)
+                    }
+                    if (person != null) {
+                        IconButton(onClick = { personId = null }) { Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.editor_person_any)) }
+                    }
+                }
+            }
+            Text(stringResource(R.string.editor_chat_scope), style = MaterialTheme.typography.labelLarge)
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                ChatScope.entries.forEachIndexed { i, scope ->
+                    SegmentedButton(
+                        selected = chatScope == scope,
+                        onClick = { chatScope = scope },
+                        shape = SegmentedButtonDefaults.itemShape(i, ChatScope.entries.size),
+                    ) {
+                        Text(
+                            stringResource(
+                                when (scope) {
+                                    ChatScope.ANY -> R.string.editor_chat_any
+                                    ChatScope.DIRECT -> R.string.editor_chat_direct
+                                    ChatScope.GROUP -> R.string.editor_chat_group
+                                }
+                            ),
+                            maxLines = 1,
+                        )
                     }
                 }
             }
@@ -296,6 +338,31 @@ fun RuleEditorScreen(
         }
     }
 
+    if (pickingPerson) {
+        AlertDialog(
+            onDismissRequest = { pickingPerson = false },
+            title = { Text(stringResource(R.string.editor_person_pick_title)) },
+            text = {
+                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                    item {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.editor_person_any)) },
+                            modifier = Modifier.clickable { personId = null; pickingPerson = false },
+                        )
+                    }
+                    items(people, key = { it.id }) { p ->
+                        ListItem(
+                            headlineContent = { Text(p.name) },
+                            supportingContent = { Text(p.aliases.joinToString(", ") { it.appName }.ifEmpty { " " }, maxLines = 1) },
+                            modifier = Modifier.clickable { personId = p.id; pickingPerson = false },
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { pickingPerson = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
     if (pickingPeople) {
         PeoplePickerDialog(
             senders = senders,

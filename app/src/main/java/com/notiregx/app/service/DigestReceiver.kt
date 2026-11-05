@@ -14,3 +14,10 @@ class DigestReceiver : BroadcastReceiver() {
         (context.applicationContext as NotiRegXApp).deliverDueDigests()
     }
 }
+
+/** Fires at the daily recap time; the app builds the recap and re-arms the alarm. */
+class RecapReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        (context.applicationContext as NotiRegXApp).sendRecap()
+    }
+}
