@@ -126,11 +126,15 @@ class Storage(dir: File) {
     })
 
     fun loadPeopleLog(): List<PersonEntry> = read(peopleLogFile, "entries") { o ->
-        PersonEntry(o.getString("personId"), notificationFromJson(o.getJSONObject("notification")), o.optBoolean("deleted"))
+        PersonEntry(
+            o.getString("personId"), notificationFromJson(o.getJSONObject("notification")), o.optBoolean("deleted"),
+            o.optString("editedFrom").takeIf { o.has("editedFrom") && !o.isNull("editedFrom") },
+        )
     }
 
     fun savePeopleLog(entries: List<PersonEntry>) = write(peopleLogFile, "entries", entries.map {
         JSONObject().put("personId", it.personId).put("notification", notificationToJson(it.notification)).put("deleted", it.deleted)
+            .put("editedFrom", it.editedFrom ?: JSONObject.NULL)
     })
 
     private fun <T> read(file: File, key: String, parse: (JSONObject) -> T): List<T> {

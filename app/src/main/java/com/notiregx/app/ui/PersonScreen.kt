@@ -331,6 +331,14 @@ fun PersonScreen(
                                 color = MaterialTheme.colorScheme.error,
                             )
                         }
+                        entry.editedFrom?.let { first ->
+                            Text(
+                                stringResource(R.string.person_edited_badge),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                            Hint(stringResource(R.string.person_edited_was, first))
+                        }
                         if (n.text.isNotEmpty()) Text(n.text, style = MaterialTheme.typography.bodyMedium, maxLines = 8)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { onMakeRule(n) }) { Text(stringResource(R.string.person_make_rule)) }

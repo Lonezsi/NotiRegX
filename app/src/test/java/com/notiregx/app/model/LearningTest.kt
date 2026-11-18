@@ -49,8 +49,29 @@ class LearningTest {
 
         val first = DismissalAdvisor.advise(events, emptyList())
         assertTrue(first.isNotEmpty())
-        val rest = DismissalAdvisor.advise(events, emptyList(), ignored = first.map { it.key }.toSet())
-        assertTrue(rest.none { it.key in first.map { a -> a.key } })
+        // "not now" to all of them: the app rests, then they stay away until there's twice the evidence
+        val declined = first.fold(AdviceRest()) { r, a -> r.notNow(a, now = 0) }
+        assertTrue(DismissalAdvisor.advise(events, emptyList(), declined, now = day / 2).isEmpty())
+        val later = DismissalAdvisor.advise(events, emptyList(), declined, now = 2 * day)
+        assertTrue(later.none { it.key in first.map { a -> a.key } })
+    }
+
+    @Test
+    fun notNowStepsBackFurtherEachTimeAndReturnsOnlyWhenStronger() {
+        val six = (1..6).map { swiped("Promo $it") }
+        val a = DismissalAdvisor.advise(six, emptyList(), now = 0).first()
+        val once = AdviceRest().notNow(a, now = 0)
+        // the app rests a day
+        assertTrue(DismissalAdvisor.advise(six, emptyList(), once, now = day - 1).isEmpty())
+        // after it, the same suggestion is still away: no more evidence than when it was declined
+        assertTrue(DismissalAdvisor.advise(six, emptyList(), once, now = day + 1).none { it.key == a.key })
+        // twice the swipes behind it: it's back
+        val twelve = (1..12).map { swiped("Promo $it") }
+        val back = DismissalAdvisor.advise(twelve, emptyList(), once, now = day + 1).first { it.key == a.key }
+        // declined again: three days this time, not one
+        val twice = once.notNow(back, now = day + 1)
+        assertTrue(DismissalAdvisor.advise(twelve, emptyList(), twice, now = day + 1 + 2 * day).isEmpty())
+        assertEquals(2, twice.apps.getValue("com.insta").times)
     }
 
     @Test

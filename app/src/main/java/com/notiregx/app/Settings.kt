@@ -7,7 +7,10 @@ import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.PowerManager
 import androidx.core.app.NotificationManagerCompat
+import com.notiregx.app.model.AdviceRest
 import com.notiregx.app.model.FriendMode
+import com.notiregx.app.model.RuleAdvice
+import org.json.JSONObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,14 +25,37 @@ class Settings(private val context: Context) {
     private val _filteringEnabled = MutableStateFlow(prefs.getBoolean(KEY_FILTERING, true))
     val filteringEnabled: StateFlow<Boolean> = _filteringEnabled.asStateFlow()
 
-    private val _ignoredAdvice = MutableStateFlow(prefs.getStringSet(KEY_IGNORED_ADVICE, emptySet()).orEmpty())
-    /** Rule suggestions the user answered "not now" to. */
-    val ignoredAdvice: StateFlow<Set<String>> = _ignoredAdvice.asStateFlow()
+    private val _adviceRest = MutableStateFlow(loadAdviceRest())
+    /** What "not now" on rule suggestions remembers (see [AdviceRest]). */
+    val adviceRest: StateFlow<AdviceRest> = _adviceRest.asStateFlow()
 
-    fun ignoreAdvice(key: String) {
-        val next = _ignoredAdvice.value + key
-        prefs.edit().putStringSet(KEY_IGNORED_ADVICE, next).apply()
-        _ignoredAdvice.value = next
+    fun notNow(advice: RuleAdvice) {
+        val next = _adviceRest.value.notNow(advice, System.currentTimeMillis())
+        val json = JSONObject()
+            .put("apps", JSONObject().apply { next.apps.forEach { (pkg, r) -> put(pkg, JSONObject().put("times", r.times).put("until", r.until)) } })
+            .put("declined", JSONObject().apply { next.declined.forEach { (k, n) -> put(k, n) } })
+        prefs.edit().putString(KEY_ADVICE_REST, json.toString()).apply()
+        _adviceRest.value = next
+    }
+
+    /** Read back; "not now"s from before, which hid a suggestion for good, become a decline that a doubling brings back. */
+    private fun loadAdviceRest(): AdviceRest {
+        val old = prefs.getStringSet(KEY_IGNORED_ADVICE, emptySet()).orEmpty().associateWith { AdviceRest.OLD_DECLINE_SWIPES }
+        val raw = prefs.getString(KEY_ADVICE_REST, null) ?: return AdviceRest(declined = old)
+        return try {
+            val o = JSONObject(raw)
+            val apps = o.optJSONObject("apps")
+            val declined = o.optJSONObject("declined")
+            AdviceRest(
+                apps = apps?.keys()?.asSequence()?.associateWith {
+                    val a = apps.getJSONObject(it)
+                    AdviceRest.AppRest(a.getInt("times"), a.getLong("until"))
+                }.orEmpty(),
+                declined = old + (declined?.keys()?.asSequence()?.associateWith { declined.getInt(it) }.orEmpty()),
+            )
+        } catch (e: org.json.JSONException) {
+            AdviceRest(declined = old)
+        }
     }
 
     private val _friendMode = MutableStateFlow(
@@ -132,6 +158,7 @@ class Settings(private val context: Context) {
         private const val KEY_MAX_SAVED = "max_saved_per_rule"
         private const val KEY_FILTERING = "filtering_enabled"
         private const val KEY_IGNORED_ADVICE = "ignored_advice"
+        private const val KEY_ADVICE_REST = "advice_rest"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
         private const val KEY_RESCUE = "rescue_alerts"
         private const val KEY_RECAP = "recap_enabled"

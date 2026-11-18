@@ -77,6 +77,13 @@ class RuleManager(
         return decision
     }
 
+    /**
+     * Whether the rules would catch [n] now, recording nothing: for looking again at what's
+     * already shown after the rules change. A burst rule doesn't fire on a second look.
+     */
+    fun wouldCatch(n: Notification, extraRules: List<Rule> = emptyList()): Boolean =
+        decide(_rules.value + extraRules, n) { 0 }.action != Action.PASS
+
     /** Adds [edited] or replaces the existing rule's configuration, keeping its history. */
     fun save(edited: Rule) = _rules.update { list ->
         if (list.none { it.id == edited.id }) {
@@ -176,6 +183,15 @@ class RuleManager(
 
     companion object {
         const val RECENT_LIMIT = 500
+
+        /**
+         * What the rules are set to, without what they've caught: it changes when a rule is
+         * added, removed, reordered or edited, and not every time one catches something.
+         */
+        fun settingsOf(rules: List<Rule>): List<Any?> = rules.map {
+            listOf(it.id, it.name, it.regex, it.field, it.packageName, it.invert, it.type, it.enabled, it.debuzz,
+                it.personId, it.chatScope, it.schedule, it.burst, it.deliveryTimes)
+        }
 
         /**
          * Evaluates every rule in order; the last one that matches is the final effective

@@ -17,7 +17,7 @@ class ConversationTest {
     /** Mimics the listener: decide each unseen message, then ask whether the whole notification can go. */
     private fun post(tracker: ConversationTracker, manager: RuleManager, messages: List<ChatMessage>): Pair<List<Action>, Boolean> {
         val actions = tracker.unseen("chat", messages).map { m ->
-            manager.process(m.notification, maxSaved = 100).action.also { tracker.record("chat", m.id, it) }
+            manager.process(m.notification, maxSaved = 100).action.also { tracker.record("chat", m.id, it, m.notification) }
         }
         return actions to tracker.allFiltered("chat")
     }
@@ -39,6 +39,34 @@ class ConversationTest {
         assertEquals(listOf(Action.HIDE), second) // only the new line is decided, and it's caught
         assertFalse(removeSecond) // the real messages keep the notification
         assertEquals(1, manager.rules.value[0].history.size)
+    }
+
+    @Test
+    fun anEditedMessageIsAnEditNotAnUnsendAndNotNew() {
+        val tracker = ConversationTracker()
+        val manager = RuleManager(hideReactions)
+        post(tracker, manager, listOf(msg(1, "Hey!"), msg(2, "Are you coming tonight?"), msg(3, "Bring snacks")))
+
+        // Anna edits the middle message: its text changes, so its id does, in the same place
+        val update = tracker.update("chat", listOf(msg(1, "Hey!"), msg(2, "Are you coming tomorrow?"), msg(3, "Bring snacks")))
+        assertTrue(update.deleted.isEmpty()) // not unsent
+        assertTrue(update.fresh.isEmpty()) // and not a new message to decide or buzz for
+        assertEquals(1, update.edited.size)
+        assertEquals("Are you coming tonight?", update.edited[0].before.text)
+        assertEquals("Are you coming tomorrow?", update.edited[0].now.notification.text)
+
+        // the edited one is known now: a re-post with nothing new decides nothing
+        val again = tracker.update("chat", listOf(msg(1, "Hey!"), msg(2, "Are you coming tomorrow?"), msg(3, "Bring snacks")))
+        assertTrue(again.fresh.isEmpty() && again.edited.isEmpty() && again.deleted.isEmpty())
+    }
+
+    @Test
+    fun anUnsentMessageIsStillUnsent() {
+        val tracker = ConversationTracker()
+        post(tracker, RuleManager(hideReactions), listOf(msg(1, "Hey!"), msg(2, "oops wrong chat"), msg(3, "Bring snacks")))
+        val update = tracker.update("chat", listOf(msg(1, "Hey!"), msg(3, "Bring snacks")))
+        assertEquals(listOf("oops wrong chat"), update.deleted.map { it.text })
+        assertTrue(update.edited.isEmpty())
     }
 
     @Test

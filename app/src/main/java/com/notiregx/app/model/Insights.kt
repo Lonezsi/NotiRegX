@@ -5,7 +5,7 @@ import java.util.Calendar
 import java.util.TimeZone
 
 /** A notification found by [Search], and whose it is if they're a known person. */
-data class SearchHit(val notification: Notification, val personId: String?, val deleted: Boolean = false)
+data class SearchHit(val notification: Notification, val personId: String?, val deleted: Boolean = false, val edited: Boolean = false)
 
 /** Full-text search over everything NotiRegX keeps: Recent, rule histories and people's timelines. */
 object Search {

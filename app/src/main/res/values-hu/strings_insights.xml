@@ -48,6 +48,7 @@
     </plurals>
     <string name="search_nothing">Nincs találat.</string>
     <string name="search_deleted">Visszavonva</string>
+    <string name="search_edited">Szerkesztve</string>
 
     <string name="activity_title">Mikor ír neked</string>
     <string name="activity_hours">Óránként</string>
@@ -76,6 +77,8 @@
     <string name="person_exported">Előzmények exportálva</string>
     <string name="person_export_failed">Sikertelen exportálás</string>
     <string name="person_deleted_badge">Visszavonva</string>
+    <string name="person_edited_badge">Szerkesztve</string>
+    <string name="person_edited_was">Eredetileg: %1$s</string>
     <string name="people_unsorted">Még nincs besorolva</string>
     <string name="people_unsorted_hint">Küldők, akik még nem tartoznak egy emberhez sem. Koppints valamelyikre, hogy emberré tedd.</string>
 

@@ -141,6 +141,7 @@ fun SearchScreen(
                         }
                         n.group?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         if (hit.deleted) Text(stringResource(R.string.search_deleted), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                        if (hit.edited) Text(stringResource(R.string.search_edited), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                         if (n.text.isNotEmpty()) Text(n.text, style = MaterialTheme.typography.bodyMedium, maxLines = 6)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { onMakeRule(n) }) { Text(stringResource(R.string.person_make_rule)) }

@@ -48,6 +48,7 @@
     </plurals>
     <string name="search_nothing">Nichts gefunden.</string>
     <string name="search_deleted">Zurückgezogen</string>
+    <string name="search_edited">Bearbeitet</string>
 
     <string name="activity_title">Wann Nachrichten kommen</string>
     <string name="activity_hours">Nach Uhrzeit</string>
@@ -76,6 +77,8 @@
     <string name="person_exported">Verlauf exportiert</string>
     <string name="person_export_failed">Export fehlgeschlagen</string>
     <string name="person_deleted_badge">Zurückgezogen</string>
+    <string name="person_edited_badge">Bearbeitet</string>
+    <string name="person_edited_was">Zuerst: %1$s</string>
     <string name="people_unsorted">Noch nicht zugeordnet</string>
     <string name="people_unsorted_hint">Absender, die noch zu keiner Person gehören. Tippe auf einen, um eine Person daraus zu machen.</string>
 

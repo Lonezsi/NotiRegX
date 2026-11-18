@@ -34,8 +34,17 @@ data class Person(
     val packages: List<String> get() = aliases.map { it.packageName }.distinct()
 }
 
-/** A notification kept in a person's timeline. [deleted]: the sender unsent it afterwards. */
-data class PersonEntry(val personId: String, val notification: Notification, val deleted: Boolean = false)
+/**
+ * A notification kept in a person's timeline. [deleted]: the sender unsent it afterwards.
+ * [editedFrom]: the sender edited it; this is what it said first (the notification holds what
+ * it says now).
+ */
+data class PersonEntry(
+    val personId: String,
+    val notification: Notification,
+    val deleted: Boolean = false,
+    val editedFrom: String? = null,
+)
 
 /** What happens to best friends' messages, whatever the rules say. */
 enum class FriendMode { OFF, ALLOW, ALERT }
@@ -142,6 +151,20 @@ class PeopleBook(initialPeople: List<Person> = emptyList(), initialLog: List<Per
             }
         }
         return personId?.let { id -> _people.value.firstOrNull { it.id == id } }
+    }
+
+    /** A saved message its sender edited: it says the new text now, and remembers the first. */
+    fun markEdited(before: Notification, nowText: String) {
+        _log.update { log ->
+            val i = log.indexOfLast {
+                !it.deleted && it.notification.packageName == before.packageName &&
+                    it.notification.title == before.title && it.notification.text == before.text
+            }
+            if (i < 0) log else log.toMutableList().apply {
+                val e = this[i]
+                this[i] = e.copy(notification = e.notification.copy(text = nowText), editedFrom = e.editedFrom ?: before.text)
+            }
+        }
     }
 
     fun clearLog(id: String) = _log.update { log -> log.filter { it.personId != id } }

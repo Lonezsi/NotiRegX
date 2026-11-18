@@ -213,4 +213,23 @@ class RuleManagerTest {
         assertTrue(r.matches(notif("Price: $5 (50% off?)")))
         assertFalse(r.matches(notif("Price: 5 50 off")))
     }
+
+    @Test
+    fun aSecondLookRecordsNothing() {
+        val manager = RuleManager(listOf(Rule(id = "r", name = "promos", regex = "Sale")))
+        val n = Notification(1, "com.shop", "Shop", "Big Sale", "50% off", postedAt = 1)
+        org.junit.Assert.assertTrue(manager.wouldCatch(n))
+        org.junit.Assert.assertTrue(manager.rules.value[0].history.isEmpty())
+        org.junit.Assert.assertTrue(manager.recent.value.isEmpty())
+    }
+
+    @Test
+    fun theRulesSettingsIgnoreWhatTheyCaught() {
+        val manager = RuleManager(listOf(Rule(id = "r", name = "promos", regex = "Sale")))
+        val before = RuleManager.settingsOf(manager.rules.value)
+        manager.process(Notification(1, "com.shop", "Shop", "Big Sale", "50% off", postedAt = 1), maxSaved = 10)
+        org.junit.Assert.assertEquals(before, RuleManager.settingsOf(manager.rules.value)) // a catch isn't an edit
+        manager.save(manager.rules.value[0].copy(regex = "Sale|Deal"))
+        org.junit.Assert.assertNotEquals(before, RuleManager.settingsOf(manager.rules.value)) // an edit is
+    }
 }

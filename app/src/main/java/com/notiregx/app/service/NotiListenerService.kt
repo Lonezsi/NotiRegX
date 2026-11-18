@@ -22,6 +22,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -38,6 +39,13 @@ class NotiListenerService : NotificationListenerService() {
 
     /** Groups whose children we removed; their summaries get removed once orphaned. */
     private val handledGroups = lru<Unit>(256)
+
+    /**
+     * Notifications we just removed. Removing one takes a moment to show in the active list, so
+     * without this a group's last child going looked like the group still had another, and its
+     * summary stayed behind on its own.
+     */
+    private val removedKeys = lru<Unit>(512)
 
     /** Notifications we let through, by key, so we can tell whether the user opened or swiped them. */
     private val inShade = lru<Notification>(1000)
@@ -73,6 +81,10 @@ class NotiListenerService : NotificationListenerService() {
                 combine(wanted, app.companionLinked) { w, linked -> w to linked }
                     .collect { (w, linked) -> if (linked) publish(muter.sync(w.first, w.second)) }
             }
+            launch {
+                // When a rule is added, removed or edited, what was decided under the old rules is looked at again.
+                app.ruleManager.rules.map { RuleManager.settingsOf(it) }.distinctUntilChanged().drop(1).collect { recheckShade() }
+            }
         }
     }
 
@@ -92,6 +104,7 @@ class NotiListenerService : NotificationListenerService() {
         val ranking = rankingMap?.let { map -> Ranking().takeIf { map.getRanking(sbn.key, it) } }
         val isUpdate = sbn.key in seenKeys
         seenKeys[sbn.key] = Unit
+        removedKeys.remove(sbn.key)
         logLikelyVibration(sbn, ranking, isUpdate)
         // A vibration-muted app may have added a category since it was muted.
         if (ranking?.channel?.shouldVibrate() == true) vibrationMuter?.takeIf { it.isMuted(sbn.packageName) }?.muteNewChannels(sbn.packageName)
@@ -144,6 +157,8 @@ class NotiListenerService : NotificationListenerService() {
             val person = app.people.markDeleted(gone)
             if (person != null && app.settings.rescueAlerts.value) app.alerter.rescued(gone, person.name)
         }
+        // Messages the sender edited: the saved one takes the new text and remembers the old.
+        update.edited.forEach { e -> app.people.markEdited(e.before, e.now.notification.text) }
         var lastPassing: Pair<Notification, Decision>? = null
         var lastCaught: Pair<Notification, Decision>? = null
         var alert: Notification? = null
@@ -183,6 +198,33 @@ class NotiListenerService : NotificationListenerService() {
             false
         }
         if (saved) app.people.update(personId) { it.copy(hasPhoto = true) }
+    }
+
+    /**
+     * The rules changed. Re-posts mustn't keep a decision made under the old rules, and what's
+     * already in the shade is looked at again: anything the rules catch now is handled like any
+     * other catch (counted, archived or bundled, and removed). Chat conversations are decided
+     * message by message and are left as they are.
+     */
+    private fun recheckShade() {
+        lastSeen.clear()
+        if (!app.settings.filteringEnabled.value) return
+        val active = try {
+            activeNotifications
+        } catch (e: SecurityException) {
+            null
+        } ?: return
+        for (sbn in active) {
+            val shown = inShade[sbn.key] ?: continue
+            if (!app.reader.isFilterable(sbn) || NotificationReader.isGroupSummary(sbn) || conversations.knows(sbn.key)) continue
+            if (!app.ruleManager.wouldCatch(shown, app.friendRules())) continue
+            val n = shown.copy(id = app.ruleManager.newNotificationId())
+            val d = app.ruleManager.process(n, app.settings.maxSaved.value, true, app.friendRules())
+            if (d.action == Action.PASS) continue
+            inShade.remove(sbn.key)
+            lastSeen[sbn.key] = n.content.hashCode() to d.action
+            remove(sbn)
+        }
     }
 
     /**
@@ -267,6 +309,7 @@ class NotiListenerService : NotificationListenerService() {
     }
 
     private fun remove(sbn: StatusBarNotification) {
+        removedKeys[sbn.key] = Unit
         cancelNotification(sbn.key)
         handledGroups[sbn.groupKey] = Unit
         removeOrphanedSummary(sbn.groupKey, exceptKey = sbn.key)
@@ -279,7 +322,7 @@ class NotiListenerService : NotificationListenerService() {
         } catch (e: SecurityException) {
             null
         } ?: return
-        val group = active.filter { it.groupKey == groupKey && it.key != exceptKey }
+        val group = active.filter { it.groupKey == groupKey && it.key != exceptKey && it.key !in removedKeys }
         if (group.isNotEmpty() && group.all(NotificationReader::isGroupSummary)) group.forEach { cancelNotification(it.key) }
     }
 

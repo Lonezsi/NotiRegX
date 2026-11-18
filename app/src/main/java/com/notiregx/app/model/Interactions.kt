@@ -37,6 +37,48 @@ data class RuleAdvice(
 }
 
 /**
+ * What "not now" remembers, so a suggestion steps back instead of being replaced by the next
+ * one straight away, and comes back only when it has more to say:
+ *
+ *  - per app: how many times its suggestions got "not now", and until when they rest. Each
+ *    "not now" rests the app three times longer than the last (a day, three, nine, ... at most
+ *    sixty days), so the more it's declined, the further it backs off;
+ *  - per suggestion: how many swipes it had when declined. That one only returns once the
+ *    swipes behind it have doubled: the pattern got clearly stronger, not just older.
+ */
+data class AdviceRest(
+    val apps: Map<String, AppRest> = emptyMap(),
+    val declined: Map<String, Int> = emptyMap(),
+) {
+    data class AppRest(val times: Int, val until: Long)
+
+    fun allows(advice: RuleAdvice, now: Long): Boolean {
+        val rest = apps[advice.packageName]
+        if (rest != null && now < rest.until) return false
+        val before = declined[advice.key] ?: return true
+        return advice.dismissed >= before * 2
+    }
+
+    /** [advice] got "not now" at [now]. */
+    fun notNow(advice: RuleAdvice, now: Long): AdviceRest {
+        val times = (apps[advice.packageName]?.times ?: 0) + 1
+        var days = 1L
+        repeat(times - 1) { days = minOf(days * 3, MAX_DAYS) }
+        return copy(
+            apps = apps + (advice.packageName to AppRest(times, now + days * DAY_MS)),
+            declined = declined + (advice.key to advice.dismissed),
+        )
+    }
+
+    companion object {
+        const val DAY_MS = 24L * 60 * 60 * 1000
+        const val MAX_DAYS = 60L
+        /** What an old "not now" (from before this, which hid a suggestion for good) counts as. */
+        const val OLD_DECLINE_SWIPES = 10
+    }
+}
+
+/**
  * Finds patterns the user dismisses without ever opening: for each app with enough swipes, it
  * asks [RuleSuggester] for candidate patterns around the dismissed notifications, and keeps the
  * ones that catch many dismissed notifications and (almost) no opened ones.
@@ -51,7 +93,8 @@ object DismissalAdvisor {
     fun advise(
         interactions: List<Interaction>,
         rules: List<Rule>,
-        ignored: Set<String> = emptySet(),
+        rest: AdviceRest = AdviceRest(),
+        now: Long = System.currentTimeMillis(),
         perApp: Int = 2,
         max: Int = 6,
     ): List<RuleAdvice> {
@@ -84,7 +127,7 @@ object DismissalAdvisor {
                         .thenBy { it.opened }
                 )
                 .distinctBy { it.dismissed to it.opened }
-                .filter { it.key !in ignored }
+                .filter { rest.allows(it, now) }
                 .take(perApp)
             out += scored
         }

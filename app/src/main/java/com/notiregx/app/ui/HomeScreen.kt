@@ -66,7 +66,7 @@ fun HomeScreen(
     onOpenArchive: (String) -> Unit,
     advice: List<RuleAdvice>,
     onUseAdvice: (RuleAdvice) -> Unit,
-    onIgnoreAdvice: (String) -> Unit,
+    onIgnoreAdvice: (RuleAdvice) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val currentRules by rememberUpdatedState(rules)
@@ -141,7 +141,7 @@ fun HomeScreen(
                 Text(stringResource(R.string.home_suggested), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             }
             items(advice, key = { "advice-" + it.key }) { a ->
-                AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a.key) })
+                AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a) })
             }
         }
         item(key = "intro") {

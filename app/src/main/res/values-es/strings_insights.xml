@@ -48,6 +48,7 @@
     </plurals>
     <string name="search_nothing">No se encontró nada.</string>
     <string name="search_deleted">Anulado</string>
+    <string name="search_edited">Editado</string>
 
     <string name="activity_title">Cuándo te escribe</string>
     <string name="activity_hours">Por hora</string>
@@ -76,6 +77,8 @@
     <string name="person_exported">Historial exportado</string>
     <string name="person_export_failed">Error al exportar</string>
     <string name="person_deleted_badge">Anulado</string>
+    <string name="person_edited_badge">Editado</string>
+    <string name="person_edited_was">Antes: %1$s</string>
     <string name="people_unsorted">Sin clasificar</string>
     <string name="people_unsorted_hint">Remitentes que aún no forman parte de ninguna persona. Toca uno para convertirlo en persona.</string>
 

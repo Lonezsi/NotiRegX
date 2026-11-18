@@ -103,11 +103,11 @@ fun AppRoot(
     }
     val dndAccess = remember(resumeTick) { app.settings.hasDndAccess() }
     val interactions by app.interactions.events.collectAsState()
-    val ignoredAdvice by app.settings.ignoredAdvice.collectAsState()
+    val adviceRest by app.settings.adviceRest.collectAsState()
     // Only rule configuration matters for advice, not histories that change with every notification.
     val ruleConfig = remember(rules) { rules.map { it.copy(history = emptyList(), hits = emptyList(), bundle = Bundle(), totalCaught = 0) } }
-    val advice by produceState(emptyList<RuleAdvice>(), interactions, ruleConfig, ignoredAdvice) {
-        value = withContext(Dispatchers.Default) { DismissalAdvisor.advise(interactions, ruleConfig, ignoredAdvice) }
+    val advice by produceState(emptyList<RuleAdvice>(), interactions, ruleConfig, adviceRest) {
+        value = withContext(Dispatchers.Default) { DismissalAdvisor.advise(interactions, ruleConfig, adviceRest) }
     }
     val vibrationMuteError by app.vibrationMuteError.collectAsState()
     val people by app.people.people.collectAsState()
@@ -267,7 +267,7 @@ fun AppRoot(
         BackHandler { searching = false }
         val sources = remember(recent, rules, peopleLog, people) {
             fun owner(n: Notification) = n.personId ?: app.people.personFor(n.packageName, n.title)?.id
-            peopleLog.map { SearchHit(it.notification, it.personId, it.deleted) } +
+            peopleLog.map { SearchHit(it.notification, it.personId, it.deleted, it.editedFrom != null) } +
                 recent.map { SearchHit(it.notification, owner(it.notification)) } +
                 rules.flatMap { r -> r.history.map { SearchHit(it, owner(it)) } }
         }
@@ -352,7 +352,7 @@ fun AppRoot(
                     onOpenArchive = { archiveRuleId = it; tab = Tab.ARCHIVE },
                     advice = advice,
                     onUseAdvice = { editing = ruleFromAdvice(context, it) },
-                    onIgnoreAdvice = app.settings::ignoreAdvice,
+                    onIgnoreAdvice = app.settings::notNow,
                 )
                 Tab.ARCHIVE -> ArchiveScreen(
                     rules = rules,
@@ -444,7 +444,7 @@ private fun personHistoryText(person: Person, log: List<PersonEntry>): String {
     val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.ROOT)
     val lines = log.filter { it.personId == person.id }.sortedBy { it.notification.postedAt }.map { e ->
         val n = e.notification
-        listOfNotNull(format.format(java.util.Date(n.postedAt)), n.appName, n.group, n.text.replace('\n', ' '), "(unsent)".takeIf { e.deleted })
+        listOfNotNull(format.format(java.util.Date(n.postedAt)), n.appName, n.group, n.text.replace('\n', ' '), "(unsent)".takeIf { e.deleted }, "(edited)".takeIf { e.editedFrom != null })
             .joinToString(" · ")
     }
     return (listOf(person.name, person.aliases.joinToString(", ") { "${it.appName}: ${it.sender}" }, "") + lines).joinToString("\n")

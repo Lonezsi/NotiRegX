@@ -48,6 +48,7 @@
     </plurals>
     <string name="search_nothing">Nothing found.</string>
     <string name="search_deleted">Unsent</string>
+    <string name="search_edited">Edited</string>
 
     <string name="activity_title">When they message you</string>
     <string name="activity_hours">By hour</string>
@@ -76,6 +77,8 @@
     <string name="person_exported">History exported</string>
     <string name="person_export_failed">Export failed</string>
     <string name="person_deleted_badge">Unsent</string>
+    <string name="person_edited_badge">Edited</string>
+    <string name="person_edited_was">First: %1$s</string>
     <string name="people_unsorted">Not sorted yet</string>
     <string name="people_unsorted_hint">Senders who aren\'t part of a person yet. Tap one to make them a person.</string>
 
