@@ -86,6 +86,9 @@ data class AdviceRest(
 object DismissalAdvisor {
     const val MIN_DISMISSED = 5
 
+    /** The phone's own UI (battery, charging, USB): hiding it is never what the user wants. */
+    val NEVER_SUGGEST = setOf("android", "com.android.systemui")
+
     /** At most one opened notification per this many dismissed ones. */
     private const val OPENED_RATIO = 10
     private const val TARGETS_PER_APP = 15
@@ -100,6 +103,7 @@ object DismissalAdvisor {
     ): List<RuleAdvice> {
         val out = ArrayList<RuleAdvice>()
         for ((pkg, events) in interactions.groupBy { it.notification.packageName }) {
+            if (pkg in NEVER_SUGGEST) continue
             val dismissed = events.filter { it.outcome == Outcome.DISMISSED }.map { it.notification }
             if (dismissed.size < MIN_DISMISSED) continue
             val opened = events.filter { it.outcome == Outcome.OPENED }.map { it.notification }

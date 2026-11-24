@@ -350,7 +350,8 @@ fun AppRoot(
                     onMoveTo = manager::moveTo,
                     onToggle = manager::setEnabled,
                     onOpenArchive = { archiveRuleId = it; tab = Tab.ARCHIVE },
-                    advice = advice,
+                    // "Not now" hides a card at once; the full recount above catches up a few seconds later.
+                    advice = remember(advice, adviceRest) { advice.filter { adviceRest.allows(it, System.currentTimeMillis()) } },
                     onUseAdvice = { editing = ruleFromAdvice(context, it) },
                     onIgnoreAdvice = app.settings::notNow,
                 )

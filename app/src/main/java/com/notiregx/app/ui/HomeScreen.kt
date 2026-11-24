@@ -2,6 +2,7 @@ package com.notiregx.app.ui
 
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -141,7 +142,9 @@ fun HomeScreen(
                 Text(stringResource(R.string.home_suggested), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             }
             items(advice, key = { "advice-" + it.key }) { a ->
-                AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a) })
+                Box(Modifier.animateItem()) {
+                    AdviceCard(a, onUse = { onUseAdvice(a) }, onIgnore = { onIgnoreAdvice(a) })
+                }
             }
         }
         item(key = "intro") {

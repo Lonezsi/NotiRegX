@@ -57,6 +57,12 @@ class LearningTest {
     }
 
     @Test
+    fun neverSuggestsHidingThePhonesOwnUi() {
+        val swipes = List(20) { swiped("Battery power 10%", pkg = "com.android.systemui") }
+        assertTrue(DismissalAdvisor.advise(swipes, emptyList()).isEmpty())
+    }
+
+    @Test
     fun notNowStepsBackFurtherEachTimeAndReturnsOnlyWhenStronger() {
         val six = (1..6).map { swiped("Promo $it") }
         val a = DismissalAdvisor.advise(six, emptyList(), now = 0).first()
