@@ -68,3 +68,10 @@ Requires JDK 17+ and the Android SDK (platform 36).
 ```
 
 The APK ends up in `app/build/outputs/apk/release/`. Run the tests with `./gradlew testDebugUnitTest`.
+
+## Releasing
+
+Bump `versionCode` and `versionName` in `app/build.gradle.kts` and push to `main`. GitHub Actions
+(`.github/workflows/release.yml`) tests and builds it, checks it's signed with the NotiRegX key, and
+publishes release `v<versionName>` with `NotiRegX.apk`; phones then update themselves. The signing
+key lives in the repository secret `SIGNING_KEYSTORE`.

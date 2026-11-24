@@ -1,0 +1,72 @@
+# Builds NotiRegX on every push to main and, when versionName in app/build.gradle.kts has no
+# release yet, publishes it as release v<version> with NotiRegX.apk, which phones then pick up
+# by themselves. To ship: bump versionCode and versionName, push to main.
+#
+# The APK must be signed with the same key as the installed app, or Android won't update it.
+# That key comes from the repo secret SIGNING_KEYSTORE (the PC's ~/.android/debug.keystore,
+# base64), and the build refuses to publish anything signed with another key.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: release
+
+env:
+  # SHA-256 of the signing certificate every NotiRegX release so far was signed with.
+  SIGNER_SHA256: eba097efa173374185a027afa50c796ee374b587ba4e50140db4fde9d47f53e6
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::error::The SIGNING_KEYSTORE secret is missing; see the comment at the top of this file."
+            exit 1
+          fi
+          mkdir -p ~/.android
+          echo "$KEYSTORE" | base64 -d > ~/.android/debug.keystore
+
+      - name: Test and build
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testDebugUnitTest assembleRelease
+
+      - name: Check the signature
+        run: |
+          apk=app/build/outputs/apk/release/app-release.apk
+          signer=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          got=$("$signer" verify --print-certs "$apk" | grep -m1 'SHA-256 digest' | awk '{print $NF}')
+          if [ "$got" != "$SIGNER_SHA256" ]; then
+            echo "::error::Signed with $got, not the NotiRegX key; phones would refuse this update."
+            exit 1
+          fi
+          cp "$apk" NotiRegX.apk
+
+      - name: Publish if the version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "v$version is already released; nothing to publish."
+          else
+            gh release create "v$version" NotiRegX.apk --target "$GITHUB_SHA" \
+              --title "NotiRegX $version" --generate-notes
+          fi
