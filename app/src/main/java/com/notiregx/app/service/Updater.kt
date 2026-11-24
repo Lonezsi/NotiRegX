@@ -51,7 +51,7 @@ class Updater(private val app: NotiRegXApp) {
         val now = System.currentTimeMillis()
         if (!force) {
             if (!app.settings.autoUpdate.value || !UpdatePolicy.shouldCheck(_state.value.lastChecked, now)) return
-            if (app.getSystemService(ConnectivityManager::class.java).isActiveNetworkMetered) return
+            if (isMetered()) return
         }
         if (!lock.tryLock()) return
         try {
@@ -64,7 +64,17 @@ class Updater(private val app: NotiRegXApp) {
         }
     }
 
-    /** Returns an error text, or null if all went well (including "already up to date"). */
+    /** Whether the network costs money; if Android won't say, assume it does and wait. */
+    private fun isMetered(): Boolean = try {
+        app.getSystemService(ConnectivityManager::class.java).isActiveNetworkMetered
+    } catch (e: SecurityException) {
+        true
+    }
+
+    /**
+     * Returns an error text, or null if all went well (including "already up to date"). Never
+     * throws: a failed update must not take the app (and its notification filtering) down with it.
+     */
     private fun run(): String? = try {
         val release = UpdatePolicy.parseRelease(fetch(UpdatePolicy.RELEASES_URL).bufferedReader().use { it.readText() })
         if (release == null) null
@@ -83,6 +93,8 @@ class Updater(private val app: NotiRegXApp) {
         e.message ?: "network error"
     } catch (e: JSONException) {
         e.message ?: "bad answer"
+    } catch (e: Exception) {
+        e.message ?: e.javaClass.simpleName
     }
 
     private fun fetch(url: String) = (URL(url).openConnection() as HttpURLConnection).run {
