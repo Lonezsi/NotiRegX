@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -99,9 +100,12 @@ fun HomeScreen(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // The list keeps its place by its first visible item. Without this always-there top, cards
+        // that show up later (suggestions, notices) would land above the screen, out of sight.
+        item(key = "top") { Spacer(Modifier.height(0.dp)) }
         if (listenerStopped) {
             item(key = "notice-stopped") {
                 NoticeCard(
