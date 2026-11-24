@@ -18,6 +18,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,6 +130,10 @@ fun SettingsScreen(
         }
 
         HorizontalDivider()
+        Section(stringResource(R.string.settings_section_updates))
+        UpdateSettings(settings, resumeTick)
+
+        HorizontalDivider()
         Section(stringResource(R.string.settings_section_permissions))
         PermissionRow(
             title = stringResource(R.string.settings_perm_notification_access),
@@ -187,6 +193,37 @@ internal fun PermissionRow(title: String, hint: String, granted: Boolean, onFix:
             TextButton(onClick = onFix) { Text(stringResource(R.string.settings_allow)) }
         }
     }
+}
+
+/** Self-update: the switch, the state of the last check, "Check now" and the install permission. */
+@Composable
+private fun UpdateSettings(settings: Settings, resumeTick: Int) {
+    val context = LocalContext.current
+    val updater = (context.applicationContext as com.notiregx.app.NotiRegXApp).updater
+    val auto by settings.autoUpdate.collectAsState()
+    val state by updater.state.collectAsState()
+    val scope = rememberCoroutineScope()
+    val canInstall = remember(resumeTick) { settings.canInstallUpdates() }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_auto_update), style = MaterialTheme.typography.bodyLarge)
+            Hint(stringResource(R.string.settings_auto_update_hint))
+        }
+        Switch(checked = auto, onCheckedChange = settings::setAutoUpdate)
+    }
+    val checked = if (state.lastChecked == 0L) stringResource(R.string.update_never)
+    else android.text.format.DateUtils.getRelativeTimeSpanString(state.lastChecked).toString()
+    Hint(stringResource(R.string.update_status, updater.currentVersion(), checked))
+    state.error?.let { Hint(stringResource(R.string.update_error, it)) }
+    TextButton(enabled = !state.busy, onClick = { scope.launch { updater.check(force = true) } }) {
+        Text(stringResource(if (state.busy) R.string.update_checking else R.string.update_check_now))
+    }
+    PermissionRow(
+        title = stringResource(R.string.settings_perm_install_updates),
+        hint = stringResource(R.string.settings_perm_install_updates_hint),
+        granted = canInstall,
+        onFix = { context.startActivity(settings.installUpdatesIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) },
+    )
 }
 
 /** Daily recap (on/off and time) and unsent-message alerts. */

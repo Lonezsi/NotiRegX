@@ -13,6 +13,10 @@
     <!-- Re-arms digest delivery alarms after a reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- Self-update: only ever talks to GitHub's release pages, and can be switched off in Settings. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
     <!-- Optional, granted only via adb: lets the vibration log read Android's own vibration history. -->
     <uses-permission
         android:name="android.permission.DUMP"
@@ -72,8 +76,14 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- Wakes the app right after a self-update so its alarms are armed again. -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".service.UpdateReceiver"
+            android:exported="false" />
 
         <service
             android:name=".service.LastBuzzTileService"

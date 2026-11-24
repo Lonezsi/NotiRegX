@@ -88,6 +88,20 @@ class Settings(private val context: Context) {
         _rescueAlerts.value = on
     }
 
+    private val _autoUpdate = MutableStateFlow(prefs.getBoolean(KEY_AUTO_UPDATE, true))
+    /** Whether NotiRegX looks for new releases on GitHub and installs them itself. */
+    val autoUpdate: StateFlow<Boolean> = _autoUpdate.asStateFlow()
+
+    fun setAutoUpdate(on: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_UPDATE, on).apply()
+        _autoUpdate.value = on
+    }
+
+    fun canInstallUpdates(): Boolean = context.packageManager.canRequestPackageInstalls()
+
+    fun installUpdatesIntent() =
+        Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}"))
+
     private val _recapEnabled = MutableStateFlow(prefs.getBoolean(KEY_RECAP, false))
     val recapEnabled: StateFlow<Boolean> = _recapEnabled.asStateFlow()
 
@@ -161,6 +175,7 @@ class Settings(private val context: Context) {
         private const val KEY_ADVICE_REST = "advice_rest"
         private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
         private const val KEY_RESCUE = "rescue_alerts"
+        private const val KEY_AUTO_UPDATE = "auto_update"
         private const val KEY_RECAP = "recap_enabled"
         private const val KEY_RECAP_MINUTE = "recap_minute"
         private const val KEY_FRIEND_MODE = "friend_mode"

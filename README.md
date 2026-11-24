@@ -33,10 +33,11 @@ Hide the noise, bundle the rest, never miss what matters, and find out what just
 - **Vibration log.** Every buzz, which app caused it, and **ghost vibrations** with no notification behind them.
   Add the *Last buzz* quick-settings tile to check in one tap.
 - **Senders.** See who sends you the most, per app, today / this week / this month / ever.
+- **Updates itself** from GitHub releases, silently once allowed, and you can switch that off.
 - **Schedules, burst limits, digests, stats, backup/restore of rules**, and a watchdog that keeps the filter running.
 - **Languages:** English, Magyar, Deutsch, Español. Pick one in Settings, or follow the phone's language.
 
-Everything stays on your phone. NotiRegX has no internet permission.
+Everything stays on your phone. The only thing NotiRegX ever fetches is the latest release from this GitHub repository, to update itself, and the *Update automatically* switch in Settings turns even that off.
 
 ## Install
 
@@ -47,7 +48,7 @@ Everything stays on your phone. NotiRegX has no internet permission.
      **Allow restricted settings**, and try again.
 4. Recommended on Samsung: allow **unrestricted battery use** (the tutorial links to it).
 
-To update, download the latest APK and install it over the old one. Your rules and history are kept.
+From 1.1.0 on, NotiRegX updates itself: it checks GitHub about twice a day (on Wi-Fi), downloads the new APK and installs it over the old one, and the filter is back within seconds. The first time, Android asks you to allow *install unknown apps* for NotiRegX (Settings, Updates) and to tap *Install*; after that Android 12+ installs silently. Your rules and history are kept. Older versions: download the latest APK and install it over the old one.
 
 ### Optional: ghost vibrations
 

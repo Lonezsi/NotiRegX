@@ -88,4 +88,19 @@
     </plurals>
     <string name="senders_use">Usar</string>
     <string name="senders_use_count">Usar %1$d</string>
+    <!-- Self-update; %1$s = version, %2$s = when it was last checked -->
+    <string name="settings_section_updates">Actualizaciones</string>
+    <string name="settings_auto_update">Actualizar automáticamente</string>
+    <string name="settings_auto_update_hint">Busca en GitHub una versión nueva unas dos veces al día con Wi-Fi y la instala sola. El filtro vuelve en segundos.</string>
+    <string name="update_status">Versión %1$s · comprobado: %2$s</string>
+    <string name="update_never">nunca</string>
+    <string name="update_error">Problema de actualización: %1$s</string>
+    <string name="update_check_now">Comprobar ahora</string>
+    <string name="update_checking">Comprobando…</string>
+    <string name="settings_perm_install_updates">Instalar actualizaciones</string>
+    <string name="settings_perm_install_updates_hint">Permite que NotiRegX se reemplace por una versión más nueva de GitHub.</string>
+    <string name="update_needs_permission">Permite primero instalar actualizaciones (Ajustes, Actualizaciones).</string>
+    <string name="update_channel_name">Actualizaciones</string>
+    <string name="update_ready_title">Actualización lista</string>
+    <string name="update_ready_text">Toca para instalar la nueva versión de NotiRegX.</string>
 </resources>

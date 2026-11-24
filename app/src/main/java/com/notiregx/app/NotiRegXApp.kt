@@ -62,6 +62,8 @@ class NotiRegXApp : Application() {
         private set
     lateinit var watchdog: Watchdog
         private set
+    lateinit var updater: com.notiregx.app.service.Updater
+        private set
 
     /** Whether Android currently has the notification listener connected, i.e. filtering works. */
     val listenerConnected = MutableStateFlow(false)
@@ -116,6 +118,7 @@ class NotiRegXApp : Application() {
         companionLinked.value = settings.isCompanionLinked()
         watchdog = Watchdog(this)
         watchdog.schedule()
+        updater = com.notiregx.app.service.Updater(this)
         scheduleRecap()
 
         scope.launch { ruleManager.rules.drop(1).collect { storage.saveRules(it) } }
@@ -149,6 +152,11 @@ class NotiRegXApp : Application() {
                 .distinctUntilChanged()
                 .collect { scheduleNextDigest(it) }
         }
+    }
+
+    /** Looks for an update if it's time (rate-limited inside the updater); called with the watchdog. */
+    fun checkForUpdate() {
+        scope.launch { updater.check() }
     }
 
     /** Pulls Android's own vibration history into the log, if the DUMP permission was granted. */

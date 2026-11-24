@@ -88,4 +88,19 @@
     </plurals>
     <string name="senders_use">Kész</string>
     <string name="senders_use_count">Kész (%1$d)</string>
+    <!-- Self-update; %1$s = version, %2$s = when it was last checked -->
+    <string name="settings_section_updates">Frissítések</string>
+    <string name="settings_auto_update">Automatikus frissítés</string>
+    <string name="settings_auto_update_hint">Naponta kétszer megnézi a GitHubon, van-e új verzió (Wi-Fin), és magától telepíti. A szűrő pár másodperc alatt visszatér.</string>
+    <string name="update_status">Verzió: %1$s · ellenőrizve: %2$s</string>
+    <string name="update_never">soha</string>
+    <string name="update_error">Frissítési hiba: %1$s</string>
+    <string name="update_check_now">Ellenőrzés most</string>
+    <string name="update_checking">Ellenőrzés…</string>
+    <string name="settings_perm_install_updates">Frissítések telepítése</string>
+    <string name="settings_perm_install_updates_hint">Engedi, hogy a NotiRegX lecserélje magát egy újabb verzióra a GitHubról.</string>
+    <string name="update_needs_permission">Előbb engedélyezd a frissítések telepítését (Beállítások, Frissítések).</string>
+    <string name="update_channel_name">Frissítések</string>
+    <string name="update_ready_title">Frissítés kész</string>
+    <string name="update_ready_text">Koppints a NotiRegX új verziójának telepítéséhez.</string>
 </resources>

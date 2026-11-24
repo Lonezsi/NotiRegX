@@ -36,6 +36,7 @@ class Watchdog(private val app: NotiRegXApp) {
 
     fun check() {
         app.checkReminders()
+        app.checkForUpdate()
         val now = SystemClock.elapsedRealtime()
         val action = WatchdogPolicy.decide(
             hasAccess = app.settings.hasNotificationAccess(),

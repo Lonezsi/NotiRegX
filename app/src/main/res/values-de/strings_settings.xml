@@ -88,4 +88,19 @@
     </plurals>
     <string name="senders_use">Übernehmen</string>
     <string name="senders_use_count">%1$d übernehmen</string>
+    <!-- Self-update; %1$s = version, %2$s = when it was last checked -->
+    <string name="settings_section_updates">Updates</string>
+    <string name="settings_auto_update">Automatisch aktualisieren</string>
+    <string name="settings_auto_update_hint">Prüft etwa zweimal am Tag per WLAN auf GitHub, ob es eine neue Version gibt, und installiert sie selbst. Der Filter ist in Sekunden wieder da.</string>
+    <string name="update_status">Version %1$s · geprüft: %2$s</string>
+    <string name="update_never">nie</string>
+    <string name="update_error">Update-Problem: %1$s</string>
+    <string name="update_check_now">Jetzt prüfen</string>
+    <string name="update_checking">Prüfe…</string>
+    <string name="settings_perm_install_updates">Updates installieren</string>
+    <string name="settings_perm_install_updates_hint">Erlaubt NotiRegX, sich durch eine neuere Version von GitHub zu ersetzen.</string>
+    <string name="update_needs_permission">Erlaube zuerst das Installieren von Updates (Einstellungen, Updates).</string>
+    <string name="update_channel_name">Updates</string>
+    <string name="update_ready_title">Update bereit</string>
+    <string name="update_ready_text">Tippe, um die neue Version von NotiRegX zu installieren.</string>
 </resources>

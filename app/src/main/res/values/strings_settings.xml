@@ -98,4 +98,19 @@
     <string name="senders_use">Use</string>
     <!-- %1$d = number of selected senders -->
     <string name="senders_use_count">Use %1$d</string>
+    <!-- Self-update; %1$s = version, %2$s = when it was last checked -->
+    <string name="settings_section_updates">Updates</string>
+    <string name="settings_auto_update">Update automatically</string>
+    <string name="settings_auto_update_hint">Checks GitHub for a new version about twice a day on Wi-Fi and installs it by itself. The filter comes back within seconds.</string>
+    <string name="update_status">Version %1$s · checked %2$s</string>
+    <string name="update_never">never</string>
+    <string name="update_error">Update problem: %1$s</string>
+    <string name="update_check_now">Check now</string>
+    <string name="update_checking">Checking…</string>
+    <string name="settings_perm_install_updates">Install updates</string>
+    <string name="settings_perm_install_updates_hint">Lets NotiRegX replace itself with a newer version from GitHub.</string>
+    <string name="update_needs_permission">Allow installing updates first (Settings, Updates).</string>
+    <string name="update_channel_name">Updates</string>
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_text">Tap to install the new version of NotiRegX.</string>
 </resources>
